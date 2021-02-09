@@ -33,11 +33,12 @@ export class Tilemap {
             }
         }
 
-        let str, content;
-        let id;
+        let str : String;
+        let content : Array<string>;
+        let id : number;
         for (let i = 0; i < data.length; ++ i) {
 
-            id = data[i].id - min;
+            id = Number(data[i].id) - min;
 
             // Get layer data & remove newlines
             str = data[i].getElementsByTagName("data")[0]
@@ -97,5 +98,13 @@ export class Tilemap {
             return null;
 
         return Array.from(this.layers[l]);
+    }
+
+
+    public cloneLayers(end = this.layers.length) : Array<Array<number>> {
+
+        return (new Array<Array<number>>(end))
+            .fill(null)
+            .map( (a, i) => this.cloneLayer(i));
     }
 }

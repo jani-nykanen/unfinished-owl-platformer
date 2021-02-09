@@ -16,10 +16,11 @@ var Tilemap = /** @class */ (function () {
                 min = d.id;
             }
         }
-        var str, content;
+        var str;
+        var content;
         var id;
         for (var i = 0; i < data.length; ++i) {
-            id = data[i].id - min;
+            id = Number(data[i].id) - min;
             // Get layer data & remove newlines
             str = data[i].getElementsByTagName("data")[0]
                 .childNodes[0]
@@ -60,6 +61,13 @@ var Tilemap = /** @class */ (function () {
         if (l < 0 || l >= this.layers.length)
             return null;
         return Array.from(this.layers[l]);
+    };
+    Tilemap.prototype.cloneLayers = function (end) {
+        var _this = this;
+        if (end === void 0) { end = this.layers.length; }
+        return (new Array(end))
+            .fill(null)
+            .map(function (a, i) { return _this.cloneLayer(i); });
     };
     return Tilemap;
 }());

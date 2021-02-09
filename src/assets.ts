@@ -116,6 +116,12 @@ export class AssetManager {
 
                 this.loadBitmap(o["name"], path + o["path"]);
             }
+
+            path = data["tilemapPath"];
+            for (let o of data["tilemaps"]) {
+
+                this.loadTilemap(o["name"], path + o["path"]);
+            }
         });
     }
 

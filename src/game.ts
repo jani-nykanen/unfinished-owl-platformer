@@ -1,19 +1,27 @@
 
+import { Camera } from "./camera.js";
 import { Canvas } from "./canvas.js";
 import { GameEvent, Scene } from "./core.js";
+import { Stage } from "./stage.js";
 
 
 export class GameScene implements Scene {
 
 
+    private cam : Camera;
+    private stage : Stage;
+
+
     constructor(param : any, ev : GameEvent) {
 
-        // ...
+        this.cam = new Camera(128, 96);
+        this.stage = new Stage(ev);
     }
 
 
     public refresh(ev : GameEvent) {
 
+        this.stage.update(ev);
     }
 
 
@@ -21,8 +29,11 @@ export class GameScene implements Scene {
 
         c.clear(170, 170, 170);
 
-        c.drawBitmap(c.getBitmap("tileset"), 0, 0);
-        c.drawText(c.getBitmap("font"), "Seems to work", 2, 2, 0, 0);
+        this.cam.use(c);
+
+        this.stage.draw(c, this.cam);
+
+        c.moveTo();
     }
 
 

@@ -69,6 +69,11 @@ var AssetManager = /** @class */ (function () {
                 var o = _a[_i];
                 _this.loadBitmap(o["name"], path + o["path"]);
             }
+            path = data["tilemapPath"];
+            for (var _b = 0, _c = data["tilemaps"]; _b < _c.length; _b++) {
+                var o = _c[_b];
+                _this.loadTilemap(o["name"], path + o["path"]);
+            }
         });
     };
     AssetManager.prototype.hasLoaded = function () {
