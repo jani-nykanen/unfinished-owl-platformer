@@ -16,6 +16,7 @@ var Camera = /** @class */ (function () {
         this.viewport.y = this.pos.y + this.centerOff.y - this.viewport.h / 2;
     };
     Camera.prototype.use = function (c) {
+        this.computeViewport(c);
         c.moveTo(-Math.round(this.viewport.x), -Math.round(this.viewport.y));
     };
     Camera.prototype.followObject = function (o, ev) {
@@ -38,13 +39,38 @@ var Camera = /** @class */ (function () {
     };
     Camera.prototype.restrictCamera = function (x, y, w, h) {
         var oldViewport = this.viewport.clone();
+        // Left
+        if (this.viewport.x < x) {
+            if (this.centerOff.x < 0) {
+                this.centerOff.x += (x - this.viewport.x);
+                if (this.centerOff.x > 0)
+                    this.centerOff.x = 0;
+            }
+            if (this.centerOff.x >= 0) {
+                this.viewport.x = x;
+                this.pos.x += this.viewport.x - oldViewport.x;
+            }
+        }
+        // Right
+        if (this.viewport.x + this.viewport.w > x + w) {
+            if (this.centerOff.x > 0) {
+                this.centerOff.x += (x + w - this.viewport.x - this.viewport.w);
+                if (this.centerOff.x < 0)
+                    this.centerOff.x = 0;
+            }
+            if (this.centerOff.x <= 0) {
+                this.viewport.x = (x + w) - this.viewport.w;
+                this.pos.x += this.viewport.x - oldViewport.x;
+            }
+        }
+        // Top
         if (this.viewport.y < y) {
             this.viewport.y = y;
         }
+        // Bottom
         if (this.viewport.y + this.viewport.h > (y + h)) {
             this.viewport.y = (y + h) - this.viewport.h;
         }
-        this.pos.x += this.viewport.x - oldViewport.x;
         this.pos.y += this.viewport.y - oldViewport.y;
     };
     return Camera;

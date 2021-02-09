@@ -112,21 +112,30 @@ export class Stage {
     }
 
 
+    private isSlope = (id : number) : boolean => (id >= 17 && id <= 23);
+
+
     private handeTileCollision(o : CollisionObject, 
-        x : number, y : number, 
+        layer : number, x : number, y : number, 
         colId : number, ev : GameEvent) {
 
         let c = COLLISION_TABLE[colId];
 
+        let left = this.getCollisionTile(this.getTile(layer, x-1, y)-1);
+        let right = this.getCollisionTile(this.getTile(layer, x+1, y)-1);
+
+        let leftMargin = !this.isSlope(left);
+        let rightMargin = !this.isSlope(right);
+
+        // Constant surfaces
         if ((c & COL_DOWN) == COL_DOWN) {
 
-            o.constantSlopeCollision(x*16, y*16, 16, 1, true, true, ev);
+            o.constantSlopeCollision(x*16, y*16, 16, 1, leftMargin, rightMargin, ev);
         }
         if ((c & COL_UP) == COL_UP) {
 
-            o.constantSlopeCollision(x*16, (y+1)*16, 16, -1, true, true, ev);
+            o.constantSlopeCollision(x*16, (y+1)*16, 16, -1, leftMargin, rightMargin, ev);
         }
-
         if ((c & COL_WALL_RIGHT) == COL_WALL_RIGHT) {
 
             o.wallCollision((x+1)*16, y*16, 16, -1, ev);
@@ -135,11 +144,38 @@ export class Stage {
 
             o.wallCollision(x*16, y*16, 16, 1, ev);
         }
+
+        // Slopes
+        if (colId == 16) {
+
+            o.slopeCollision(x*16, y*16, (x+1)*16, (y+1)*16, 1, ev);
+        }
+        else if (colId == 17) {
+
+            o.slopeCollision(x*16, (y+1)*16, (x+1)*16, y*16, 1, ev);
+        }
+        else if (colId == 20) {
+
+            o.slopeCollision(x*16, y*16, (x+1)*16, y*16 + 8, 1, ev);
+        }
+        else if (colId == 21) {
+
+            o.slopeCollision(x*16, y*16 + 8, (x+1)*16, (y+1)*16, 1, ev);
+        }
+        else if (colId == 23) {
+
+            o.slopeCollision(x*16, y*16 + 8, (x+1)*16, y*16, 1, ev);
+        }
+        else if (colId == 22) {
+
+            o.slopeCollision(x*16, (y+1)*16, (x+1)*16, y*16 + 8, 1, ev);
+        }
     }
 
 
     public objectCollisions(o : CollisionObject, ev : GameEvent) {
 
+        const BOUND_COLLISION_Y_MARGIN = 256;
         const RADIUS = 2;
 
         if (!o.doesExist()) 
@@ -163,10 +199,17 @@ export class Stage {
                     colId = this.getCollisionTile(tid-1);
                     if (colId <= 0) continue;
 
-                    this.handeTileCollision(o, x, y, colId-1, ev);
+                    this.handeTileCollision(o,layer,  x, y, colId-1, ev);
                 }
             }
         }
+
+        o.wallCollision(0, -BOUND_COLLISION_Y_MARGIN,
+            this.height*16 + BOUND_COLLISION_Y_MARGIN*2, -1, ev, 
+            true);
+        o.wallCollision(this.width*16, -BOUND_COLLISION_Y_MARGIN,
+            this.height*16 + BOUND_COLLISION_Y_MARGIN*2, 1, ev, 
+            true);
     }
 
 

@@ -22,6 +22,7 @@ var COLLISION_TABLE = [
 ];
 var Stage = /** @class */ (function () {
     function Stage(ev) {
+        this.isSlope = function (id) { return (id >= 17 && id <= 23); };
         var baseMap = ev.getTilemap("test");
         this.layers = baseMap.cloneLayers();
         this.collisionMap = ev.getTilemap("collisions").cloneLayer(0);
@@ -68,13 +69,18 @@ var Stage = /** @class */ (function () {
             }
         }
     };
-    Stage.prototype.handeTileCollision = function (o, x, y, colId, ev) {
+    Stage.prototype.handeTileCollision = function (o, layer, x, y, colId, ev) {
         var c = COLLISION_TABLE[colId];
+        var left = this.getCollisionTile(this.getTile(layer, x - 1, y) - 1);
+        var right = this.getCollisionTile(this.getTile(layer, x + 1, y) - 1);
+        var leftMargin = !this.isSlope(left);
+        var rightMargin = !this.isSlope(right);
+        // Constant surfaces
         if ((c & COL_DOWN) == COL_DOWN) {
-            o.constantSlopeCollision(x * 16, y * 16, 16, 1, true, true, ev);
+            o.constantSlopeCollision(x * 16, y * 16, 16, 1, leftMargin, rightMargin, ev);
         }
         if ((c & COL_UP) == COL_UP) {
-            o.constantSlopeCollision(x * 16, (y + 1) * 16, 16, -1, true, true, ev);
+            o.constantSlopeCollision(x * 16, (y + 1) * 16, 16, -1, leftMargin, rightMargin, ev);
         }
         if ((c & COL_WALL_RIGHT) == COL_WALL_RIGHT) {
             o.wallCollision((x + 1) * 16, y * 16, 16, -1, ev);
@@ -82,8 +88,28 @@ var Stage = /** @class */ (function () {
         if ((c & COL_WALL_LEFT) == COL_WALL_LEFT) {
             o.wallCollision(x * 16, y * 16, 16, 1, ev);
         }
+        // Slopes
+        if (colId == 16) {
+            o.slopeCollision(x * 16, y * 16, (x + 1) * 16, (y + 1) * 16, 1, ev);
+        }
+        else if (colId == 17) {
+            o.slopeCollision(x * 16, (y + 1) * 16, (x + 1) * 16, y * 16, 1, ev);
+        }
+        else if (colId == 20) {
+            o.slopeCollision(x * 16, y * 16, (x + 1) * 16, y * 16 + 8, 1, ev);
+        }
+        else if (colId == 21) {
+            o.slopeCollision(x * 16, y * 16 + 8, (x + 1) * 16, (y + 1) * 16, 1, ev);
+        }
+        else if (colId == 23) {
+            o.slopeCollision(x * 16, y * 16 + 8, (x + 1) * 16, y * 16, 1, ev);
+        }
+        else if (colId == 22) {
+            o.slopeCollision(x * 16, (y + 1) * 16, (x + 1) * 16, y * 16 + 8, 1, ev);
+        }
     };
     Stage.prototype.objectCollisions = function (o, ev) {
+        var BOUND_COLLISION_Y_MARGIN = 256;
         var RADIUS = 2;
         if (!o.doesExist())
             return;
@@ -100,10 +126,12 @@ var Stage = /** @class */ (function () {
                     colId = this.getCollisionTile(tid - 1);
                     if (colId <= 0)
                         continue;
-                    this.handeTileCollision(o, x, y, colId - 1, ev);
+                    this.handeTileCollision(o, layer, x, y, colId - 1, ev);
                 }
             }
         }
+        o.wallCollision(0, -BOUND_COLLISION_Y_MARGIN, this.height * 16 + BOUND_COLLISION_Y_MARGIN * 2, -1, ev, true);
+        o.wallCollision(this.width * 16, -BOUND_COLLISION_Y_MARGIN, this.height * 16 + BOUND_COLLISION_Y_MARGIN * 2, 1, ev, true);
     };
     Stage.prototype.restrictCamera = function (cam) {
         cam.restrictCamera(0, 0, this.width * 16, this.height * 16);
