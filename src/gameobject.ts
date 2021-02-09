@@ -153,6 +153,7 @@ export abstract class CollisionObject extends GameObject {
 
 
     protected wallCollisionEvent(dir : number, ev : GameEvent) {}
+    protected floorCollisionEvent(ev : GameEvent) {}
 
 
     public wallCollision(
@@ -200,6 +201,8 @@ export abstract class CollisionObject extends GameObject {
     public slopeCollision(x1 : number, y1: number, x2 : number, y2 : number, ev : GameEvent) : boolean {
 
         const EPS = 0.001;
+        const NEAR_MARGIN = 2;
+        const FAR_MARGIN = 8;
 
         if (this.speed.y <= 0.0 &&
             Math.abs(x1 - x2) < EPS)
@@ -207,6 +210,20 @@ export abstract class CollisionObject extends GameObject {
 
         if (this.pos.x < x1 || this.pos.x >= x2)
             return false;
+
+        let k = (y2 - y1) / (x2 - x1);
+        let y0 = y1 + k * (this.pos.x - x1);
+
+        let py = this.pos.y + this.center.y + this.collisionBox.y/2;
+
+        if (py > y0 - NEAR_MARGIN * ev.step && py <= y0 + (this.speed.y + FAR_MARGIN) * ev.step ) {
+
+            this.speed.y = 0;
+            this.pos.y = y0 - this.center.y - this.collisionBox.y/2;
+
+            this.floorCollisionEvent(ev);
+            return true;
+        }
     
         return false;
     }
