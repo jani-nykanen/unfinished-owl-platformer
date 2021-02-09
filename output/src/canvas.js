@@ -63,12 +63,12 @@ var Canvas = /** @class */ (function () {
     Canvas.prototype.moveTo = function (x, y) {
         if (x === void 0) { x = 0.0; }
         if (y === void 0) { y = 0.0; }
-        this.translation.x = x;
-        this.translation.y = y;
+        this.translation.x = x | 0;
+        this.translation.y = y | 0;
     };
     Canvas.prototype.move = function (x, y) {
-        this.translation.x += x;
-        this.translation.y += y;
+        this.translation.x += x | 0;
+        this.translation.y += y | 0;
     };
     Canvas.prototype.clear = function (r, g, b) {
         this.ctx.fillStyle = this.getColorString(r, g, b);

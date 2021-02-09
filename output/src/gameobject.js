@@ -18,6 +18,8 @@ var GameObject = /** @class */ (function () {
     function GameObject(x, y) {
         var _this = this;
         this.getPos = function () { return _this.pos.clone(); };
+        this.getSpeed = function () { return _this.speed.clone(); };
+        this.getTarget = function () { return _this.target.clone(); };
         this.isInCamera = function () { return _this.inCamera; };
         this.isDying = function () { return _this.dying; };
         this.doesExist = function () { return _this.exist; };
@@ -85,13 +87,14 @@ var CollisionObject = /** @class */ (function (_super) {
     function CollisionObject(x, y) {
         var _this = _super.call(this, x, y) || this;
         _this.getHitbox = function () { return _this.hitbox.clone(); };
+        _this.collisionsDisabled = function () { return _this.disableCollisions; };
         _this.collisionBox = new Vector2();
         _this.bounceFactor = 0;
         _this.disableCollisions = false;
         return _this;
     }
     CollisionObject.prototype.wallCollisionEvent = function (dir, ev) { };
-    CollisionObject.prototype.floorCollisionEvent = function (ev) { };
+    CollisionObject.prototype.slopeCollisionEvent = function (dir, ev) { };
     CollisionObject.prototype.wallCollision = function (x, y, h, dir, ev, force) {
         if (force === void 0) { force = false; }
         var EPS = 0.001;
@@ -121,25 +124,42 @@ var CollisionObject = /** @class */ (function (_super) {
         }
         return false;
     };
-    CollisionObject.prototype.slopeCollision = function (x1, y1, x2, y2, ev) {
+    CollisionObject.prototype.slopeCollision = function (x1, y1, x2, y2, dir, ev, force) {
+        if (force === void 0) { force = false; }
         var EPS = 0.001;
         var NEAR_MARGIN = 2;
         var FAR_MARGIN = 8;
-        if (this.speed.y <= 0.0 &&
+        if (!this.inCamera ||
+            (!force && this.disableCollisions) ||
+            !this.exist || this.dying ||
+            this.speed.y * dir < EPS ||
             Math.abs(x1 - x2) < EPS)
             return false;
         if (this.pos.x < x1 || this.pos.x >= x2)
             return false;
         var k = (y2 - y1) / (x2 - x1);
         var y0 = y1 + k * (this.pos.x - x1);
-        var py = this.pos.y + this.center.y + this.collisionBox.y / 2;
-        if (py > y0 - NEAR_MARGIN * ev.step && py <= y0 + (this.speed.y + FAR_MARGIN) * ev.step) {
+        var py = this.pos.y + this.center.y + dir * this.collisionBox.y / 2;
+        if ((dir > 0 && py > y0 - NEAR_MARGIN * ev.step &&
+            py <= y0 + (this.speed.y + FAR_MARGIN) * ev.step) ||
+            (dir < 0 && py < y0 + NEAR_MARGIN * ev.step &&
+                py >= y0 + (this.speed.y - FAR_MARGIN) * ev.step)) {
             this.speed.y = 0;
-            this.pos.y = y0 - this.center.y - this.collisionBox.y / 2;
-            this.floorCollisionEvent(ev);
+            this.pos.y = y0 - this.center.y - dir * this.collisionBox.y / 2;
+            this.slopeCollisionEvent(dir, ev);
             return true;
         }
         return false;
+    };
+    CollisionObject.prototype.constantSlopeCollision = function (x, y, w, dir, leftMargin, rightMargin, ev) {
+        if (leftMargin) {
+            x -= this.collisionBox.x / 2;
+            w += this.collisionBox.x / 2;
+        }
+        if (rightMargin) {
+            w += this.collisionBox.x / 2;
+        }
+        return this.slopeCollision(x, y, x + w, y, dir, ev);
     };
     CollisionObject.prototype.hurtCollision = function (x, y, w, h, dmg, knockback, ev) {
         return false;

@@ -125,9 +125,11 @@ export abstract class GameObject {
     public postDraw(c : Canvas) {}
 
     public getPos = () => this.pos.clone();
+    public getSpeed = () => this.speed.clone();
+    public getTarget = () => this.target.clone();
+
     public isInCamera = () => this.inCamera;
     public isDying = () => this.dying;
-
 
     public doesExist = () => this.exist;
 }
@@ -153,7 +155,7 @@ export abstract class CollisionObject extends GameObject {
 
 
     protected wallCollisionEvent(dir : number, ev : GameEvent) {}
-    protected floorCollisionEvent(ev : GameEvent) {}
+    protected slopeCollisionEvent(dir : number, ev : GameEvent) {}
 
 
     public wallCollision(
@@ -198,13 +200,17 @@ export abstract class CollisionObject extends GameObject {
     }    
 
 
-    public slopeCollision(x1 : number, y1: number, x2 : number, y2 : number, ev : GameEvent) : boolean {
+    public slopeCollision(x1 : number, y1: number, x2 : number, y2 : number, 
+        dir : number, ev : GameEvent, force = false) : boolean {
 
         const EPS = 0.001;
         const NEAR_MARGIN = 2;
         const FAR_MARGIN = 8;
 
-        if (this.speed.y <= 0.0 &&
+        if (!this.inCamera ||
+            (!force && this.disableCollisions) ||
+            !this.exist || this.dying ||
+            this.speed.y * dir < EPS ||
             Math.abs(x1 - x2) < EPS)
             return false;
 
@@ -214,18 +220,39 @@ export abstract class CollisionObject extends GameObject {
         let k = (y2 - y1) / (x2 - x1);
         let y0 = y1 + k * (this.pos.x - x1);
 
-        let py = this.pos.y + this.center.y + this.collisionBox.y/2;
+        let py = this.pos.y + this.center.y + dir * this.collisionBox.y/2;
 
-        if (py > y0 - NEAR_MARGIN * ev.step && py <= y0 + (this.speed.y + FAR_MARGIN) * ev.step ) {
+        if ((dir > 0 && py > y0 - NEAR_MARGIN * ev.step && 
+            py <= y0 + (this.speed.y + FAR_MARGIN) * ev.step) || 
+            (dir < 0 && py < y0 + NEAR_MARGIN * ev.step && 
+            py >= y0 + (this.speed.y - FAR_MARGIN) * ev.step) ) {
 
             this.speed.y = 0;
-            this.pos.y = y0 - this.center.y - this.collisionBox.y/2;
+            this.pos.y = y0 - this.center.y - dir*this.collisionBox.y/2;
 
-            this.floorCollisionEvent(ev);
+            this.slopeCollisionEvent(dir, ev);
             return true;
         }
     
         return false;
+    }
+
+
+    public constantSlopeCollision(x : number, y : number, w : number, dir : number,
+        leftMargin : boolean, rightMargin : boolean, ev : GameEvent) : boolean {
+
+        if (leftMargin) {
+            
+            x -= this.collisionBox.x/2;
+            w += this.collisionBox.x/2;
+        }
+
+        if (rightMargin) {
+            
+            w += this.collisionBox.x/2;
+        }
+
+        return this.slopeCollision(x, y, x+w, y, dir, ev);
     }
 
 
@@ -237,4 +264,5 @@ export abstract class CollisionObject extends GameObject {
 
 
     public getHitbox = () : Vector2 => this.hitbox.clone();
+    public collisionsDisabled = () : boolean => this.disableCollisions;
 }

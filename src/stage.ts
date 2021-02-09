@@ -1,12 +1,40 @@
 import { Camera } from "./camera.js";
 import { Canvas } from "./canvas.js";
 import { GameEvent } from "./core.js";
+import { CollisionObject } from "./gameobject.js";
+
+
+// For collisions
+const COL_DOWN = 0b0001;
+const COL_WALL_LEFT = 0b0010;
+const COL_WALL_RIGHT = 0b0100;
+const COL_UP = 0b1000;
+
+
+const COLLISION_TABLE = [
+        COL_DOWN,
+        COL_WALL_RIGHT,
+        COL_UP,
+        COL_WALL_LEFT,
+        COL_DOWN | COL_UP,
+        COL_WALL_LEFT | COL_WALL_RIGHT,
+        COL_WALL_LEFT | COL_DOWN,
+        COL_WALL_RIGHT | COL_DOWN,
+        COL_WALL_RIGHT | COL_UP,
+        COL_WALL_LEFT | COL_UP,
+        COL_WALL_LEFT | COL_DOWN | COL_WALL_RIGHT,
+        COL_WALL_RIGHT | COL_DOWN | COL_UP,
+        COL_WALL_LEFT | COL_UP | COL_WALL_RIGHT,
+        COL_WALL_LEFT | COL_DOWN | COL_UP,
+        COL_WALL_LEFT | COL_DOWN | COL_WALL_RIGHT | COL_UP,
+];
 
 
 export class Stage {
 
 
     private layers : Array<Array<number>>;
+    private collisionMap : Array<number>;
     public readonly width : number;
     public readonly height : number;
 
@@ -16,6 +44,7 @@ export class Stage {
         let baseMap = ev.getTilemap("test");
 
         this.layers = baseMap.cloneLayers();
+        this.collisionMap = ev.getTilemap("collisions").cloneLayer(0);
         this.width = baseMap.width;
         this.height = baseMap.height;
     }
@@ -29,6 +58,15 @@ export class Stage {
             return def;
 
         return this.layers[l][y * this.width + x];
+    }
+
+
+    private getCollisionTile(i : number, def = 0) : number {
+
+        if (i < 0 || i >= this.collisionMap.length)
+            return def;
+
+        return this.collisionMap[i];
     }
 
 
@@ -71,5 +109,69 @@ export class Stage {
                 }
             }
         }
+    }
+
+
+    private handeTileCollision(o : CollisionObject, 
+        x : number, y : number, 
+        colId : number, ev : GameEvent) {
+
+        let c = COLLISION_TABLE[colId];
+
+        if ((c & COL_DOWN) == COL_DOWN) {
+
+            o.constantSlopeCollision(x*16, y*16, 16, 1, true, true, ev);
+        }
+        if ((c & COL_UP) == COL_UP) {
+
+            o.constantSlopeCollision(x*16, (y+1)*16, 16, -1, true, true, ev);
+        }
+
+        if ((c & COL_WALL_RIGHT) == COL_WALL_RIGHT) {
+
+            o.wallCollision((x+1)*16, y*16, 16, -1, ev);
+        }
+        if ((c & COL_WALL_LEFT) == COL_WALL_LEFT) {
+
+            o.wallCollision(x*16, y*16, 16, 1, ev);
+        }
+    }
+
+
+    public objectCollisions(o : CollisionObject, ev : GameEvent) {
+
+        const RADIUS = 2;
+
+        if (!o.doesExist()) 
+            return;
+
+        let px = Math.floor(o.getPos().x / 16);
+        let py = Math.floor(o.getPos().y / 16);
+
+        let tid : number;
+        let colId : number;
+
+        for (let layer = 0; layer < this.layers.length; ++ layer) {
+
+            for (let y = py - RADIUS; y <= py + RADIUS; ++ y) {
+
+                for (let x = px - RADIUS; x <= px + RADIUS; ++ x) {
+
+                    tid = this.getTile(layer, x, y);
+                    if (tid <= 0) continue;
+
+                    colId = this.getCollisionTile(tid-1);
+                    if (colId <= 0) continue;
+
+                    this.handeTileCollision(o, x, y, colId-1, ev);
+                }
+            }
+        }
+    }
+
+
+    public restrictCamera(cam : Camera) {
+
+        cam.restrictCamera(0, 0, this.width*16, this.height*16);
     }
 }

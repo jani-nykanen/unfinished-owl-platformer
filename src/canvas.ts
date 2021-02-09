@@ -108,15 +108,15 @@ export class Canvas {
 
     public moveTo(x = 0.0, y = 0.0) {
 
-        this.translation.x = x;
-        this.translation.y = y;
+        this.translation.x = x | 0;
+        this.translation.y = y | 0;
     }
 
 
     public move(x : number, y : number) {
 
-        this.translation.x += x;
-        this.translation.y += y;
+        this.translation.x += x | 0;
+        this.translation.y += y | 0;
     }
 
 

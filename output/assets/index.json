@@ -9,6 +9,7 @@
 
     "tilemapPath" : "assets/tilemaps/",
     "tilemaps" : [
+        {"name": "collisions",  "path": "collisions.tmx"},
         {"name": "test",  "path": "test.tmx"}
     ]
 }
