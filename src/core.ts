@@ -181,6 +181,14 @@ export class Core {
     }
 
 
+    public loadAssets(indexFilePath : string) : Core {
+
+        this.assets.parseAssetIndexFile(indexFilePath);
+
+        return this;
+    }
+
+
     public run(initialScene : Function) {
 
         this.activeSceneType = initialScene;
@@ -194,5 +202,5 @@ export class Core {
         let param = this.activeScene.dispose();
         this.activeScene = new newScene.prototype.constructor(param, this.ev);
     }
-
+    
 }

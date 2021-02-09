@@ -93,6 +93,10 @@ var Core = /** @class */ (function () {
         this.input.addAction(name, key, button1, button2);
         return this;
     };
+    Core.prototype.loadAssets = function (indexFilePath) {
+        this.assets.parseAssetIndexFile(indexFilePath);
+        return this;
+    };
     Core.prototype.run = function (initialScene) {
         this.activeSceneType = initialScene;
         this.loop(0);

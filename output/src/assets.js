@@ -60,6 +60,17 @@ var AssetManager = /** @class */ (function () {
             ++_this.loaded;
         });
     };
+    AssetManager.prototype.parseAssetIndexFile = function (url) {
+        var _this = this;
+        this.loadTextfile(url, "json", function (s) {
+            var data = JSON.parse(s);
+            var path = data["bitmapPath"];
+            for (var _i = 0, _a = data["bitmaps"]; _i < _a.length; _i++) {
+                var o = _a[_i];
+                _this.loadBitmap(o["name"], path + o["path"]);
+            }
+        });
+    };
     AssetManager.prototype.hasLoaded = function () {
         return this.loaded >= this.total;
     };

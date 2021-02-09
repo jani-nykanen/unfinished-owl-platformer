@@ -106,6 +106,20 @@ export class AssetManager {
     }
 
 
+    public parseAssetIndexFile(url : string) {
+
+        this.loadTextfile(url, "json", (s : string) => {
+
+            let data = JSON.parse(s);
+            let path = data["bitmapPath"];
+            for (let o of data["bitmaps"]) {
+
+                this.loadBitmap(o["name"], path + o["path"]);
+            }
+        });
+    }
+
+
     public hasLoaded() : boolean {
 
         return this.loaded >= this.total;

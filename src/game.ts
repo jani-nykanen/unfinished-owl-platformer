@@ -20,6 +20,9 @@ export class GameScene implements Scene {
     public redraw(c : Canvas) {
 
         c.clear(170, 170, 170);
+
+        c.drawBitmap(c.getBitmap("tileset"), 0, 0);
+        c.drawText(c.getBitmap("font"), "Seems to work", 2, 2, 0, 0);
     }
 
 
