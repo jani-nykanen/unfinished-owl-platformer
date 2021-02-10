@@ -1,7 +1,8 @@
 import { Canvas } from "./canvas.js";
 import { GameEvent } from "./core.js";
 import { CollisionObject } from "./gameobject.js";
-import { State } from "./util.js";
+import { Sprite } from "./sprite.js";
+import { clamp, State } from "./util.js";
 import { Vector2 } from "./vector.js";
 
 
@@ -11,6 +12,10 @@ export class Player extends CollisionObject {
     private canJump : boolean;
     private jumpTimer : number;
     private jumpMargin : number;
+
+    private sprBody : Sprite;
+    private sprFeet : Sprite;
+    private eyePos : Vector2;
 
 
     constructor(x : number, y : number) {
@@ -26,6 +31,10 @@ export class Player extends CollisionObject {
         this.canJump = false;
         this.jumpTimer = 0;
         this.jumpMargin = 0;
+
+        this.sprBody = new Sprite(32, 24);
+        this.sprFeet = new Sprite(16, 8);
+        this.eyePos = new Vector2();
     }
 
     
@@ -50,6 +59,42 @@ export class Player extends CollisionObject {
     }
 
 
+    private animate(ev : GameEvent) {
+
+        const EPS = 0.01;
+
+        let speed : number;
+
+        this.eyePos.x = 0;
+        this.eyePos.y = 0;
+
+        if (Math.abs(this.speed.x) >= 0.5) {
+
+            this.eyePos.x = Math.sign(this.speed.x);
+        }
+
+        if (this.canJump) {
+
+            if (Math.abs(this.speed.x) > EPS) {
+
+                speed = 10 - Math.abs(this.speed.x)*4;
+                this.sprFeet.animate(3, 1, 4, speed, ev.step);
+            }
+            else {
+
+                this.sprFeet.setFrame(0, 3);
+            }
+        }
+        else {
+
+            if (Math.abs(this.speed.y) >= 0.5) {
+
+                this.eyePos.y = Math.sign(this.speed.y);
+            }
+        }
+    }
+
+
     private updateTimers(ev : GameEvent) {
 
         const JUMP_SPEED = -3.0;
@@ -70,6 +115,7 @@ export class Player extends CollisionObject {
     protected updateLogic(ev : GameEvent) {
 
         this.control(ev);
+        this.animate(ev);
         this.updateTimers(ev);
 
         this.canJump = false;
@@ -78,14 +124,20 @@ export class Player extends CollisionObject {
 
     public draw(c : Canvas) {
 
-        let px = Math.round(this.pos.x) - 8;
-        let py = Math.round(this.pos.y) - 8;
+        let px = Math.round(this.pos.x);
+        let py = Math.round(this.pos.y);
+        
+        let bmp = c.getBitmap("owl");
+
+        c.drawSprite(this.sprBody, bmp, px - 16, py - 16);
+        c.drawSprite(this.sprFeet, bmp, px - 8, py + 1);
+
+        px += this.eyePos.x;
+        py += this.eyePos.y;
 
         c.setFillColor(0, 0, 0);
-        c.fillRect(px-1, py-1, 18, 18);
-
-        c.setFillColor(255, 0, 0);
-        c.fillRect(px, py, 16, 16);
+        c.fillRect(px - 3, py - 9, 2, 2);
+        c.fillRect(px + 1, py - 9, 2, 2);
     }
 
 

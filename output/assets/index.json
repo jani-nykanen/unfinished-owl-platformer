@@ -6,6 +6,7 @@
         {"name": "sky",  "path": "sky.png"},
         {"name": "trees",  "path": "trees.png"},
         {"name": "clouds",  "path": "clouds.png"},
+        {"name": "owl",  "path": "owl.png"},
         {"name": "tileset",  "path": "tileset.png"}
     ],
 
