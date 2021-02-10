@@ -155,7 +155,7 @@ export abstract class CollisionObject extends GameObject {
 
 
     protected wallCollisionEvent(dir : number, ev : GameEvent) {}
-    protected slopeCollisionEvent(dir : number, ev : GameEvent) {}
+    protected slopeCollisionEvent(dir : number, friction : number, ev : GameEvent) {}
 
 
     public wallCollision(
@@ -230,7 +230,7 @@ export abstract class CollisionObject extends GameObject {
             this.speed.y = 0;
             this.pos.y = y0 - this.center.y - dir*this.collisionBox.y/2;
 
-            this.slopeCollisionEvent(dir, ev);
+            this.slopeCollisionEvent(dir, k, ev);
             return true;
         }
     

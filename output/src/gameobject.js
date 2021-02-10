@@ -94,7 +94,7 @@ var CollisionObject = /** @class */ (function (_super) {
         return _this;
     }
     CollisionObject.prototype.wallCollisionEvent = function (dir, ev) { };
-    CollisionObject.prototype.slopeCollisionEvent = function (dir, ev) { };
+    CollisionObject.prototype.slopeCollisionEvent = function (dir, friction, ev) { };
     CollisionObject.prototype.wallCollision = function (x, y, h, dir, ev, force) {
         if (force === void 0) { force = false; }
         var EPS = 0.001;
@@ -146,7 +146,7 @@ var CollisionObject = /** @class */ (function (_super) {
                 py >= y0 + (this.speed.y - FAR_MARGIN) * ev.step)) {
             this.speed.y = 0;
             this.pos.y = y0 - this.center.y - dir * this.collisionBox.y / 2;
-            this.slopeCollisionEvent(dir, ev);
+            this.slopeCollisionEvent(dir, k, ev);
             return true;
         }
         return false;

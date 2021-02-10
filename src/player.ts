@@ -1,4 +1,4 @@
-import { Canvas } from "./canvas.js";
+import { Canvas, Flip } from "./canvas.js";
 import { GameEvent } from "./core.js";
 import { CollisionObject } from "./gameobject.js";
 import { Sprite } from "./sprite.js";
@@ -14,8 +14,11 @@ export class Player extends CollisionObject {
     private jumpMargin : number;
 
     private sprBody : Sprite;
+    private sprWing : Sprite;
     private sprFeet : Sprite;
     private eyePos : Vector2;
+
+    private slopeFriction : number;
 
 
     constructor(x : number, y : number) {
@@ -32,8 +35,9 @@ export class Player extends CollisionObject {
         this.jumpTimer = 0;
         this.jumpMargin = 0;
 
-        this.sprBody = new Sprite(32, 24);
+        this.sprBody = new Sprite(24, 24);
         this.sprFeet = new Sprite(16, 8);
+        this.sprWing = new Sprite(12, 24);
         this.eyePos = new Vector2();
     }
 
@@ -56,6 +60,13 @@ export class Player extends CollisionObject {
 
             this.jumpTimer = 0;
         }
+
+        // Not quite working yet
+        if (this.slopeFriction > 0 && 
+            Math.sign(this.target.x) != Math.sign(this.slopeFriction)) {
+
+            //this.target.x *= 1.0 - 0.5 * Math.abs(this.slopeFriction);
+        }
     }
 
 
@@ -64,6 +75,8 @@ export class Player extends CollisionObject {
         const EPS = 0.01;
 
         let speed : number;
+        let bodyFrame : number;
+        let wingFrame : number;
 
         this.eyePos.x = 0;
         this.eyePos.y = 0;
@@ -73,24 +86,37 @@ export class Player extends CollisionObject {
             this.eyePos.x = Math.sign(this.speed.x);
         }
 
+        // TEMP
+        this.sprWing.setFrame(0, 1);
+
         if (this.canJump) {
 
             if (Math.abs(this.speed.x) > EPS) {
 
                 speed = 10 - Math.abs(this.speed.x)*4;
-                this.sprFeet.animate(3, 1, 4, speed, ev.step);
+                this.sprFeet.animate(6, 1, 4, speed, ev.step);
             }
             else {
 
-                this.sprFeet.setFrame(0, 3);
+                this.sprFeet.setFrame(0, 6);
             }
-        }
-        else {
 
+            this.sprBody.setFrame(0, 0);
+            this.sprWing.setFrame(0, 1);
+        }
+        else {  
+
+            bodyFrame = 0;
+            wingFrame = 2;
             if (Math.abs(this.speed.y) >= 0.5) {
 
-                this.eyePos.y = Math.sign(this.speed.y);
+                this.eyePos.y = Math.sign(this.speed.y) * 2;
+                bodyFrame = this.speed.y < 0 ? 1 : 2;
+                wingFrame = this.speed.y < 0 ? 1 : 3;
             }
+            this.sprBody.setFrame(bodyFrame, 0);
+            this.sprWing.setFrame(wingFrame, 1);
+            this.sprFeet.setFrame(bodyFrame, 7);
         }
     }
 
@@ -119,6 +145,7 @@ export class Player extends CollisionObject {
         this.updateTimers(ev);
 
         this.canJump = false;
+        this.slopeFriction = 0;
     }
 
 
@@ -129,19 +156,25 @@ export class Player extends CollisionObject {
         
         let bmp = c.getBitmap("owl");
 
-        c.drawSprite(this.sprBody, bmp, px - 16, py - 16);
+        // Wings
+        c.drawSprite(this.sprWing, bmp, px - 16, py - 16);
+        c.drawSprite(this.sprWing, bmp, px + 4, py - 16, Flip.Horizontal);
+        // Body
+        c.drawSprite(this.sprBody, bmp, px - 12, py - 16);
+        // Feet
         c.drawSprite(this.sprFeet, bmp, px - 8, py + 1);
 
         px += this.eyePos.x;
         py += this.eyePos.y;
 
+        // Eyes
         c.setFillColor(0, 0, 0);
         c.fillRect(px - 3, py - 9, 2, 2);
         c.fillRect(px + 1, py - 9, 2, 2);
     }
 
 
-    protected slopeCollisionEvent(dir : number, ev : GameEvent) {
+    protected slopeCollisionEvent(dir : number, friction : number, ev : GameEvent) {
 
         const JUMP_MARGIN = 10;
 
@@ -149,6 +182,8 @@ export class Player extends CollisionObject {
 
             this.canJump = true;
             this.jumpMargin = JUMP_MARGIN;
+
+            this.slopeFriction = friction;
         }
         else {
 
