@@ -74,10 +74,9 @@ export class Player extends CollisionObject {
         }
 
         // Not quite working yet
-        if (this.slopeFriction > 0 && 
-            Math.sign(this.target.x) != Math.sign(this.slopeFriction)) {
+        if (Math.abs(this.slopeFriction) > 0) {
 
-            //this.target.x *= 1.0 - 0.5 * Math.abs(this.slopeFriction);
+            // this.target.x *= Math.abs(this.slopeFriction);
         }
     }
 
@@ -210,6 +209,7 @@ export class Player extends CollisionObject {
             this.jumpMargin = JUMP_MARGIN;
 
             this.slopeFriction = friction;
+
         }
         else {
 

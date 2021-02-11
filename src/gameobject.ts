@@ -231,7 +231,8 @@ export abstract class CollisionObject extends GameObject {
             this.pos.y = y0 - this.center.y - dir*this.collisionBox.y/2;
 
             this.slopeCollisionEvent(dir, 
-                -k, ev);
+                (x2 - x1) / Math.hypot(x2 - x1, y2 - y1), 
+                ev);
             return true;
         }
     

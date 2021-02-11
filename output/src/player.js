@@ -56,9 +56,8 @@ var Player = /** @class */ (function (_super) {
             this.jumpTimer = 0;
         }
         // Not quite working yet
-        if (this.slopeFriction > 0 &&
-            Math.sign(this.target.x) != Math.sign(this.slopeFriction)) {
-            //this.target.x *= 1.0 - 0.5 * Math.abs(this.slopeFriction);
+        if (Math.abs(this.slopeFriction) > 0) {
+            // this.target.x *= Math.abs(this.slopeFriction);
         }
     };
     Player.prototype.animate = function (ev) {
