@@ -10,6 +10,7 @@ export class Player extends CollisionObject {
 
 
     private canJump : boolean;
+    private doubleJump : boolean;
     private jumpTimer : number;
     private jumpMargin : number;
 
@@ -25,13 +26,14 @@ export class Player extends CollisionObject {
 
         super(x, y);
 
-        this.friction = new Vector2(0.15, 0.15);
+        this.friction = new Vector2(0.125, 0.125);
         this.hitbox = new Vector2(16, 16);
-        this.collisionBox = new Vector2(16, 16);
+        this.collisionBox = new Vector2(12, 16);
         this.center = new Vector2();
 
         this.inCamera = true;
         this.canJump = false;
+        this.doubleJump = false;
         this.jumpTimer = 0;
         this.jumpMargin = 0;
 
@@ -44,17 +46,27 @@ export class Player extends CollisionObject {
     
     private control(ev : GameEvent) {
 
-        const BASE_GRAVITY = 4.0;
-        const BASE_SPEED = 1.5;
+        const BASE_GRAVITY = 3.0;
+        const BASE_SPEED = 1.25;
         const JUMP_TIME = 15;
+        const DJUMP_TIME = 60;
 
         this.target.x = ev.getStick().x * BASE_SPEED;
         this.target.y = BASE_GRAVITY;
 
         let s = ev.getAction("fire1");
-        if (this.jumpMargin > 0 && s == State.Pressed) {
+        let canDoDoubleJump = this.jumpMargin <= 0 && !this.doubleJump;
 
-            this.jumpTimer = JUMP_TIME;
+        if ( (this.jumpMargin > 0 || canDoDoubleJump) && 
+            s == State.Pressed) {
+
+            this.jumpTimer = canDoDoubleJump ? DJUMP_TIME : JUMP_TIME;
+
+            if (canDoDoubleJump) {
+
+                this.speed.y = Math.max(this.speed.y, 0);
+                this.doubleJump = true;
+            }
         }
         else if (this.jumpTimer > 0 && (s & State.DownOrPressed) == 0) {
 
@@ -86,9 +98,6 @@ export class Player extends CollisionObject {
             this.eyePos.x = Math.sign(this.speed.x);
         }
 
-        // TEMP
-        this.sprWing.setFrame(0, 1);
-
         if (this.canJump) {
 
             if (Math.abs(this.speed.x) > EPS) {
@@ -115,15 +124,25 @@ export class Player extends CollisionObject {
                 wingFrame = this.speed.y < 0 ? 1 : 3;
             }
             this.sprBody.setFrame(bodyFrame, 0);
-            this.sprWing.setFrame(wingFrame, 1);
             this.sprFeet.setFrame(bodyFrame, 7);
+
+            if (!this.doubleJump || this.jumpTimer <= 0) {
+
+                this.sprWing.setFrame(wingFrame, 1);
+            }
+            else {
+
+                this.sprWing.animate(1, 1, 4, 4, ev.step);
+            }
         }
     }
 
 
     private updateTimers(ev : GameEvent) {
 
-        const JUMP_SPEED = -3.0;
+        const JUMP_SPEED = -2.5;
+        const DOUBLE_JUMP_SPEED = -0.225;
+        const DOUBLE_JUMP_MIN_SPEED = -1.5;
 
         if (this.jumpMargin > 0) {
 
@@ -133,7 +152,12 @@ export class Player extends CollisionObject {
         if (this.jumpTimer > 0) {
 
             this.jumpTimer -= ev.step;
-            this.speed.y = JUMP_SPEED;
+
+            if (this.doubleJump)
+                this.speed.y = Math.max(DOUBLE_JUMP_MIN_SPEED, 
+                    this.speed.y + DOUBLE_JUMP_SPEED * ev.step);
+            else
+                this.speed.y = JUMP_SPEED;
         }
     }
 
@@ -176,11 +200,13 @@ export class Player extends CollisionObject {
 
     protected slopeCollisionEvent(dir : number, friction : number, ev : GameEvent) {
 
-        const JUMP_MARGIN = 10;
+        const JUMP_MARGIN = 12;
 
         if (dir > 0) {
 
             this.canJump = true;
+            this.jumpTimer = 0;
+            this.doubleJump = false;
             this.jumpMargin = JUMP_MARGIN;
 
             this.slopeFriction = friction;
