@@ -36,6 +36,7 @@ var Player = /** @class */ (function (_super) {
         return _this;
     }
     Player.prototype.control = function (ev) {
+        var EPS = 0.1;
         var BASE_GRAVITY = 3.0;
         var BASE_SPEED = 1.25;
         var JUMP_TIME = 15;
@@ -56,7 +57,18 @@ var Player = /** @class */ (function (_super) {
             this.jumpTimer = 0;
         }
         // Not quite working yet
-        if (Math.abs(this.slopeFriction) > 0) {
+        var k = this.slopeFriction;
+        if (Math.abs(k) > EPS) {
+            if (k > 0) {
+                if (this.target.x > 0)
+                    k *= -0.5;
+                this.target.x *= 1.0 - 0.5 * k;
+            }
+            else {
+                if (this.target.x < 0)
+                    k *= -0.5;
+                this.target.x *= 1.0 + 0.5 * k;
+            }
             // this.target.x *= Math.abs(this.slopeFriction);
         }
     };

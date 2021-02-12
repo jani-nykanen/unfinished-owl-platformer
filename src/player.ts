@@ -46,6 +46,7 @@ export class Player extends CollisionObject {
     
     private control(ev : GameEvent) {
 
+        const EPS = 0.1;
         const BASE_GRAVITY = 3.0;
         const BASE_SPEED = 1.25;
         const JUMP_TIME = 15;
@@ -74,7 +75,23 @@ export class Player extends CollisionObject {
         }
 
         // Not quite working yet
-        if (Math.abs(this.slopeFriction) > 0) {
+        let k = this.slopeFriction;
+        if (Math.abs(k) > EPS) {
+
+            if (k > 0) {
+
+                if (this.target.x > 0)
+                    k *= -0.5;
+
+                this.target.x *= 1.0 - 0.5 * k;
+            }
+            else {
+
+                if (this.target.x < 0)
+                    k *= -0.5;
+
+                this.target.x *= 1.0 + 0.5 * k;
+            }
 
             // this.target.x *= Math.abs(this.slopeFriction);
         }
