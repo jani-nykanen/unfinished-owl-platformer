@@ -76,6 +76,7 @@ var Core = /** @class */ (function () {
             if (this.initialized && this.activeScene != null) {
                 this.activeScene.refresh(this.ev);
             }
+            this.canvas.update(this.ev);
             this.input.postUpdate();
             this.timeSum -= FRAME_WAIT;
         }

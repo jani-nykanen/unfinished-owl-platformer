@@ -37,6 +37,7 @@ var GameScene = /** @class */ (function () {
         this.cam.computeViewport(c);
         this.stage.restrictCamera(c, this.cam);
         this.cam.use(c);
+        c.applyShake();
         this.stage.draw(c, this.cam);
         this.objects.draw(c);
         c.moveTo();

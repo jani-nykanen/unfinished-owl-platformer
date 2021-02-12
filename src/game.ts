@@ -78,6 +78,8 @@ export class GameScene implements Scene {
         this.stage.restrictCamera(c, this.cam);
         this.cam.use(c);
 
+        c.applyShake();
+
         this.stage.draw(c, this.cam);
         this.objects.draw(c);
 

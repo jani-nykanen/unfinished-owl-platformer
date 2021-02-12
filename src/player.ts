@@ -27,6 +27,8 @@ export class Player extends CollisionObject {
 
     private isThumping : boolean;
     private thumpWait : number;
+    private thumpApplied : boolean;
+
     private flip : Flip;
 
 
@@ -55,6 +57,7 @@ export class Player extends CollisionObject {
     
         this.isThumping = false;
         this.thumpWait = 0;
+        this.thumpApplied = true;
 
         this.flip = Flip.None;
     }
@@ -279,6 +282,12 @@ export class Player extends CollisionObject {
 
     public preDraw(c : Canvas) {
 
+        if (!this.thumpApplied) {
+
+            c.shake(30, 4);
+            this.thumpApplied = true;
+        }
+
         for (let d of this.dust) {
 
             d.draw(c);
@@ -344,6 +353,7 @@ export class Player extends CollisionObject {
             if (this.isThumping && this.thumpWait <= 0) {
 
                 this.thumpWait = THUMP_WAIT;
+                this.thumpApplied = false;
             }
         }
         else {

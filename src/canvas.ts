@@ -1,4 +1,6 @@
 import { AssetManager } from "./assets.js";
+import { GameEvent } from "./core.js";
+import { GameObject } from "./gameobject.js";
 import { Sprite } from "./sprite.js";
 import { clamp } from "./util.js";
 import { Vector2 } from "./vector.js";
@@ -24,6 +26,9 @@ export class Canvas {
 
     private translation : Vector2;
 
+    private shakeTimer : number;
+    private shakeAmount : number;
+
 
     constructor(width : number, height : number, assets : AssetManager) {
 
@@ -37,6 +42,9 @@ export class Canvas {
         this.createHtml5Canvas(width, height);
         window.addEventListener("resize", () => this.resize(
             window.innerWidth, window.innerHeight));
+    
+        this.shakeTimer = 0;
+        this.shakeAmount = 0;
     }
 
 
@@ -278,4 +286,30 @@ export class Canvas {
         return this.assets.getBitmap(name);
     }
 
+
+    public shake(shakeTime : number, shakeAmount : number) {
+
+        this.shakeTimer = shakeTime;
+        this.shakeAmount = shakeAmount;
+    }
+
+
+    public update(ev : GameEvent) {
+
+        if (this.shakeTimer > 0) {
+
+            this.shakeTimer -= ev.step;
+        }
+    }
+
+
+    public applyShake() {
+
+        if (this.shakeTimer <= 0) return;
+
+        let rx = Math.round(Math.random() * this.shakeAmount * 2) - this.shakeAmount;
+        let ry = Math.round(Math.random() * this.shakeAmount * 2) - this.shakeAmount;
+
+        this.move(rx, ry);
+    }
 }

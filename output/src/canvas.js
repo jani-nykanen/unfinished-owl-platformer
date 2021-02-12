@@ -17,6 +17,8 @@ var Canvas = /** @class */ (function () {
         this.assets = assets;
         this.createHtml5Canvas(width, height);
         window.addEventListener("resize", function () { return _this.resize(window.innerWidth, window.innerHeight); });
+        this.shakeTimer = 0;
+        this.shakeAmount = 0;
     }
     Canvas.prototype.createHtml5Canvas = function (width, height) {
         var cdiv = document.createElement("div");
@@ -167,6 +169,22 @@ var Canvas = /** @class */ (function () {
     };
     Canvas.prototype.getBitmap = function (name) {
         return this.assets.getBitmap(name);
+    };
+    Canvas.prototype.shake = function (shakeTime, shakeAmount) {
+        this.shakeTimer = shakeTime;
+        this.shakeAmount = shakeAmount;
+    };
+    Canvas.prototype.update = function (ev) {
+        if (this.shakeTimer > 0) {
+            this.shakeTimer -= ev.step;
+        }
+    };
+    Canvas.prototype.applyShake = function () {
+        if (this.shakeTimer <= 0)
+            return;
+        var rx = Math.round(Math.random() * this.shakeAmount * 2) - this.shakeAmount;
+        var ry = Math.round(Math.random() * this.shakeAmount * 2) - this.shakeAmount;
+        this.move(rx, ry);
     };
     return Canvas;
 }());

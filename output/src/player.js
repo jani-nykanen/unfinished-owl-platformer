@@ -38,6 +38,7 @@ var Player = /** @class */ (function (_super) {
         _this.dustTimer = 0;
         _this.isThumping = false;
         _this.thumpWait = 0;
+        _this.thumpApplied = true;
         _this.flip = Flip.None;
         return _this;
     }
@@ -192,6 +193,10 @@ var Player = /** @class */ (function (_super) {
         this.slopeFriction = 0;
     };
     Player.prototype.preDraw = function (c) {
+        if (!this.thumpApplied) {
+            c.shake(30, 4);
+            this.thumpApplied = true;
+        }
         for (var _i = 0, _a = this.dust; _i < _a.length; _i++) {
             var d = _a[_i];
             d.draw(c);
@@ -237,6 +242,7 @@ var Player = /** @class */ (function (_super) {
             this.slopeFriction = friction;
             if (this.isThumping && this.thumpWait <= 0) {
                 this.thumpWait = THUMP_WAIT;
+                this.thumpApplied = false;
             }
         }
         else {

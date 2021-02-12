@@ -152,6 +152,7 @@ export class Core {
 
                 this.activeScene.refresh(this.ev);
             }
+            this.canvas.update(this.ev);
 
             this.input.postUpdate();
 
