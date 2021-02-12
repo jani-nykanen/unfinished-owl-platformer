@@ -213,8 +213,9 @@ export class Stage {
     }
 
 
-    public restrictCamera(cam : Camera) {
+    public restrictCamera(c : Canvas, cam : Camera) {
 
-        cam.restrictCamera(0, 0, this.width*16, this.height*16);
+        cam.restrictCamera(c,
+            0, 0, this.width*16, this.height*16);
     }
 }

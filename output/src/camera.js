@@ -35,45 +35,40 @@ var Camera = /** @class */ (function () {
             dir = Math.sign(target);
         }
         this.centerOffTarget.x = dir * FORWARD;
-        if (this.viewport.x < EPS && this.centerOffTarget.x < 0)
-            this.centerOffTarget.x = 0.0;
         this.centerOff.x = updateSpeedAxis(this.centerOff.x, this.centerOffTarget.x, MOVE_SPEED_X * ev.step);
     };
-    Camera.prototype.restrictCamera = function (x, y, w, h) {
+    Camera.prototype.restrictCamera = function (c, x, y, w, h) {
         var oldViewport = this.viewport.clone();
         // Left
-        if (this.viewport.x < x) {
+        var px = this.pos.x + this.centerOff.x;
+        if (px < x + c.width / 2) {
             if (this.centerOff.x < 0) {
-                this.centerOff.x += (x - this.viewport.x);
-                if (this.centerOff.x > 0)
-                    this.centerOff.x = 0;
+                this.centerOff.x += (x + c.width / 2 - px);
             }
             if (this.centerOff.x >= 0) {
-                this.viewport.x = x;
-                this.pos.x += this.viewport.x - oldViewport.x;
+                this.centerOff.x = 0;
+                this.pos.x = x + c.width / 2;
             }
         }
         // Right
-        if (this.viewport.x + this.viewport.w > x + w) {
+        px = this.pos.x + this.centerOff.x;
+        if (px > x + w - c.width / 2) {
             if (this.centerOff.x > 0) {
-                this.centerOff.x += (x + w - this.viewport.x - this.viewport.w);
-                if (this.centerOff.x < 0)
-                    this.centerOff.x = 0;
+                this.centerOff.x -= (px - (x + w - c.width / 2));
             }
             if (this.centerOff.x <= 0) {
-                this.viewport.x = (x + w) - this.viewport.w;
-                this.pos.x += this.viewport.x - oldViewport.x;
+                this.centerOff.x = 0;
+                this.pos.x = x + w - c.width / 2;
             }
         }
         // Top
-        if (this.viewport.y < y) {
-            this.viewport.y = y;
+        if (this.pos.y < y + c.height / 2) {
+            this.pos.y = y + c.height / 2;
         }
         // Bottom
-        if (this.viewport.y + this.viewport.h > (y + h)) {
-            this.viewport.y = (y + h) - this.viewport.h;
+        if (this.pos.y > (y + h) - c.height / 2) {
+            this.pos.y = (y + h) - c.height / 2;
         }
-        this.pos.y += this.viewport.y - oldViewport.y;
     };
     return Camera;
 }());

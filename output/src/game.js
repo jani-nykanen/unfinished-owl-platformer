@@ -9,7 +9,7 @@ var GameScene = /** @class */ (function () {
         this.cloudPos = (new Array(2)).fill(0);
     }
     GameScene.prototype.refresh = function (ev) {
-        var CLOUD_SPEED = [0.25, 0.5];
+        var CLOUD_SPEED = [0.125, 0.25];
         this.objects.update(this.cam, this.stage, ev);
         this.stage.update(ev);
         for (var i = 0; i < this.cloudPos.length; ++i) {
@@ -35,7 +35,7 @@ var GameScene = /** @class */ (function () {
         c.moveTo();
         this.drawBackground(c);
         this.cam.computeViewport(c);
-        this.stage.restrictCamera(this.cam);
+        this.stage.restrictCamera(c, this.cam);
         this.cam.use(c);
         this.stage.draw(c, this.cam);
         this.objects.draw(c);

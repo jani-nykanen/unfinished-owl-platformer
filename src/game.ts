@@ -28,7 +28,7 @@ export class GameScene implements Scene {
 
     public refresh(ev : GameEvent) {
         
-        const CLOUD_SPEED = [0.25, 0.5];
+        const CLOUD_SPEED = [0.125, 0.25];
 
         this.objects.update(this.cam, this.stage, ev);
 
@@ -75,7 +75,7 @@ export class GameScene implements Scene {
         this.drawBackground(c);
 
         this.cam.computeViewport(c);
-        this.stage.restrictCamera(this.cam);
+        this.stage.restrictCamera(c, this.cam);
         this.cam.use(c);
 
         this.stage.draw(c, this.cam);
