@@ -18,7 +18,7 @@ export class ObjectManager {
 
 
     public update(cam : Camera, stage : Stage, ev : GameEvent) {
-
+        
         this.player.update(ev);
         cam.followObject(this.player, ev);
 
@@ -28,6 +28,7 @@ export class ObjectManager {
 
     public draw(c : Canvas) {
 
+        this.player.preDraw(c);
         this.player.draw(c);
     }
 }

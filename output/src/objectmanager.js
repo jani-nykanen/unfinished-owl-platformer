@@ -9,6 +9,7 @@ var ObjectManager = /** @class */ (function () {
         stage.objectCollisions(this.player, ev);
     };
     ObjectManager.prototype.draw = function (c) {
+        this.player.preDraw(c);
         this.player.draw(c);
     };
     return ObjectManager;

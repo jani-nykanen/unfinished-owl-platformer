@@ -14,26 +14,37 @@ var __extends = (this && this.__extends) || (function () {
 import { Sprite } from "./sprite.js";
 import { boxOverlay, updateSpeedAxis } from "./util.js";
 import { Vector2 } from "./vector.js";
-var GameObject = /** @class */ (function () {
-    function GameObject(x, y) {
+var ExistingObject = /** @class */ (function () {
+    function ExistingObject() {
         var _this = this;
-        this.getPos = function () { return _this.pos.clone(); };
-        this.getSpeed = function () { return _this.speed.clone(); };
-        this.getTarget = function () { return _this.target.clone(); };
-        this.isInCamera = function () { return _this.inCamera; };
-        this.isDying = function () { return _this.dying; };
         this.doesExist = function () { return _this.exist; };
-        this.pos = new Vector2(x, y);
-        this.oldPos = this.pos.clone();
-        this.speed = new Vector2();
-        this.target = this.speed.clone();
-        this.friction = new Vector2(1, 1);
-        this.center = new Vector2();
-        this.hitbox = new Vector2();
-        this.spr = new Sprite(0, 0);
-        this.dying = false;
-        this.inCamera = false;
-        this.exist = true;
+        this.exist = false;
+    }
+    return ExistingObject;
+}());
+export { ExistingObject };
+var GameObject = /** @class */ (function (_super) {
+    __extends(GameObject, _super);
+    function GameObject(x, y) {
+        var _this = _super.call(this) || this;
+        _this.getPos = function () { return _this.pos.clone(); };
+        _this.getSpeed = function () { return _this.speed.clone(); };
+        _this.getTarget = function () { return _this.target.clone(); };
+        _this.isInCamera = function () { return _this.inCamera; };
+        _this.isDying = function () { return _this.dying; };
+        _this.doesExist = function () { return _this.exist; };
+        _this.pos = new Vector2(x, y);
+        _this.oldPos = _this.pos.clone();
+        _this.speed = new Vector2();
+        _this.target = _this.speed.clone();
+        _this.friction = new Vector2(1, 1);
+        _this.center = new Vector2();
+        _this.hitbox = new Vector2();
+        _this.spr = new Sprite(0, 0);
+        _this.dying = false;
+        _this.inCamera = false;
+        _this.exist = true;
+        return _this;
     }
     GameObject.prototype.die = function (ev) {
         return true;
@@ -80,7 +91,7 @@ var GameObject = /** @class */ (function () {
     GameObject.prototype.draw = function (c) { };
     GameObject.prototype.postDraw = function (c) { };
     return GameObject;
-}());
+}(ExistingObject));
 export { GameObject };
 var CollisionObject = /** @class */ (function (_super) {
     __extends(CollisionObject, _super);

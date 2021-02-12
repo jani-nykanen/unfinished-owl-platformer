@@ -7,9 +7,9 @@
         {"name": "trees",  "path": "trees.png"},
         {"name": "clouds",  "path": "clouds.png"},
         {"name": "owl",  "path": "owl.png"},
+        {"name": "dust",  "path": "dust.png"},
         {"name": "tileset",  "path": "tileset.png"}
     ],
-
 
     "tilemapPath" : "assets/tilemaps/",
     "tilemaps" : [

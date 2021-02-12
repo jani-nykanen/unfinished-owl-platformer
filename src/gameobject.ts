@@ -6,7 +6,22 @@ import { boxOverlay, updateSpeedAxis } from "./util.js";
 import { Vector2 } from "./vector.js";
 
 
-export abstract class GameObject {
+export abstract class ExistingObject {
+
+    protected exist : boolean;
+
+
+    constructor() {
+
+        this.exist = false;
+    }
+    
+
+    public doesExist = () : boolean => this.exist;
+}
+
+
+export abstract class GameObject extends ExistingObject {
     
 
     protected pos : Vector2;
@@ -18,7 +33,6 @@ export abstract class GameObject {
 
     protected hitbox : Vector2;
 
-    protected exist : boolean;
     protected dying : boolean;
     protected inCamera : boolean;
 
@@ -26,6 +40,8 @@ export abstract class GameObject {
 
 
     constructor(x : number, y : number) {
+
+        super();
 
         this.pos = new Vector2(x, y);
         this.oldPos = this.pos.clone();

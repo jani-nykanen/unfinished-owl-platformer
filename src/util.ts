@@ -4,6 +4,7 @@
  * (c) 2021 Jani Nykänen
  */
 
+import { ExistingObject } from "./gameobject.js";
 import { Vector2, Rect } from "./vector.js";
 
 
@@ -76,4 +77,28 @@ export const boxOverlayRect = (rect : Rect,
         new Vector2(), 
         new Vector2(rect.w, rect.h), 
         x, y, w, h);
+}
+
+
+export function nextObject<T extends ExistingObject> (arr : Array<T>, type : Function) {
+
+    let o : T;
+
+    o = null;
+    for (let a of arr) {
+
+        if (!a.doesExist()) {
+
+            o = a;
+            break;
+        }
+    }
+
+    if (o == null) {
+
+        o = new type.prototype.constructor();
+        arr.push(o);
+    }
+
+    return o;
 }

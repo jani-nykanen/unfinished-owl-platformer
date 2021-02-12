@@ -43,3 +43,19 @@ export var boxOverlay = function (pos, center, hitbox, x, y, w, h) {
 export var boxOverlayRect = function (rect, x, y, w, h) {
     return boxOverlay(new Vector2(rect.x + rect.w / 2, rect.y + rect.h / 2), new Vector2(), new Vector2(rect.w, rect.h), x, y, w, h);
 };
+export function nextObject(arr, type) {
+    var o;
+    o = null;
+    for (var _i = 0, arr_1 = arr; _i < arr_1.length; _i++) {
+        var a = arr_1[_i];
+        if (!a.doesExist()) {
+            o = a;
+            break;
+        }
+    }
+    if (o == null) {
+        o = new type.prototype.constructor();
+        arr.push(o);
+    }
+    return o;
+}
