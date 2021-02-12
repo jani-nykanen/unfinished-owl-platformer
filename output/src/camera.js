@@ -35,6 +35,8 @@ var Camera = /** @class */ (function () {
             dir = Math.sign(target);
         }
         this.centerOffTarget.x = dir * FORWARD;
+        if (this.viewport.x < EPS && this.centerOffTarget.x < 0)
+            this.centerOffTarget.x = 0.0;
         this.centerOff.x = updateSpeedAxis(this.centerOff.x, this.centerOffTarget.x, MOVE_SPEED_X * ev.step);
     };
     Camera.prototype.restrictCamera = function (x, y, w, h) {

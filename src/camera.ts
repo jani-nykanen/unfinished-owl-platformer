@@ -66,6 +66,8 @@ export class Camera {
 
         this.centerOff.x = updateSpeedAxis(this.centerOff.x, 
             this.centerOffTarget.x, MOVE_SPEED_X * ev.step);
+
+        
     }
 
 
