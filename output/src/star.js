@@ -16,7 +16,7 @@ import { Particle } from "./particle.js";
 import { Sprite } from "./sprite.js";
 import { nextObject } from "./util.js";
 import { Vector2 } from "./vector.js";
-var STAR_DEATH_TIME = 30;
+var STAR_DEATH_TIME = 32;
 var Star = /** @class */ (function (_super) {
     __extends(Star, _super);
     function Star(x, y) {
@@ -65,7 +65,7 @@ var Star = /** @class */ (function (_super) {
             angle = Math.PI * 2 / count * i + angleOffset;
             speed = new Vector2(Math.cos(angle) * speedAmount, Math.sin(angle) * speedAmount + BASE_JUMP * speedAmount);
             nextObject(this.particles, Particle)
-                .spawn(this.pos.x, this.pos.y, speed, STAR_DEATH_TIME, BASE_GRAVITY, 0);
+                .spawn(this.pos.x, this.pos.y, speed, STAR_DEATH_TIME - 1, STAR_DEATH_TIME / 4, BASE_GRAVITY, 0);
         }
     };
     Star.prototype.playerCollision = function (pl) {

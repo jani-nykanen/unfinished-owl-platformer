@@ -1,6 +1,7 @@
 import { Canvas } from "./canvas.js";
 import { GameEvent } from "./core.js";
 import { ExistingObject } from "./gameobject.js";
+import { Sprite } from "./sprite.js";
 import { Vector2 } from "./vector.js";
 
 
@@ -12,7 +13,10 @@ export class Particle extends ExistingObject {
     private gravity : number;
 
     private timer : number;
-    
+
+    private animSpeed : number;
+    private spr : Sprite;
+
     private id : number;
 
 
@@ -24,12 +28,18 @@ export class Particle extends ExistingObject {
     }
 
 
-    public spawn(x : number, y : number, speed : Vector2, time : number, gravity = 0, id = 0) {
+    public spawn(x : number, y : number, speed : Vector2, 
+        time : number, animSpeed : number, gravity = 0, id = 0) {
 
         this.pos = new Vector2(x, y);
         this.speed = speed.clone();
         this.gravity = gravity;
         this.timer = time;
+
+        this.animSpeed = animSpeed;
+        this.spr = new Sprite(16, 16);
+        this.spr.setFrame(0, id);
+
         this.id = id;
 
         this.exist = true;
@@ -49,6 +59,8 @@ export class Particle extends ExistingObject {
 
             this.exist = false;
         }
+
+        this.spr.animate(this.id, 0, 3, this.animSpeed, ev.step);
     }
 
 
@@ -56,8 +68,7 @@ export class Particle extends ExistingObject {
 
         if (!this.exist) return;
 
-        c.drawBitmapRegion(c.getBitmap("particles"), 
-            0, this.id*16, 16, 16,
+        c.drawSprite(this.spr, c.getBitmap("particles"), 
             Math.round(this.pos.x) - 8,
             Math.round(this.pos.y) - 8);
     }

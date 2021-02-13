@@ -12,6 +12,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 import { ExistingObject } from "./gameobject.js";
+import { Sprite } from "./sprite.js";
 import { Vector2 } from "./vector.js";
 var Particle = /** @class */ (function (_super) {
     __extends(Particle, _super);
@@ -20,13 +21,16 @@ var Particle = /** @class */ (function (_super) {
         _this.exist = false;
         return _this;
     }
-    Particle.prototype.spawn = function (x, y, speed, time, gravity, id) {
+    Particle.prototype.spawn = function (x, y, speed, time, animSpeed, gravity, id) {
         if (gravity === void 0) { gravity = 0; }
         if (id === void 0) { id = 0; }
         this.pos = new Vector2(x, y);
         this.speed = speed.clone();
         this.gravity = gravity;
         this.timer = time;
+        this.animSpeed = animSpeed;
+        this.spr = new Sprite(16, 16);
+        this.spr.setFrame(0, id);
         this.id = id;
         this.exist = true;
     };
@@ -39,11 +43,12 @@ var Particle = /** @class */ (function (_super) {
         if ((this.timer -= ev.step) <= 0) {
             this.exist = false;
         }
+        this.spr.animate(this.id, 0, 3, this.animSpeed, ev.step);
     };
     Particle.prototype.draw = function (c) {
         if (!this.exist)
             return;
-        c.drawBitmapRegion(c.getBitmap("particles"), 0, this.id * 16, 16, 16, Math.round(this.pos.x) - 8, Math.round(this.pos.y) - 8);
+        c.drawSprite(this.spr, c.getBitmap("particles"), Math.round(this.pos.x) - 8, Math.round(this.pos.y) - 8);
     };
     return Particle;
 }(ExistingObject));

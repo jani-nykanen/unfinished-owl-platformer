@@ -8,7 +8,7 @@ import { nextObject } from "./util.js";
 import { Vector2 } from "./vector.js";
 
 
-const STAR_DEATH_TIME = 30;
+const STAR_DEATH_TIME = 32;
 
 
 export class Star extends WeakGameObject {
@@ -96,7 +96,8 @@ export class Star extends WeakGameObject {
 
             nextObject(this.particles, Particle)
                 .spawn(this.pos.x, this.pos.y, speed, 
-                    STAR_DEATH_TIME, BASE_GRAVITY, 0);
+                    STAR_DEATH_TIME-1, STAR_DEATH_TIME / 4,
+                    BASE_GRAVITY, 0);
         }
     }
 
