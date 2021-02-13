@@ -2,6 +2,7 @@ import { Camera } from "./camera.js";
 import { Canvas } from "./canvas.js";
 import { GameEvent } from "./core.js";
 import { CollisionObject } from "./gameobject.js";
+import { ObjectManager } from "./objectmanager.js";
 
 
 // For collisions
@@ -90,7 +91,7 @@ export class Stage {
         let sy : number;
 
         let tid : number;
-        for (let layer = 0; layer < this.layers.length; ++ layer) {
+        for (let layer = 0; layer < this.layers.length - 1; ++ layer) {
 
             for (let y = starty; y < endy; ++ y) {
 
@@ -187,7 +188,7 @@ export class Stage {
         let tid : number;
         let colId : number;
 
-        for (let layer = 0; layer < this.layers.length; ++ layer) {
+        for (let layer = 0; layer < this.layers.length - 1; ++ layer) {
 
             for (let y = py - RADIUS; y <= py + RADIUS; ++ y) {
 
@@ -217,5 +218,41 @@ export class Stage {
 
         cam.restrictCamera(c,
             0, 0, this.width*16, this.height*16);
+    }
+
+
+    public parseObjects(objects : ObjectManager) {
+
+        const FIRST_OBJECT_INDEX = 257;
+
+        let tid : number;
+        for (let y = 0; y < this.height; ++ y) {
+
+            for (let x = 0; x < this.width; ++ x) {
+
+                tid = this.layers[this.layers.length-1][y * this.width + x];
+                if (tid < FIRST_OBJECT_INDEX) continue;
+
+                tid -= FIRST_OBJECT_INDEX;
+
+                switch(tid) {
+
+                // Player
+                case 0:
+
+                    // ...
+                    break;
+                
+                // Star
+                case 1:
+
+                    objects.addStar(x, y);
+                    break;
+                
+                default:
+                    break;
+                }
+            }
+        }
     }
 }

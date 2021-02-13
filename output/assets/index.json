@@ -8,6 +8,7 @@
         {"name": "clouds",  "path": "clouds.png"},
         {"name": "owl",  "path": "owl.png"},
         {"name": "dust",  "path": "dust.png"},
+        {"name": "star",  "path": "star.png"},
         {"name": "tileset",  "path": "tileset.png"}
     ],
 

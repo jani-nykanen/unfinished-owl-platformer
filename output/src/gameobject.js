@@ -23,21 +23,15 @@ var ExistingObject = /** @class */ (function () {
     return ExistingObject;
 }());
 export { ExistingObject };
-var GameObject = /** @class */ (function (_super) {
-    __extends(GameObject, _super);
-    function GameObject(x, y) {
+var WeakGameObject = /** @class */ (function (_super) {
+    __extends(WeakGameObject, _super);
+    function WeakGameObject(x, y) {
         var _this = _super.call(this) || this;
         _this.getPos = function () { return _this.pos.clone(); };
-        _this.getSpeed = function () { return _this.speed.clone(); };
-        _this.getTarget = function () { return _this.target.clone(); };
         _this.isInCamera = function () { return _this.inCamera; };
         _this.isDying = function () { return _this.dying; };
-        _this.doesExist = function () { return _this.exist; };
         _this.pos = new Vector2(x, y);
         _this.oldPos = _this.pos.clone();
-        _this.speed = new Vector2();
-        _this.target = _this.speed.clone();
-        _this.friction = new Vector2(1, 1);
         _this.center = new Vector2();
         _this.hitbox = new Vector2();
         _this.spr = new Sprite(0, 0);
@@ -46,19 +40,10 @@ var GameObject = /** @class */ (function (_super) {
         _this.exist = true;
         return _this;
     }
-    GameObject.prototype.die = function (ev) {
+    WeakGameObject.prototype.die = function (ev) {
         return true;
     };
-    GameObject.prototype.updateLogic = function (ev) { };
-    GameObject.prototype.postUpdate = function (ev) { };
-    GameObject.prototype.outsideCameraEvent = function () { };
-    GameObject.prototype.updateMovement = function (ev) {
-        this.speed.x = updateSpeedAxis(this.speed.x, this.target.x, this.friction.x * ev.step);
-        this.speed.y = updateSpeedAxis(this.speed.y, this.target.y, this.friction.y * ev.step);
-        this.pos.x += this.speed.x * ev.step;
-        this.pos.y += this.speed.y * ev.step;
-    };
-    GameObject.prototype.update = function (ev) {
+    WeakGameObject.prototype.update = function (ev) {
         if (!this.exist || !this.inCamera)
             return;
         if (this.dying) {
@@ -70,14 +55,9 @@ var GameObject = /** @class */ (function (_super) {
         }
         this.oldPos = this.pos.clone();
         this.updateLogic(ev);
-        this.updateMovement(ev);
-        this.postUpdate(ev);
+        this.extendedLogic(ev);
     };
-    GameObject.prototype.stopMovement = function () {
-        this.speed.zeros();
-        this.target.zeros();
-    };
-    GameObject.prototype.cameraCheck = function (cam) {
+    WeakGameObject.prototype.cameraCheck = function (cam) {
         var view = cam.getViewport();
         var oldState = this.inCamera;
         this.inCamera = boxOverlay(this.pos, this.center, this.hitbox, view.x, view.y, view.w, view.h);
@@ -85,13 +65,49 @@ var GameObject = /** @class */ (function (_super) {
             this.outsideCameraEvent();
         }
     };
-    GameObject.prototype.overlayObject = function (o) {
+    WeakGameObject.prototype.overlayObject = function (o) {
         return boxOverlay(this.pos, this.center, this.hitbox, o.pos.x + o.center.x - o.hitbox.x / 2, o.pos.y + o.center.y - o.hitbox.y / 2, o.hitbox.x, o.hitbox.y);
     };
-    GameObject.prototype.draw = function (c) { };
-    GameObject.prototype.postDraw = function (c) { };
-    return GameObject;
+    WeakGameObject.prototype.updateLogic = function (ev) { };
+    ;
+    WeakGameObject.prototype.outsideCameraEvent = function () { };
+    WeakGameObject.prototype.extendedLogic = function (ev) { };
+    WeakGameObject.prototype.draw = function (c) { };
+    WeakGameObject.prototype.postDraw = function (c) { };
+    return WeakGameObject;
 }(ExistingObject));
+export { WeakGameObject };
+var GameObject = /** @class */ (function (_super) {
+    __extends(GameObject, _super);
+    function GameObject(x, y) {
+        var _this = _super.call(this, x, y) || this;
+        _this.getSpeed = function () { return _this.speed.clone(); };
+        _this.getTarget = function () { return _this.target.clone(); };
+        _this.speed = new Vector2();
+        _this.target = _this.speed.clone();
+        _this.friction = new Vector2(1, 1);
+        return _this;
+    }
+    GameObject.prototype.die = function (ev) {
+        return true;
+    };
+    GameObject.prototype.postUpdate = function (ev) { };
+    GameObject.prototype.updateMovement = function (ev) {
+        this.speed.x = updateSpeedAxis(this.speed.x, this.target.x, this.friction.x * ev.step);
+        this.speed.y = updateSpeedAxis(this.speed.y, this.target.y, this.friction.y * ev.step);
+        this.pos.x += this.speed.x * ev.step;
+        this.pos.y += this.speed.y * ev.step;
+    };
+    GameObject.prototype.extendedLogic = function (ev) {
+        this.updateMovement(ev);
+        this.postUpdate(ev);
+    };
+    GameObject.prototype.stopMovement = function () {
+        this.speed.zeros();
+        this.target.zeros();
+    };
+    return GameObject;
+}(WeakGameObject));
 export { GameObject };
 var CollisionObject = /** @class */ (function (_super) {
     __extends(CollisionObject, _super);

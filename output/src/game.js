@@ -6,6 +6,7 @@ var GameScene = /** @class */ (function () {
         this.cam = new Camera(128, 96);
         this.stage = new Stage(ev);
         this.objects = new ObjectManager();
+        this.stage.parseObjects(this.objects);
         this.cloudPos = (new Array(2)).fill(0);
     }
     GameScene.prototype.refresh = function (ev) {

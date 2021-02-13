@@ -55,7 +55,7 @@ var Stage = /** @class */ (function () {
         var sx;
         var sy;
         var tid;
-        for (var layer = 0; layer < this.layers.length; ++layer) {
+        for (var layer = 0; layer < this.layers.length - 1; ++layer) {
             for (var y = starty; y < endy; ++y) {
                 for (var x = startx; x < endx; ++x) {
                     tid = this.getTile(layer, x, y, 0);
@@ -117,7 +117,7 @@ var Stage = /** @class */ (function () {
         var py = Math.floor(o.getPos().y / 16);
         var tid;
         var colId;
-        for (var layer = 0; layer < this.layers.length; ++layer) {
+        for (var layer = 0; layer < this.layers.length - 1; ++layer) {
             for (var y = py - RADIUS; y <= py + RADIUS; ++y) {
                 for (var x = px - RADIUS; x <= px + RADIUS; ++x) {
                     tid = this.getTile(layer, x, y);
@@ -135,6 +135,30 @@ var Stage = /** @class */ (function () {
     };
     Stage.prototype.restrictCamera = function (c, cam) {
         cam.restrictCamera(c, 0, 0, this.width * 16, this.height * 16);
+    };
+    Stage.prototype.parseObjects = function (objects) {
+        var FIRST_OBJECT_INDEX = 257;
+        var tid;
+        for (var y = 0; y < this.height; ++y) {
+            for (var x = 0; x < this.width; ++x) {
+                tid = this.layers[this.layers.length - 1][y * this.width + x];
+                if (tid < FIRST_OBJECT_INDEX)
+                    continue;
+                tid -= FIRST_OBJECT_INDEX;
+                switch (tid) {
+                    // Player
+                    case 0:
+                        // ...
+                        break;
+                    // Star
+                    case 1:
+                        objects.addStar(x, y);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
     };
     return Stage;
 }());
