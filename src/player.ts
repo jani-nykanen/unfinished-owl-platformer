@@ -2,6 +2,7 @@ import { Canvas, Flip } from "./canvas.js";
 import { GameEvent } from "./core.js";
 import { Dust } from "./dust.js";
 import { CollisionObject } from "./gameobject.js";
+import { GameState } from "./gamestate.js";
 import { Sprite } from "./sprite.js";
 import { nextObject, State } from "./util.js";
 import { Vector2 } from "./vector.js";
@@ -31,8 +32,10 @@ export class Player extends CollisionObject {
 
     private flip : Flip;
 
+    private readonly state : GameState;
 
-    constructor(x : number, y : number) {
+
+    constructor(x : number, y : number, state : GameState) {
 
         super(x, y);
 
@@ -60,6 +63,8 @@ export class Player extends CollisionObject {
         this.thumpApplied = true;
 
         this.flip = Flip.None;
+
+        this.state = state;
     }
 
     
@@ -360,5 +365,11 @@ export class Player extends CollisionObject {
 
             this.jumpTimer = 0;
         }
+    }
+
+
+    public addStar() {
+
+        this.state.addStar();
     }
 }

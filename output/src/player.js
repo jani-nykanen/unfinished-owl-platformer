@@ -19,7 +19,7 @@ import { nextObject, State } from "./util.js";
 import { Vector2 } from "./vector.js";
 var Player = /** @class */ (function (_super) {
     __extends(Player, _super);
-    function Player(x, y) {
+    function Player(x, y, state) {
         var _this = _super.call(this, x, y) || this;
         _this.friction = new Vector2(0.125, 0.125);
         _this.hitbox = new Vector2(16, 16);
@@ -40,6 +40,7 @@ var Player = /** @class */ (function (_super) {
         _this.thumpWait = 0;
         _this.thumpApplied = true;
         _this.flip = Flip.None;
+        _this.state = state;
         return _this;
     }
     Player.prototype.control = function (ev) {
@@ -248,6 +249,9 @@ var Player = /** @class */ (function (_super) {
         else {
             this.jumpTimer = 0;
         }
+    };
+    Player.prototype.addStar = function () {
+        this.state.addStar();
     };
     return Player;
 }(CollisionObject));

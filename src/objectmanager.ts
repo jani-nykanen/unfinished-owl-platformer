@@ -1,10 +1,10 @@
 import { Camera } from "./camera.js";
 import { Canvas } from "./canvas.js";
 import { GameEvent } from "./core.js";
+import { GameState } from "./gamestate.js";
 import { Player } from "./player.js";
 import { Stage } from "./stage.js";
 import { Star } from "./star.js";
-import { nextObject } from "./util.js";
 
 
 export class ObjectManager {
@@ -14,9 +14,9 @@ export class ObjectManager {
     private stars : Array<Star>;
 
 
-    constructor() {
+    constructor(state : GameState) {
 
-        this.player = new Player(128, 96);
+        this.player = new Player(128, 96, state);
         this.stars = new Array<Star> ();
     }
 

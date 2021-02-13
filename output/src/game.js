@@ -1,11 +1,13 @@
 import { Camera } from "./camera.js";
+import { GameState } from "./gamestate.js";
 import { ObjectManager } from "./objectmanager.js";
 import { Stage } from "./stage.js";
 var GameScene = /** @class */ (function () {
     function GameScene(param, ev) {
+        this.state = new GameState();
         this.cam = new Camera(128, 96);
         this.stage = new Stage(ev);
-        this.objects = new ObjectManager();
+        this.objects = new ObjectManager(this.state);
         this.stage.parseObjects(this.objects);
         this.cloudPos = (new Array(2)).fill(0);
     }
@@ -32,6 +34,12 @@ var GameScene = /** @class */ (function () {
             c.drawBitmap(bmpTrees, i * bmpTrees.width - dx, 16 + 192 - bmpTrees.height - dy);
         }
     };
+    GameScene.prototype.drawHUD = function (c) {
+        var fontBigger = c.getBitmap("fontBigger");
+        c.drawText(fontBigger, String.fromCharCode(3) +
+            String.fromCharCode(2) +
+            String(this.state.getStarCount()), 4, 2, -6, 0);
+    };
     GameScene.prototype.redraw = function (c) {
         c.moveTo();
         this.drawBackground(c);
@@ -42,6 +50,7 @@ var GameScene = /** @class */ (function () {
         this.stage.draw(c, this.cam);
         this.objects.draw(c);
         c.moveTo();
+        this.drawHUD(c);
     };
     GameScene.prototype.dispose = function () {
         return null;

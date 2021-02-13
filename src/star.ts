@@ -113,6 +113,8 @@ export class Star extends WeakGameObject {
             this.dying = true;
             this.deathTimer = STAR_DEATH_TIME;
 
+            pl.addStar();
+
             return true;
         }
 

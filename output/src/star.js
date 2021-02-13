@@ -75,6 +75,7 @@ var Star = /** @class */ (function (_super) {
             this.spawnParticles(5, 3, -Math.PI / 10);
             this.dying = true;
             this.deathTimer = STAR_DEATH_TIME;
+            pl.addStar();
             return true;
         }
         return false;

@@ -2,6 +2,7 @@
 import { Camera } from "./camera.js";
 import { Canvas } from "./canvas.js";
 import { GameEvent, Scene } from "./core.js";
+import { GameState } from "./gamestate.js";
 import { ObjectManager } from "./objectmanager.js";
 import { Stage } from "./stage.js";
 
@@ -12,15 +13,18 @@ export class GameScene implements Scene {
     private cam : Camera;
     private stage : Stage;
     private objects : ObjectManager;
+    private state : GameState;
 
     private cloudPos : Array<number>;
 
 
     constructor(param : any, ev : GameEvent) {
 
+        this.state = new GameState();
+
         this.cam = new Camera(128, 96);
         this.stage = new Stage(ev);
-        this.objects = new ObjectManager();
+        this.objects = new ObjectManager(this.state);
         this.stage.parseObjects(this.objects);
 
         this.cloudPos = (new Array<number>(2)).fill(0);
@@ -70,6 +74,18 @@ export class GameScene implements Scene {
     }
 
 
+    private drawHUD(c : Canvas) {
+
+        let fontBigger = c.getBitmap("fontBigger");
+
+        c.drawText(fontBigger, 
+            String.fromCharCode(3) + 
+            String.fromCharCode(2) + 
+            String(this.state.getStarCount()), 
+            4, 2, -6, 0);
+    }
+
+
     public redraw(c : Canvas) {
 
         c.moveTo();
@@ -85,6 +101,7 @@ export class GameScene implements Scene {
         this.objects.draw(c);
 
         c.moveTo();
+        this.drawHUD(c);
     }
 
 

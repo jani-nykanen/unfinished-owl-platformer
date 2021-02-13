@@ -3,6 +3,8 @@
     "bitmaps" : [
 
         {"name": "font",  "path": "font.png"},
+        {"name": "fontBigger",  "path": "font_bigger.png"},
+
         {"name": "sky",  "path": "sky.png"},
         {"name": "trees",  "path": "trees.png"},
         {"name": "clouds",  "path": "clouds.png"},

@@ -1,8 +1,8 @@
 import { Player } from "./player.js";
 import { Star } from "./star.js";
 var ObjectManager = /** @class */ (function () {
-    function ObjectManager() {
-        this.player = new Player(128, 96);
+    function ObjectManager(state) {
+        this.player = new Player(128, 96, state);
         this.stars = new Array();
     }
     ObjectManager.prototype.update = function (cam, stage, ev) {
