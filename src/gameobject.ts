@@ -114,6 +114,7 @@ export abstract class WeakGameObject extends ExistingObject {
     public postDraw(c : Canvas) {}
 
     public getPos = () => this.pos.clone();
+    public getHitbox = () : Vector2 => this.hitbox.clone();
 
     public isInCamera = () => this.inCamera;
     public isDying = () => this.dying;
@@ -307,6 +308,6 @@ export abstract class CollisionObject extends GameObject {
     }
 
 
-    public getHitbox = () : Vector2 => this.hitbox.clone();
+    public getCollisionBox = () : Vector2 => this.collisionBox.clone();
     public collisionsDisabled = () : boolean => this.disableCollisions;
 }

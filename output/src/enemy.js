@@ -12,8 +12,11 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 import { CollisionObject } from "./gameobject.js";
+import { Particle } from "./particle.js";
 import { Sprite } from "./sprite.js";
+import { nextObject } from "./util.js";
 import { Vector2 } from "./vector.js";
+var ENEMY_DEATH_TIME = 32;
 var Enemy = /** @class */ (function (_super) {
     __extends(Enemy, _super);
     function Enemy(x, y, id) {
@@ -31,27 +34,75 @@ var Enemy = /** @class */ (function (_super) {
         _this.renderOffset = new Vector2();
         _this.slopeFriction = 0;
         _this.canJump = false;
+        _this.particles = new Array();
+        _this.deathTime = 0;
         return _this;
     }
     Enemy.prototype.updateAI = function (ev) { };
+    Enemy.prototype.die = function (ev) {
+        for (var _i = 0, _a = this.particles; _i < _a.length; _i++) {
+            var p = _a[_i];
+            p.update(ev);
+        }
+        return (this.deathTime -= ev.step) <= 0;
+    };
     Enemy.prototype.updateLogic = function (ev) {
         this.updateAI(ev);
         this.canJump = false;
         this.slopeFriction = 0;
     };
+    Enemy.prototype.preDraw = function (c) {
+        if (!this.exist || !this.dying)
+            return;
+        for (var _i = 0, _a = this.particles; _i < _a.length; _i++) {
+            var p = _a[_i];
+            p.draw(c);
+        }
+    };
     Enemy.prototype.draw = function (c) {
-        if (!this.exist || !this.inCamera)
-            return false;
+        if (this.isDeactivated())
+            return;
         var bmp = c.getBitmap("enemies");
         var px = Math.round(this.pos.x) + this.renderOffset.x - this.spr.width / 2;
         var py = Math.round(this.pos.y) + this.renderOffset.y - this.spr.height / 2;
         c.drawSprite(this.spr, bmp, px, py, this.flip);
     };
     Enemy.prototype.playerEvent = function (pl, ev) { };
+    Enemy.prototype.spawnParticles = function (count, speedAmount, angleOffset) {
+        if (angleOffset === void 0) { angleOffset = 0; }
+        var ANIM_SPEED = 4.0;
+        var EXIST_TIME = 32;
+        var angle;
+        var speed;
+        for (var i = 0; i < count; ++i) {
+            angle = Math.PI * 2 / count * i + angleOffset;
+            speed = new Vector2(Math.cos(angle) * speedAmount, Math.sin(angle) * speedAmount);
+            nextObject(this.particles, Particle)
+                .spawn(this.pos.x, this.pos.y, speed, ENEMY_DEATH_TIME - 1, ANIM_SPEED, 0, 1);
+        }
+    };
     Enemy.prototype.playerCollision = function (pl, ev) {
+        var STOMP_MARGIN = 8;
+        var STOMP_MARGIN_TIME = 8;
         if (this.isDeactivated())
             return false;
         this.playerEvent(pl, ev);
+        // Stomp
+        var top = this.pos.y + this.center.y - this.collisionBox.y / 2;
+        var py = pl.getBottom();
+        var hbox = pl.getHitbox();
+        var px = pl.getPos().x;
+        if (pl.getSpeed().y >= this.speed.y &&
+            px + hbox.x / 2 >= this.pos.x - this.hitbox.x / 2 &&
+            px - hbox.x / 2 < this.pos.x + this.hitbox.x / 2 &&
+            py >= top &&
+            py < top + (STOMP_MARGIN + Math.max(0, this.speed.y)) * ev.step) {
+            if (!pl.isThumping())
+                pl.setStompMargin(STOMP_MARGIN_TIME);
+            this.dying = true;
+            this.deathTime = ENEMY_DEATH_TIME;
+            this.spawnParticles(6, 1.5);
+        }
         return false;
     };
     Enemy.prototype.enemyCollisionEvent = function (dirx, diry, ev) { };

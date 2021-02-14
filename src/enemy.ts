@@ -1,9 +1,14 @@
 import { Canvas, Flip } from "./canvas.js";
 import { GameEvent } from "./core.js";
 import { CollisionObject } from "./gameobject.js";
+import { Particle } from "./particle.js";
 import { Player } from "./player.js";
 import { Sprite } from "./sprite.js";
+import { nextObject } from "./util.js";
 import { Vector2 } from "./vector.js";
+
+
+const ENEMY_DEATH_TIME = 32;
 
 
 export abstract class Enemy extends CollisionObject {
@@ -15,6 +20,9 @@ export abstract class Enemy extends CollisionObject {
     protected renderOffset : Vector2;
     protected slopeFriction : number;
     protected canJump : boolean;
+
+    protected particles : Array<Particle>;
+    protected deathTime : number;
 
 
     constructor(x : number, y : number, id = 0) {
@@ -35,6 +43,9 @@ export abstract class Enemy extends CollisionObject {
 
         this.slopeFriction = 0;
         this.canJump = false;
+
+        this.particles = new Array<Particle> ();
+        this.deathTime = 0;
     }
 
     
@@ -42,6 +53,17 @@ export abstract class Enemy extends CollisionObject {
 
 
     protected updateAI(ev : GameEvent) {}
+
+
+    protected die(ev : GameEvent) : boolean {
+
+        for (let p of this.particles) {
+
+            p.update(ev);
+        }
+
+        return (this.deathTime -= ev.step) <= 0;
+    }
 
 
     public updateLogic(ev : GameEvent) {
@@ -53,10 +75,21 @@ export abstract class Enemy extends CollisionObject {
     }
 
 
+    public preDraw(c : Canvas) {
+
+        if (!this.exist || !this.dying) return;
+
+        for (let p of this.particles) {
+
+            p.draw(c);
+        }
+    }
+
+
     public draw(c : Canvas) {
 
-        if (!this.exist || !this.inCamera) 
-            return false;
+        if (this.isDeactivated())
+            return;
 
         let bmp = c.getBitmap("enemies");
 
@@ -70,12 +103,60 @@ export abstract class Enemy extends CollisionObject {
     protected playerEvent(pl : Player, ev : GameEvent) {}
 
 
+    private spawnParticles(count : number, speedAmount : number, angleOffset = 0) {
+
+        const ANIM_SPEED = 4.0;
+        const EXIST_TIME = 32;
+
+        let angle : number;
+        let speed : Vector2;
+
+        for (let i = 0; i < count; ++ i) {
+
+            angle = Math.PI * 2 / count * i + angleOffset;
+
+            speed = new Vector2(
+                Math.cos(angle) * speedAmount,
+                Math.sin(angle) * speedAmount);
+
+            nextObject(this.particles, Particle)
+                .spawn(this.pos.x, this.pos.y, speed, 
+                    ENEMY_DEATH_TIME-1, ANIM_SPEED,
+                    0, 1);
+        }
+    }
+
+
     public playerCollision(pl : Player, ev : GameEvent) : boolean {
+
+        const STOMP_MARGIN = 8;
+        const STOMP_MARGIN_TIME = 8;
 
         if (this.isDeactivated()) 
             return false;
 
         this.playerEvent(pl, ev);
+
+        // Stomp
+        let top = this.pos.y + this.center.y - this.collisionBox.y/2;
+        let py = pl.getBottom();
+
+        let hbox = pl.getHitbox();
+        let px = pl.getPos().x;
+
+        if (pl.getSpeed().y >= this.speed.y &&
+            px + hbox.x/2 >= this.pos.x - this.hitbox.x/2 &&
+            px - hbox.x/2 < this.pos.x + this.hitbox.x/2 &&
+            py >= top && 
+            py < top + (STOMP_MARGIN + Math.max(0, this.speed.y))*ev.step) {
+
+            if (!pl.isThumping())
+                pl.setStompMargin(STOMP_MARGIN_TIME);
+            
+            this.dying = true;
+            this.deathTime = ENEMY_DEATH_TIME;
+            this.spawnParticles(6, 1.5);
+        }
 
         return false;
     }

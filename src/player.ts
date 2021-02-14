@@ -15,6 +15,7 @@ export class Player extends CollisionObject {
     private doubleJump : boolean;
     private jumpTimer : number;
     private jumpMargin : number;
+    private stompMargin : number;
 
     private sprBody : Sprite;
     private sprWing : Sprite;
@@ -26,7 +27,7 @@ export class Player extends CollisionObject {
     private dust : Array<Dust>;
     private dustTimer : number;
 
-    private isThumping : boolean;
+    private thumping : boolean;
     private thumpWait : number;
     private thumpApplied : boolean;
 
@@ -49,6 +50,7 @@ export class Player extends CollisionObject {
         this.doubleJump = false;
         this.jumpTimer = 0;
         this.jumpMargin = 0;
+        this.stompMargin = 0;
 
         this.sprBody = new Sprite(24, 24);
         this.sprFeet = new Sprite(16, 8);
@@ -58,7 +60,7 @@ export class Player extends CollisionObject {
         this.dust = new Array<Dust>();
         this.dustTimer = 0;
     
-        this.isThumping = false;
+        this.thumping = false;
         this.thumpWait = 0;
         this.thumpApplied = true;
 
@@ -70,19 +72,19 @@ export class Player extends CollisionObject {
     
     private control(ev : GameEvent) {
 
-        const EPS = 0.1;
         const THUMP_EPS = 0.5;
         const BASE_GRAVITY = 3.0;
         const BASE_SPEED = 1.25;
         const JUMP_TIME = 15;
         const DJUMP_TIME = 60;
+        const STOMP_BONUS = 8;
         const THUMP_TARGET = 8.0;
         const THUMP_JUMP = -3.0;
         const BASE_Y_FRICTION = 0.125;
         const THUMP_Y_FRICTION = 0.5; 
         
         this.friction.y = BASE_Y_FRICTION;
-        if (this.isThumping) {
+        if (this.thumping) {
 
             this.friction.y = THUMP_Y_FRICTION;
             this.target.x = 0;
@@ -99,12 +101,18 @@ export class Player extends CollisionObject {
         if (!this.canJump && ev.getStick().y > THUMP_EPS) {
 
             this.speed.y = THUMP_JUMP;
-            this.isThumping = true;
+            this.thumping = true;
             this.thumpWait = 0;
             return;
         }
 
-        if ( (this.jumpMargin > 0 || canDoDoubleJump) && 
+        if (this.stompMargin > 0 && (s & State.DownOrPressed) == 1) {
+
+            this.jumpTimer = this.stompMargin + STOMP_BONUS;
+            this.stompMargin = 0;
+            this.jumpMargin = 0;
+        }
+        else if ( (this.jumpMargin > 0 || canDoDoubleJump) && 
             s == State.Pressed) {
 
             if (canDoDoubleJump) {
@@ -137,7 +145,7 @@ export class Player extends CollisionObject {
         this.eyePos.x = 0;
         this.eyePos.y = 0;
 
-        if (this.isThumping) {
+        if (this.thumping) {
 
             this.sprBody.setFrame(0, 0);
             this.sprFeet.setFrame(1, 7);
@@ -233,9 +241,12 @@ export class Player extends CollisionObject {
             this.jumpMargin -= ev.step;
         }
         
-        if (this.jumpTimer > 0) {
+        if (this.jumpTimer > 0 || this.stompMargin > 0) {
 
-            this.jumpTimer -= ev.step;
+            if (this.jumpTimer > 0)
+                this.jumpTimer -= ev.step;
+            if (this.stompMargin > 0)
+                this.stompMargin -= ev.step;
 
             if (this.doubleJump)
                 this.speed.y = Math.max(DOUBLE_JUMP_MIN_SPEED, 
@@ -244,11 +255,11 @@ export class Player extends CollisionObject {
                 this.speed.y = JUMP_SPEED;
         }
 
-        if (this.isThumping && this.thumpWait > 0) {
+        if (this.thumping && this.thumpWait > 0) {
 
             if ((this.thumpWait -= ev.step) <= 0) {
 
-                this.isThumping = false;
+                this.thumping = false;
             }
         }
     }
@@ -331,12 +342,13 @@ export class Player extends CollisionObject {
 
             this.canJump = true;
             this.jumpTimer = 0;
+            this.stompMargin = 0;
             this.doubleJump = false;
             this.jumpMargin = JUMP_MARGIN;
 
             this.slopeFriction = friction;
 
-            if (this.isThumping && this.thumpWait <= 0) {
+            if (this.thumping && this.thumpWait <= 0) {
 
                 this.thumpWait = THUMP_WAIT;
                 this.thumpApplied = false;
@@ -345,6 +357,7 @@ export class Player extends CollisionObject {
         else {
 
             this.jumpTimer = 0;
+            this.stompMargin = 0;
         }
     }
 
@@ -360,4 +373,22 @@ export class Player extends CollisionObject {
 
         this.state.addStar();
     }
+
+    
+    public getBottom() : number {
+
+        return this.pos.y + this.collisionBox.y/2;
+    }
+
+
+    public setStompMargin(time : number) {
+
+        this.stompMargin = time;
+        this.jumpTimer = 0;
+
+        this.doubleJump = false;
+    }
+
+
+    public isThumping = () : boolean => this.thumping;
 }

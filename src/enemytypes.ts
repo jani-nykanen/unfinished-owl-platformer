@@ -13,6 +13,7 @@ export class Turtle extends Enemy {
 
     
     protected dir : number;
+    protected oldCanJump : boolean;
 
 
     constructor(x : number, y : number) {
@@ -25,10 +26,12 @@ export class Turtle extends Enemy {
 
         this.target.y = BASE_GRAVITY;
 
-        this.hitbox = new Vector2(16, 12);
-        this.collisionBox = new Vector2(14, 10);
+        this.hitbox = new Vector2(14, 12);
+        this.collisionBox = new Vector2(8, 10);
 
         this.center.y = 4;
+
+        this.oldCanJump = false;
     }
 
 
@@ -36,11 +39,21 @@ export class Turtle extends Enemy {
 
         const BASE_SPEED = 0.25;
 
-        this.target.x = computeFriction(this.dir * BASE_SPEED, this.slopeFriction);
+        if (!this.canJump && this.oldCanJump) {
+
+            this.dir *= -1;
+        }
+        this.target.x = computeFriction(this.dir * BASE_SPEED, 
+            this.slopeFriction);
         this.speed.x = this.target.x;
 
-        this.spr.animate(this.id, 0, 3, 6, ev.step);
+        if (this.canJump) {
+
+            this.spr.animate(this.id, 0, 3, 6, ev.step);
+        }
         this.flip = this.speed.x > 0 ? Flip.Horizontal : Flip.None;
+
+        this.oldCanJump = this.canJump;
     }
 
 

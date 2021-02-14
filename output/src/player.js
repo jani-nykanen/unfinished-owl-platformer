@@ -21,6 +21,7 @@ var Player = /** @class */ (function (_super) {
     __extends(Player, _super);
     function Player(x, y, state) {
         var _this = _super.call(this, x, y) || this;
+        _this.isThumping = function () { return _this.thumping; };
         _this.friction = new Vector2(0.125, 0.125);
         _this.hitbox = new Vector2(16, 16);
         _this.collisionBox = new Vector2(12, 16);
@@ -30,13 +31,14 @@ var Player = /** @class */ (function (_super) {
         _this.doubleJump = false;
         _this.jumpTimer = 0;
         _this.jumpMargin = 0;
+        _this.stompMargin = 0;
         _this.sprBody = new Sprite(24, 24);
         _this.sprFeet = new Sprite(16, 8);
         _this.sprWing = new Sprite(12, 24);
         _this.eyePos = new Vector2();
         _this.dust = new Array();
         _this.dustTimer = 0;
-        _this.isThumping = false;
+        _this.thumping = false;
         _this.thumpWait = 0;
         _this.thumpApplied = true;
         _this.flip = Flip.None;
@@ -44,18 +46,18 @@ var Player = /** @class */ (function (_super) {
         return _this;
     }
     Player.prototype.control = function (ev) {
-        var EPS = 0.1;
         var THUMP_EPS = 0.5;
         var BASE_GRAVITY = 3.0;
         var BASE_SPEED = 1.25;
         var JUMP_TIME = 15;
         var DJUMP_TIME = 60;
+        var STOMP_BONUS = 8;
         var THUMP_TARGET = 8.0;
         var THUMP_JUMP = -3.0;
         var BASE_Y_FRICTION = 0.125;
         var THUMP_Y_FRICTION = 0.5;
         this.friction.y = BASE_Y_FRICTION;
-        if (this.isThumping) {
+        if (this.thumping) {
             this.friction.y = THUMP_Y_FRICTION;
             this.target.x = 0;
             this.target.y = THUMP_TARGET;
@@ -67,11 +69,16 @@ var Player = /** @class */ (function (_super) {
         var canDoDoubleJump = this.jumpMargin <= 0 && !this.doubleJump;
         if (!this.canJump && ev.getStick().y > THUMP_EPS) {
             this.speed.y = THUMP_JUMP;
-            this.isThumping = true;
+            this.thumping = true;
             this.thumpWait = 0;
             return;
         }
-        if ((this.jumpMargin > 0 || canDoDoubleJump) &&
+        if (this.stompMargin > 0 && (s & State.DownOrPressed) == 1) {
+            this.jumpTimer = this.stompMargin + STOMP_BONUS;
+            this.stompMargin = 0;
+            this.jumpMargin = 0;
+        }
+        else if ((this.jumpMargin > 0 || canDoDoubleJump) &&
             s == State.Pressed) {
             if (canDoDoubleJump) {
                 this.speed.y = Math.max(this.speed.y, 0);
@@ -92,7 +99,7 @@ var Player = /** @class */ (function (_super) {
         var wingFrame;
         this.eyePos.x = 0;
         this.eyePos.y = 0;
-        if (this.isThumping) {
+        if (this.thumping) {
             this.sprBody.setFrame(0, 0);
             this.sprFeet.setFrame(1, 7);
             this.sprWing.setFrame(1, 1);
@@ -158,16 +165,19 @@ var Player = /** @class */ (function (_super) {
         if (this.jumpMargin > 0) {
             this.jumpMargin -= ev.step;
         }
-        if (this.jumpTimer > 0) {
-            this.jumpTimer -= ev.step;
+        if (this.jumpTimer > 0 || this.stompMargin > 0) {
+            if (this.jumpTimer > 0)
+                this.jumpTimer -= ev.step;
+            if (this.stompMargin > 0)
+                this.stompMargin -= ev.step;
             if (this.doubleJump)
                 this.speed.y = Math.max(DOUBLE_JUMP_MIN_SPEED, this.speed.y + DOUBLE_JUMP_SPEED * ev.step);
             else
                 this.speed.y = JUMP_SPEED;
         }
-        if (this.isThumping && this.thumpWait > 0) {
+        if (this.thumping && this.thumpWait > 0) {
             if ((this.thumpWait -= ev.step) <= 0) {
-                this.isThumping = false;
+                this.thumping = false;
             }
         }
     };
@@ -224,16 +234,18 @@ var Player = /** @class */ (function (_super) {
         if (dir > 0) {
             this.canJump = true;
             this.jumpTimer = 0;
+            this.stompMargin = 0;
             this.doubleJump = false;
             this.jumpMargin = JUMP_MARGIN;
             this.slopeFriction = friction;
-            if (this.isThumping && this.thumpWait <= 0) {
+            if (this.thumping && this.thumpWait <= 0) {
                 this.thumpWait = THUMP_WAIT;
                 this.thumpApplied = false;
             }
         }
         else {
             this.jumpTimer = 0;
+            this.stompMargin = 0;
         }
     };
     Player.prototype.setPosition = function (x, y) {
@@ -242,6 +254,14 @@ var Player = /** @class */ (function (_super) {
     };
     Player.prototype.addStar = function () {
         this.state.addStar();
+    };
+    Player.prototype.getBottom = function () {
+        return this.pos.y + this.collisionBox.y / 2;
+    };
+    Player.prototype.setStompMargin = function (time) {
+        this.stompMargin = time;
+        this.jumpTimer = 0;
+        this.doubleJump = false;
     };
     return Player;
 }(CollisionObject));

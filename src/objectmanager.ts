@@ -19,7 +19,7 @@ export class ObjectManager {
 
     constructor(state : GameState) {
 
-        this.player = new Player(128, 96, state);
+        this.player = new Player(0, 0, state);
         this.stars = new Array<Star> ();
         this.enemies = new Array<Enemy> ();
     }
@@ -35,7 +35,7 @@ export class ObjectManager {
         }
 
         // TODO: A class that extends all this methods, so
-        // we can just call "updateObjectArray" or something
+        // we can just call "updateObjectArray" or something?
         for (let e of this.enemies) {
 
             e.cameraCheck(cam);
@@ -63,6 +63,11 @@ export class ObjectManager {
 
 
     public draw(c : Canvas) {
+
+        for (let e of this.enemies) {
+
+            e.preDraw(c);
+        }
 
         for (let s of this.stars) {
 

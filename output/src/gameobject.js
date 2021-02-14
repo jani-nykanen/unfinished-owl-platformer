@@ -28,6 +28,7 @@ var WeakGameObject = /** @class */ (function (_super) {
     function WeakGameObject(x, y) {
         var _this = _super.call(this) || this;
         _this.getPos = function () { return _this.pos.clone(); };
+        _this.getHitbox = function () { return _this.hitbox.clone(); };
         _this.isInCamera = function () { return _this.inCamera; };
         _this.isDying = function () { return _this.dying; };
         _this.pos = new Vector2(x, y);
@@ -113,7 +114,7 @@ var CollisionObject = /** @class */ (function (_super) {
     __extends(CollisionObject, _super);
     function CollisionObject(x, y) {
         var _this = _super.call(this, x, y) || this;
-        _this.getHitbox = function () { return _this.hitbox.clone(); };
+        _this.getCollisionBox = function () { return _this.collisionBox.clone(); };
         _this.collisionsDisabled = function () { return _this.disableCollisions; };
         _this.collisionBox = new Vector2();
         _this.bounceFactor = 0;
