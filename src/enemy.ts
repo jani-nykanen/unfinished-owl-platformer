@@ -24,6 +24,10 @@ export abstract class Enemy extends CollisionObject {
     protected particles : Array<Particle>;
     protected deathTime : number;
 
+    protected canBeKnocked : boolean;
+    protected knockTimer : number;
+    protected knockOffset : number;
+
 
     constructor(x : number, y : number, id = 0) {
 
@@ -46,6 +50,10 @@ export abstract class Enemy extends CollisionObject {
 
         this.particles = new Array<Particle> ();
         this.deathTime = 0;
+
+        this.canBeKnocked = true;
+        this.knockTimer = 0;
+        this.knockOffset = 0;
     }
 
     
@@ -67,6 +75,25 @@ export abstract class Enemy extends CollisionObject {
 
 
     public updateLogic(ev : GameEvent) {
+
+        const KNOCK_TIME = 120;
+        const KNOCK_JUMP = -2.0;
+
+        if (this.knockTimer > 0) {
+
+            this.knockTimer -= ev.step;
+            return;
+        }
+
+        if (this.canBeKnocked &&
+            ev.isShaking() && this.canJump) {
+
+            this.target.x = 0;
+            this.speed.y = KNOCK_JUMP;
+            this.knockTimer = KNOCK_TIME;
+
+            return;
+        }
 
         this.updateAI(ev);
 
@@ -96,7 +123,15 @@ export abstract class Enemy extends CollisionObject {
         let px = Math.round(this.pos.x) + this.renderOffset.x - this.spr.width/2;
         let py = Math.round(this.pos.y) + this.renderOffset.y - this.spr.height/2;
 
-        c.drawSprite(this.spr, bmp, px, py, this.flip);
+        let flip = this.flip;
+        if (this.knockTimer > 0) {
+            
+            flip |= Flip.Vertical;
+
+            py += this.center.y + this.knockOffset;
+        }
+
+        c.drawSprite(this.spr, bmp, px, py, flip);
     }
     
 
@@ -106,7 +141,6 @@ export abstract class Enemy extends CollisionObject {
     private spawnParticles(count : number, speedAmount : number, angleOffset = 0) {
 
         const ANIM_SPEED = 4.0;
-        const EXIST_TIME = 32;
 
         let angle : number;
         let speed : Vector2;

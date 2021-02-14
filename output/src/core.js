@@ -2,9 +2,12 @@ import { AssetManager } from "./assets.js";
 import { Canvas } from "./canvas.js";
 import { InputManager } from "./input.js";
 var GameEvent = /** @class */ (function () {
-    function GameEvent(step, core, input, assets) {
+    function GameEvent(step, core, canvas, input, assets) {
+        var _this = this;
+        this.isShaking = function () { return _this.canvas.isShaking(); };
         this.core = core;
         this.step = step;
+        this.canvas = canvas;
         this.input = input;
         this.assets = assets;
     }
@@ -20,6 +23,9 @@ var GameEvent = /** @class */ (function () {
     GameEvent.prototype.changeScene = function (newScene) {
         this.core.changeScene(newScene);
     };
+    GameEvent.prototype.shake = function (shakeTime, magnitude) {
+        this.canvas.shake(shakeTime, magnitude);
+    };
     return GameEvent;
 }());
 export { GameEvent };
@@ -32,7 +38,7 @@ var Core = /** @class */ (function () {
             .addAction("up", "ArrowUp", 12)
             .addAction("right", "ArrowRight", 15)
             .addAction("down", "ArrowDown", 13),
-            this.ev = new GameEvent(frameSkip + 1, this, this.input, this.assets);
+            this.ev = new GameEvent(frameSkip + 1, this, this.canvas, this.input, this.assets);
         this.timeSum = 0.0;
         this.oldTime = 0.0;
         this.initialized = false;

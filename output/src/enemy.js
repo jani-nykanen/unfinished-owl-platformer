@@ -11,6 +11,7 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+import { Flip } from "./canvas.js";
 import { CollisionObject } from "./gameobject.js";
 import { Particle } from "./particle.js";
 import { Sprite } from "./sprite.js";
@@ -36,6 +37,9 @@ var Enemy = /** @class */ (function (_super) {
         _this.canJump = false;
         _this.particles = new Array();
         _this.deathTime = 0;
+        _this.canBeKnocked = true;
+        _this.knockTimer = 0;
+        _this.knockOffset = 0;
         return _this;
     }
     Enemy.prototype.updateAI = function (ev) { };
@@ -47,6 +51,19 @@ var Enemy = /** @class */ (function (_super) {
         return (this.deathTime -= ev.step) <= 0;
     };
     Enemy.prototype.updateLogic = function (ev) {
+        var KNOCK_TIME = 120;
+        var KNOCK_JUMP = -2.0;
+        if (this.knockTimer > 0) {
+            this.knockTimer -= ev.step;
+            return;
+        }
+        if (this.canBeKnocked &&
+            ev.isShaking() && this.canJump) {
+            this.target.x = 0;
+            this.speed.y = KNOCK_JUMP;
+            this.knockTimer = KNOCK_TIME;
+            return;
+        }
         this.updateAI(ev);
         this.canJump = false;
         this.slopeFriction = 0;
@@ -65,13 +82,17 @@ var Enemy = /** @class */ (function (_super) {
         var bmp = c.getBitmap("enemies");
         var px = Math.round(this.pos.x) + this.renderOffset.x - this.spr.width / 2;
         var py = Math.round(this.pos.y) + this.renderOffset.y - this.spr.height / 2;
-        c.drawSprite(this.spr, bmp, px, py, this.flip);
+        var flip = this.flip;
+        if (this.knockTimer > 0) {
+            flip |= Flip.Vertical;
+            py += this.center.y + this.knockOffset;
+        }
+        c.drawSprite(this.spr, bmp, px, py, flip);
     };
     Enemy.prototype.playerEvent = function (pl, ev) { };
     Enemy.prototype.spawnParticles = function (count, speedAmount, angleOffset) {
         if (angleOffset === void 0) { angleOffset = 0; }
         var ANIM_SPEED = 4.0;
-        var EXIST_TIME = 32;
         var angle;
         var speed;
         for (var i = 0; i < count; ++i) {

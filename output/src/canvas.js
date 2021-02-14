@@ -11,6 +11,7 @@ export var Flip;
 var Canvas = /** @class */ (function () {
     function Canvas(width, height, assets) {
         var _this = this;
+        this.isShaking = function () { return _this.shakeTimer > 0; };
         this.width = width;
         this.height = height;
         this.translation = new Vector2();

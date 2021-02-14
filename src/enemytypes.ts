@@ -30,6 +30,7 @@ export class Turtle extends Enemy {
         this.collisionBox = new Vector2(8, 10);
 
         this.center.y = 4;
+        this.knockOffset = 1;
 
         this.oldCanJump = false;
     }

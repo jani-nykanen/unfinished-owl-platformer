@@ -312,4 +312,7 @@ export class Canvas {
 
         this.move(rx, ry);
     }
+
+
+    public isShaking = () : boolean => this.shakeTimer > 0;
 }

@@ -13,13 +13,15 @@ export class GameEvent {
     private readonly input : InputManager;
     private readonly assets : AssetManager;
     private readonly core : Core;
+    private readonly canvas : Canvas;
 
 
-    constructor(step : number, core : Core, 
+    constructor(step : number, core : Core, canvas : Canvas,
         input : InputManager, assets : AssetManager) {
 
         this.core = core;
         this.step = step;
+        this.canvas = canvas;
         this.input = input;
         this.assets = assets;
     }
@@ -47,6 +49,15 @@ export class GameEvent {
 
         this.core.changeScene(newScene);
     }
+
+
+    public shake(shakeTime : number, magnitude : number) {
+
+        this.canvas.shake(shakeTime, magnitude);
+    }
+
+
+    public isShaking = () : boolean => this.canvas.isShaking();
 }
 
 
@@ -87,7 +98,8 @@ export class Core {
             .addAction("right", "ArrowRight", 15)
             .addAction("down", "ArrowDown", 13),
 
-        this.ev = new GameEvent(frameSkip+1, this, this.input, this.assets);
+        this.ev = new GameEvent(frameSkip+1, this, this.canvas, 
+            this.input, this.assets);
 
         this.timeSum = 0.0;
         this.oldTime = 0.0;

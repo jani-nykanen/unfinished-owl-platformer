@@ -29,6 +29,7 @@ var Turtle = /** @class */ (function (_super) {
         _this.hitbox = new Vector2(14, 12);
         _this.collisionBox = new Vector2(8, 10);
         _this.center.y = 4;
+        _this.knockOffset = 1;
         _this.oldCanJump = false;
         return _this;
     }
