@@ -70,11 +70,14 @@ export class Camera {
     }
 
 
+    public setPosition(v : Vector2) {
+
+        this.pos = v.clone();
+    }
+
+
     public restrictCamera(c : Canvas,
         x : number, y : number, w : number, h : number) {
-
-        let oldViewport = this.viewport.clone();
-
 
         // Left
         let px = this.pos.x + this.centerOff.x;

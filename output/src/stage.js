@@ -111,7 +111,7 @@ var Stage = /** @class */ (function () {
     Stage.prototype.objectCollisions = function (o, ev) {
         var BOUND_COLLISION_Y_MARGIN = 256;
         var RADIUS = 2;
-        if (!o.doesExist())
+        if (!o.doesExist() || o.isDying() || !o.isInCamera())
             return;
         var px = Math.floor(o.getPos().x / 16);
         var py = Math.floor(o.getPos().y / 16);
@@ -148,7 +148,7 @@ var Stage = /** @class */ (function () {
                 switch (tid) {
                     // Player
                     case 0:
-                        // ...
+                        objects.setPlayerPosition(x, y);
                         break;
                     // Star
                     case 1:
@@ -156,6 +156,9 @@ var Stage = /** @class */ (function () {
                         break;
                     default:
                         break;
+                }
+                if (tid >= 16 && tid < 32) {
+                    objects.addEnemy(x, y, tid - 16);
                 }
             }
         }

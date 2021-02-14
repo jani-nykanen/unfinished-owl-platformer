@@ -15,7 +15,7 @@ import { Flip } from "./canvas.js";
 import { Dust } from "./dust.js";
 import { CollisionObject } from "./gameobject.js";
 import { Sprite } from "./sprite.js";
-import { nextObject, State } from "./util.js";
+import { computeFriction, nextObject, State } from "./util.js";
 import { Vector2 } from "./vector.js";
 var Player = /** @class */ (function (_super) {
     __extends(Player, _super);
@@ -83,21 +83,7 @@ var Player = /** @class */ (function (_super) {
         else if (this.jumpTimer > 0 && (s & State.DownOrPressed) == 0) {
             this.jumpTimer = 0;
         }
-        // Not quite working yet
-        var k = this.slopeFriction;
-        if (Math.abs(k) > EPS) {
-            if (k > 0) {
-                if (this.target.x > 0)
-                    k *= -0.5;
-                this.target.x *= 1.0 - 0.5 * k;
-            }
-            else {
-                if (this.target.x < 0)
-                    k *= -0.5;
-                this.target.x *= 1.0 + 0.5 * k;
-            }
-            // this.target.x *= Math.abs(this.slopeFriction);
-        }
+        this.target.x = computeFriction(this.target.x, this.slopeFriction);
     };
     Player.prototype.animate = function (ev) {
         var EPS = 0.01;
@@ -249,6 +235,10 @@ var Player = /** @class */ (function (_super) {
         else {
             this.jumpTimer = 0;
         }
+    };
+    Player.prototype.setPosition = function (x, y) {
+        this.pos = new Vector2(x, y);
+        this.oldPos = this.pos.clone();
     };
     Player.prototype.addStar = function () {
         this.state.addStar();

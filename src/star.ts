@@ -102,7 +102,7 @@ export class Star extends WeakGameObject {
     }
 
 
-    public playerCollision(pl : Player) : boolean {
+    public playerCollision(pl : Player, ev : GameEvent) : boolean {
 
         if (!this.exist || this.dying || !this.inCamera)
             return false;

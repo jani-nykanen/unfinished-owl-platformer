@@ -38,6 +38,7 @@ export class GameScene implements Scene {
         this.stage = new Stage(ev);
         this.objects = new ObjectManager(this.state);
         this.stage.parseObjects(this.objects);
+        this.objects.setCamera(this.cam);
 
         this.cloudPos = (new Array<number>(2)).fill(0);
 

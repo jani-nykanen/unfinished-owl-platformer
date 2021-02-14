@@ -102,3 +102,28 @@ export function nextObject<T extends ExistingObject> (arr : Array<T>, type : Fun
 
     return o;
 }
+
+
+export const computeFriction = (target : number, k : number) : number => {
+
+    const EPS = 0.01;
+
+    if (Math.abs(k) > EPS) {
+
+        if (k > 0) {
+
+            if (target > 0)
+                k *= -0.5;
+
+            target *= 1.0 - 0.5 * k;
+        }
+        else {
+
+            if (target < 0)
+                k *= -0.5;
+
+            target *= 1.0 + 0.5 * k;
+        }
+    }
+    return target;
+}

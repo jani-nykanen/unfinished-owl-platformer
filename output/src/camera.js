@@ -37,8 +37,10 @@ var Camera = /** @class */ (function () {
         this.centerOffTarget.x = dir * FORWARD;
         this.centerOff.x = updateSpeedAxis(this.centerOff.x, this.centerOffTarget.x, MOVE_SPEED_X * ev.step);
     };
+    Camera.prototype.setPosition = function (v) {
+        this.pos = v.clone();
+    };
     Camera.prototype.restrictCamera = function (c, x, y, w, h) {
-        var oldViewport = this.viewport.clone();
         // Left
         var px = this.pos.x + this.centerOff.x;
         if (px < x + c.width / 2) {

@@ -59,3 +59,19 @@ export function nextObject(arr, type) {
     }
     return o;
 }
+export var computeFriction = function (target, k) {
+    var EPS = 0.01;
+    if (Math.abs(k) > EPS) {
+        if (k > 0) {
+            if (target > 0)
+                k *= -0.5;
+            target *= 1.0 - 0.5 * k;
+        }
+        else {
+            if (target < 0)
+                k *= -0.5;
+            target *= 1.0 + 0.5 * k;
+        }
+    }
+    return target;
+};

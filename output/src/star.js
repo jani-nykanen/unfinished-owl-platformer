@@ -68,7 +68,7 @@ var Star = /** @class */ (function (_super) {
                 .spawn(this.pos.x, this.pos.y, speed, STAR_DEATH_TIME - 1, STAR_DEATH_TIME / 4, BASE_GRAVITY, 0);
         }
     };
-    Star.prototype.playerCollision = function (pl) {
+    Star.prototype.playerCollision = function (pl, ev) {
         if (!this.exist || this.dying || !this.inCamera)
             return false;
         if (pl.overlayObject(this)) {

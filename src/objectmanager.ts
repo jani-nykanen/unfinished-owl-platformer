@@ -1,6 +1,8 @@
 import { Camera } from "./camera.js";
 import { Canvas } from "./canvas.js";
 import { GameEvent } from "./core.js";
+import { Enemy } from "./enemy.js";
+import { getEnemyType } from "./enemytypes.js";
 import { GameState } from "./gamestate.js";
 import { Player } from "./player.js";
 import { Stage } from "./stage.js";
@@ -12,12 +14,14 @@ export class ObjectManager {
 
     private player : Player;
     private stars : Array<Star>;
+    private enemies : Array<Enemy>;
 
 
     constructor(state : GameState) {
 
         this.player = new Player(128, 96, state);
         this.stars = new Array<Star> ();
+        this.enemies = new Array<Enemy> ();
     }
 
 
@@ -27,7 +31,17 @@ export class ObjectManager {
 
             s.cameraCheck(cam);
             s.update(ev);
-            s.playerCollision(this.player);
+            s.playerCollision(this.player, ev);
+        }
+
+        // TODO: A class that extends all this methods, so
+        // we can just call "updateObjectArray" or something
+        for (let e of this.enemies) {
+
+            e.cameraCheck(cam);
+            e.update(ev);
+            e.playerCollision(this.player, ev);
+            stage.objectCollisions(e, ev);
         }
 
         this.player.update(ev);
@@ -44,13 +58,38 @@ export class ObjectManager {
             s.draw(c);
         }
 
+        for (let e of this.enemies) {
+
+            e.draw(c);
+        }
+
         this.player.preDraw(c);
         this.player.draw(c);
+    }
+
+
+    public setCamera(cam : Camera) {
+
+        cam.setPosition(this.player.getPos());
+    }
+
+
+    public setPlayerPosition(x : number, y : number) {
+
+        this.player.setPosition(x*16 + 8, y*16 + 8);
     }
 
 
     public addStar(x : number, y : number) {
 
         this.stars.push(new Star(x*16 + 8, y*16 + 8));
+    }
+
+
+    public addEnemy(x : number, y : number, id : number) {
+
+        this.enemies.push(new (getEnemyType(id))
+            .prototype
+            .constructor(x*16 + 8, y*16 + 8));
     }
 }

@@ -179,7 +179,7 @@ export class Stage {
         const BOUND_COLLISION_Y_MARGIN = 256;
         const RADIUS = 2;
 
-        if (!o.doesExist()) 
+        if (!o.doesExist() || o.isDying() || !o.isInCamera()) 
             return;
 
         let px = Math.floor(o.getPos().x / 16);
@@ -240,7 +240,7 @@ export class Stage {
                 // Player
                 case 0:
 
-                    // ...
+                    objects.setPlayerPosition(x, y);
                     break;
                 
                 // Star
@@ -251,6 +251,11 @@ export class Stage {
                 
                 default:
                     break;
+                }
+
+                if (tid >= 16 && tid < 32) {
+
+                    objects.addEnemy(x, y, tid-16);
                 }
             }
         }
