@@ -11,7 +11,7 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-import { WeakGameObject } from "./gameobject.js";
+import { InteractionTarget } from "./interactiontarget.js";
 import { Particle } from "./particle.js";
 import { Sprite } from "./sprite.js";
 import { nextObject } from "./util.js";
@@ -81,5 +81,5 @@ var Star = /** @class */ (function (_super) {
         return false;
     };
     return Star;
-}(WeakGameObject));
+}(InteractionTarget));
 export { Star };

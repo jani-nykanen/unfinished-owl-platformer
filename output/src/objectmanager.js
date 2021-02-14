@@ -6,25 +6,29 @@ var ObjectManager = /** @class */ (function () {
         this.player = new Player(0, 0, state);
         this.stars = new Array();
         this.enemies = new Array();
+        this.checkpoints = new Array();
     }
-    ObjectManager.prototype.update = function (cam, stage, ev) {
-        for (var _i = 0, _a = this.stars; _i < _a.length; _i++) {
-            var s = _a[_i];
-            s.cameraCheck(cam);
-            s.update(ev);
-            s.playerCollision(this.player, ev);
+    ObjectManager.prototype.updateInteractionTargetArray = function (arr, cam, ev) {
+        for (var _i = 0, arr_1 = arr; _i < arr_1.length; _i++) {
+            var a = arr_1[_i];
+            a.cameraCheck(cam);
+            a.update(ev);
+            a.playerCollision(this.player, ev);
         }
+    };
+    ObjectManager.prototype.update = function (cam, stage, ev) {
+        this.updateInteractionTargetArray(this.stars, cam, ev);
         // TODO: A class that extends all this methods, so
         // we can just call "updateObjectArray" or something?
-        for (var _b = 0, _c = this.enemies; _b < _c.length; _b++) {
-            var e = _c[_b];
+        for (var _i = 0, _a = this.enemies; _i < _a.length; _i++) {
+            var e = _a[_i];
             e.cameraCheck(cam);
             e.update(ev);
             e.playerCollision(this.player, ev);
             stage.objectCollisions(e, ev);
             if (!e.isDeactivated()) {
-                for (var _d = 0, _e = this.enemies; _d < _e.length; _d++) {
-                    var e2 = _e[_d];
+                for (var _b = 0, _c = this.enemies; _b < _c.length; _b++) {
+                    var e2 = _c[_b];
                     if (e2 != e) {
                         e.enemyCollision(e2, ev);
                     }

@@ -10,6 +10,7 @@ import { Vector2 } from "./vector.js";
 
 export class Player extends CollisionObject {
 
+    private checkpoint : Vector2;
 
     private canJump : boolean;
     private doubleJump : boolean;
@@ -38,6 +39,8 @@ export class Player extends CollisionObject {
     constructor(x : number, y : number, state : GameState) {
 
         super(x, y);
+
+        this.checkpoint = this.pos.clone();
 
         this.friction = new Vector2(0.125, 0.125);
         this.hitbox = new Vector2(16, 16);
@@ -384,4 +387,10 @@ export class Player extends CollisionObject {
 
 
     public isThumping = () : boolean => this.thumping;
+
+
+    public setCheckPoint(p : Vector2) {
+
+        this.checkpoint = p.clone();
+    }
 }

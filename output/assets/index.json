@@ -13,6 +13,7 @@
         {"name": "particles",  "path": "particles.png"},
         {"name": "star",  "path": "star.png"},
         {"name": "enemies",  "path": "enemies.png"},
+        {"name": "checkpoint",  "path": "checkpoint.png"},
         {"name": "tileset",  "path": "tileset.png"}
     ],
 

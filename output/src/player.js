@@ -22,6 +22,7 @@ var Player = /** @class */ (function (_super) {
     function Player(x, y, state) {
         var _this = _super.call(this, x, y) || this;
         _this.isThumping = function () { return _this.thumping; };
+        _this.checkpoint = _this.pos.clone();
         _this.friction = new Vector2(0.125, 0.125);
         _this.hitbox = new Vector2(16, 16);
         _this.collisionBox = new Vector2(12, 16);
@@ -257,6 +258,9 @@ var Player = /** @class */ (function (_super) {
         this.stompMargin = time;
         this.jumpTimer = 0;
         this.doubleJump = false;
+    };
+    Player.prototype.setCheckPoint = function (p) {
+        this.checkpoint = p.clone();
     };
     return Player;
 }(CollisionObject));

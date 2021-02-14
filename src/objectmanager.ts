@@ -1,9 +1,11 @@
 import { Camera } from "./camera.js";
 import { Canvas } from "./canvas.js";
+import { Checkpoint } from "./checkpoint.js";
 import { GameEvent } from "./core.js";
 import { Enemy } from "./enemy.js";
 import { getEnemyType } from "./enemytypes.js";
 import { GameState } from "./gamestate.js";
+import { InteractionTarget } from "./interactiontarget.js";
 import { Player } from "./player.js";
 import { Stage } from "./stage.js";
 import { Star } from "./star.js";
@@ -14,6 +16,7 @@ export class ObjectManager {
 
     private player : Player;
     private stars : Array<Star>;
+    private checkpoints : Array<Checkpoint>;
     private enemies : Array<Enemy>;
 
 
@@ -22,20 +25,26 @@ export class ObjectManager {
         this.player = new Player(0, 0, state);
         this.stars = new Array<Star> ();
         this.enemies = new Array<Enemy> ();
+        this.checkpoints = new Array<Checkpoint> ();
+    }
+
+
+    private updateInteractionTargetArray(arr : Array<InteractionTarget>, 
+        cam : Camera, ev : GameEvent) {
+
+        for (let a of arr) {
+
+            a.cameraCheck(cam);
+            a.update(ev);
+            a.playerCollision(this.player, ev);
+        }
     }
 
 
     public update(cam : Camera, stage : Stage, ev : GameEvent) {
         
-        for (let s of this.stars) {
+        this.updateInteractionTargetArray(this.stars, cam, ev);
 
-            s.cameraCheck(cam);
-            s.update(ev);
-            s.playerCollision(this.player, ev);
-        }
-
-        // TODO: A class that extends all this methods, so
-        // we can just call "updateObjectArray" or something?
         for (let e of this.enemies) {
 
             e.cameraCheck(cam);

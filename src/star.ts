@@ -1,6 +1,6 @@
 import { Canvas } from "./canvas.js";
 import { GameEvent } from "./core.js";
-import { WeakGameObject } from "./gameobject.js";
+import { InteractionTarget } from "./interactiontarget.js";
 import { Particle } from "./particle.js";
 import { Player } from "./player.js";
 import { Sprite } from "./sprite.js";
@@ -11,7 +11,7 @@ import { Vector2 } from "./vector.js";
 const STAR_DEATH_TIME = 32;
 
 
-export class Star extends WeakGameObject {
+export class Star extends InteractionTarget {
 
 
     private waveTimer : number;
@@ -47,7 +47,7 @@ export class Star extends WeakGameObject {
     protected updateLogic(ev : GameEvent) {
 
         const ANIM_SPEED = 6;
-        const WAVE_SPEED = 0.05
+        const WAVE_SPEED = 0.05;
 
         this.spr.animate(0, 0, 7, ANIM_SPEED, ev.step);
 
