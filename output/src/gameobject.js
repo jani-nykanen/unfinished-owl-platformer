@@ -172,8 +172,8 @@ var CollisionObject = /** @class */ (function (_super) {
             py <= y0 + (this.speed.y + FAR_MARGIN) * ev.step) ||
             (dir < 0 && py < y0 + NEAR_MARGIN * ev.step &&
                 py >= y0 + (this.speed.y - FAR_MARGIN) * ev.step)) {
-            this.speed.y = 0;
             this.pos.y = y0 - this.center.y - dir * this.collisionBox.y / 2;
+            this.speed.y *= -this.bounceFactor;
             this.slopeCollisionEvent(dir, k, ev);
             return true;
         }

@@ -248,6 +248,12 @@ export class Stage {
 
                     objects.addStar(x, y);
                     break;
+
+                // Checkpoint
+                case 2:
+                    
+                    objects.addCheckpoint(x, y);
+                    break;
                 
                 default:
                     break;

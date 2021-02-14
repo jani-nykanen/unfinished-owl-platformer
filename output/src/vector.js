@@ -37,6 +37,7 @@ var Vector2 = /** @class */ (function () {
     Vector2.scalarMultiply = function (v, s) { return new Vector2(v.x * s, v.y * s); };
     Vector2.distance = function (a, b) { return Math.hypot(a.x - b.x, a.y - b.y); };
     Vector2.direction = function (a, b) { return (new Vector2(b.x - a.x, b.y - a.y)).normalize(true); };
+    Vector2.add = function (a, b) { return new Vector2(a.x + b.x, a.y + b.y); };
     return Vector2;
 }());
 export { Vector2 };

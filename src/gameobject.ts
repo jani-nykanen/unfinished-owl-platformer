@@ -150,7 +150,7 @@ export abstract class GameObject extends WeakGameObject {
     protected postUpdate(ev : GameEvent) {}
 
 
-    private updateMovement(ev : GameEvent) {
+    protected updateMovement(ev : GameEvent) {
 
         this.speed.x = updateSpeedAxis(this.speed.x,
             this.target.x, this.friction.x*ev.step);
@@ -272,10 +272,11 @@ export abstract class CollisionObject extends GameObject {
             (dir < 0 && py < y0 + NEAR_MARGIN * ev.step && 
             py >= y0 + (this.speed.y - FAR_MARGIN) * ev.step) ) {
 
-            this.speed.y = 0;
             this.pos.y = y0 - this.center.y - dir*this.collisionBox.y/2;
+            this.speed.y *= -this.bounceFactor;
 
             this.slopeCollisionEvent(dir, k, ev);
+
             return true;
         }
     

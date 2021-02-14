@@ -11,15 +11,22 @@ export class Checkpoint extends InteractionTarget {
 
     private waveTimer : number;
     private active : boolean;
+    private actualSprite : Sprite;
 
 
     constructor(x : number, y  : number) {
 
         super(x, y);
 
-        this.spr = new Sprite(24, 24);
-        this.hitbox = new Vector2(8, 20);
-        this.waveTimer = Math.random() * (Math.PI * 2);
+        // For checking if in camera 
+        // (need more height because of the
+        // wave animation)
+        this.spr = new Sprite(16, 24);
+
+        // For animation
+        this.actualSprite = new Sprite(16, 16);
+        this.hitbox = new Vector2(12, 16);
+        this.waveTimer = Math.PI/2;
 
         this.active = false;
     }
@@ -32,7 +39,7 @@ export class Checkpoint extends InteractionTarget {
 
         if (!this.active) return;
 
-        this.spr.animate(0, 1, 5, ANIM_SPEED, ev.step);
+        this.actualSprite.animate(0, 1, 5, ANIM_SPEED, ev.step);
 
         this.waveTimer = (this.waveTimer + WAVE_SPEED*ev.step) % (Math.PI*2);
     }
@@ -44,25 +51,33 @@ export class Checkpoint extends InteractionTarget {
 
         if (!this.exist || !this.inCamera) return;
 
-        let yoff = Math.round(Math.sin(this.waveTimer) * AMPLITUDE);
+        let yoff = 1; 
+        if (this.active)
+            yoff = -4 + Math.round(Math.sin(this.waveTimer) * AMPLITUDE);
 
-        c.drawSprite(this.spr, c.getBitmap("checkpoint"),
-            Math.round(this.pos.x) - 12,
-            Math.round(this.pos.y) - 12 + yoff);
+        c.drawSprite(this.actualSprite, 
+            c.getBitmap("checkpoint"),
+            Math.round(this.pos.x) - 8,
+            Math.round(this.pos.y) - 8 + yoff);
     }
 
 
     public playerCollision(pl : Player, ev : GameEvent) : boolean {
 
-        if (!this.exist || this.dying || !this.inCamera)
+        if (!this.exist || this.dying || !this.inCamera || pl.isDying())
             return false;
 
         if (pl.overlayObject(this)) {
 
             this.active = true;
-            pl.setCheckPoint(this.pos);
+            pl.setCheckpoint(this.pos);
 
             return true;
+        }
+
+        if (this.active && pl.getCheckpointRef() != this.pos) {
+
+            this.deactivate();
         }
 
         return false;
@@ -72,7 +87,7 @@ export class Checkpoint extends InteractionTarget {
     public deactivate() {
 
         this.active = false;
-        this.spr.setFrame(0, 0);
-        this.waveTimer = 0;
+        this.actualSprite.setFrame(0, 0);
+        this.waveTimer = Math.PI/2;
     }
 }

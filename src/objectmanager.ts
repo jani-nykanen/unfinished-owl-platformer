@@ -44,6 +44,7 @@ export class ObjectManager {
     public update(cam : Camera, stage : Stage, ev : GameEvent) {
         
         this.updateInteractionTargetArray(this.stars, cam, ev);
+        this.updateInteractionTargetArray(this.checkpoints, cam, ev);
 
         for (let e of this.enemies) {
 
@@ -64,10 +65,12 @@ export class ObjectManager {
             }
         }
 
+        this.player.specialCameraCheck(cam);
         this.player.update(ev);
         cam.followObject(this.player, ev);
 
         stage.objectCollisions(this.player, ev);
+        this.player.bodypieceCollisions(stage, ev);
     }
 
 
@@ -81,6 +84,11 @@ export class ObjectManager {
         for (let s of this.stars) {
 
             s.draw(c);
+        }
+
+        for (let o of this.checkpoints) {
+
+            o.draw(c);
         }
 
         for (let e of this.enemies) {
@@ -108,6 +116,12 @@ export class ObjectManager {
     public addStar(x : number, y : number) {
 
         this.stars.push(new Star(x*16 + 8, y*16 + 8));
+    }
+
+
+    public addCheckpoint(x : number, y : number) {
+
+        this.checkpoints.push(new Checkpoint(x*16 + 8, y*16 + 8));
     }
 
 

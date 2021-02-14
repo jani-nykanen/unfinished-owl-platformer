@@ -154,6 +154,10 @@ var Stage = /** @class */ (function () {
                     case 1:
                         objects.addStar(x, y);
                         break;
+                    // Checkpoint
+                    case 2:
+                        objects.addCheckpoint(x, y);
+                        break;
                     default:
                         break;
                 }

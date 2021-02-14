@@ -11,6 +11,7 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+import { BodyPiece } from "./bodypiece.js";
 import { Flip } from "./canvas.js";
 import { Dust } from "./dust.js";
 import { CollisionObject } from "./gameobject.js";
@@ -22,6 +23,7 @@ var Player = /** @class */ (function (_super) {
     function Player(x, y, state) {
         var _this = _super.call(this, x, y) || this;
         _this.isThumping = function () { return _this.thumping; };
+        _this.canBeHurt = function () { return _this.hurtTimer <= 0; };
         _this.checkpoint = _this.pos.clone();
         _this.friction = new Vector2(0.125, 0.125);
         _this.hitbox = new Vector2(16, 16);
@@ -33,18 +35,58 @@ var Player = /** @class */ (function (_super) {
         _this.jumpTimer = 0;
         _this.jumpMargin = 0;
         _this.stompMargin = 0;
+        _this.spr = new Sprite(16, 16);
         _this.sprBody = new Sprite(24, 24);
         _this.sprFeet = new Sprite(16, 8);
         _this.sprWing = new Sprite(12, 24);
         _this.eyePos = new Vector2();
         _this.dust = new Array();
         _this.dustTimer = 0;
+        _this.pieces = new Array();
         _this.thumping = false;
         _this.thumpWait = 0;
+        _this.hurtTimer = 0;
         _this.flip = Flip.None;
         _this.state = state;
         return _this;
     }
+    Player.prototype.respawn = function () {
+        this.dying = false;
+        this.stopMovement();
+        this.thumping = false;
+        this.inCamera = true;
+        this.canJump = false;
+        this.doubleJump = false;
+        this.jumpTimer = 0;
+        this.jumpMargin = 0;
+        this.stompMargin = 0;
+    };
+    Player.prototype.die = function (ev) {
+        var NEAR = 4.0;
+        var RETURN_SPEED = 2.0;
+        var HURT_TIME = 120.0;
+        this.updatePieces(ev);
+        for (var _i = 0, _a = this.dust; _i < _a.length; _i++) {
+            var d = _a[_i];
+            d.update(ev);
+        }
+        var dir = new Vector2(this.checkpoint.x - this.pos.x, this.checkpoint.y - this.pos.y);
+        this.target = Vector2.scalarMultiply(Vector2.normalize(dir), RETURN_SPEED);
+        this.updateMovement(ev);
+        if (dir.length() < NEAR) {
+            this.respawn();
+            this.hurtTimer = HURT_TIME;
+        }
+        this.flip = this.speed.x < 0 ? Flip.Horizontal : Flip.None;
+        this.spr.setFrame(0, 4);
+        return false;
+    };
+    Player.prototype.updatePieces = function (ev) {
+        for (var _i = 0, _a = this.pieces; _i < _a.length; _i++) {
+            var p = _a[_i];
+            p.update(ev);
+        }
+    };
     Player.prototype.control = function (ev) {
         var THUMP_EPS = 0.5;
         var BASE_GRAVITY = 3.0;
@@ -162,6 +204,9 @@ var Player = /** @class */ (function (_super) {
         var JUMP_SPEED = -2.5;
         var DOUBLE_JUMP_SPEED = -0.225;
         var DOUBLE_JUMP_MIN_SPEED = -1.5;
+        if (this.hurtTimer > 0) {
+            this.hurtTimer -= ev.step;
+        }
         if (this.jumpMargin > 0) {
             this.jumpMargin -= ev.step;
         }
@@ -186,8 +231,21 @@ var Player = /** @class */ (function (_super) {
         this.animate(ev);
         this.updateTimers(ev);
         this.updateDust(ev);
+        this.updatePieces(ev);
         this.canJump = false;
         this.slopeFriction = 0;
+    };
+    Player.prototype.specialCameraCheck = function (cam) {
+        for (var _i = 0, _a = this.pieces; _i < _a.length; _i++) {
+            var p = _a[_i];
+            p.cameraCheck(cam);
+        }
+    };
+    Player.prototype.bodypieceCollisions = function (stage, ev) {
+        for (var _i = 0, _a = this.pieces; _i < _a.length; _i++) {
+            var p = _a[_i];
+            stage.objectCollisions(p, ev);
+        }
     };
     Player.prototype.preDraw = function (c) {
         for (var _i = 0, _a = this.dust; _i < _a.length; _i++) {
@@ -196,12 +254,22 @@ var Player = /** @class */ (function (_super) {
         }
     };
     Player.prototype.draw = function (c) {
+        var bmp = c.getBitmap("owl");
+        for (var _i = 0, _a = this.pieces; _i < _a.length; _i++) {
+            var p = _a[_i];
+            p.draw(c);
+        }
+        if (this.hurtTimer > 0 && Math.floor(this.hurtTimer / 4) % 2 == 0)
+            return;
         var px = Math.round(this.pos.x);
         var py = Math.round(this.pos.y);
+        if (this.dying) {
+            c.drawSprite(this.spr, bmp, px - 8, py - 8, this.flip);
+            return;
+        }
         if (this.flip == Flip.Vertical) {
             py += 4;
         }
-        var bmp = c.getBitmap("owl");
         // Wings
         c.drawSprite(this.sprWing, bmp, px - 16, py - 16, this.flip);
         c.drawSprite(this.sprWing, bmp, px + 4, py - 16, Flip.Horizontal | this.flip);
@@ -246,6 +314,7 @@ var Player = /** @class */ (function (_super) {
     };
     Player.prototype.setPosition = function (x, y) {
         this.pos = new Vector2(x, y);
+        this.checkpoint = this.pos.clone();
         this.oldPos = this.pos.clone();
     };
     Player.prototype.addStar = function () {
@@ -259,8 +328,31 @@ var Player = /** @class */ (function (_super) {
         this.jumpTimer = 0;
         this.doubleJump = false;
     };
-    Player.prototype.setCheckPoint = function (p) {
-        this.checkpoint = p.clone();
+    Player.prototype.setCheckpoint = function (p) {
+        // NOTE: we do not clone p
+        this.checkpoint = p;
+    };
+    Player.prototype.getCheckpointRef = function () {
+        return this.checkpoint;
+    };
+    Player.prototype.spawnPieces = function (count, angleOffset, speedAmount) {
+        var BASE_SPEED = 1.5;
+        var BASE_JUMP = -1.0;
+        var angle;
+        var speed;
+        for (var i = 0; i < count; ++i) {
+            angle = Math.PI * 2 / count * i + angleOffset;
+            speed = new Vector2(Math.cos(angle) * BASE_SPEED, Math.sin(angle) * BASE_SPEED + BASE_JUMP * speedAmount);
+            nextObject(this.pieces, BodyPiece)
+                .spawn(this.pos.x, this.pos.y, speed);
+        }
+    };
+    Player.prototype.kill = function (ev) {
+        if (this.dying)
+            return;
+        this.spawnPieces(6, 0, 2.0);
+        this.dying = true;
+        // this.stopMovement();
     };
     return Player;
 }(CollisionObject));

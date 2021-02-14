@@ -69,7 +69,7 @@ var Star = /** @class */ (function (_super) {
         }
     };
     Star.prototype.playerCollision = function (pl, ev) {
-        if (!this.exist || this.dying || !this.inCamera)
+        if (!this.exist || this.dying || !this.inCamera || pl.isDying())
             return false;
         if (pl.overlayObject(this)) {
             this.spawnParticles(5, 3, -Math.PI / 10);

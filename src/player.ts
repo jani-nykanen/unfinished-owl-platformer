@@ -1,9 +1,12 @@
+import { BodyPiece } from "./bodypiece.js";
+import { Camera } from "./camera.js";
 import { Canvas, Flip } from "./canvas.js";
 import { GameEvent } from "./core.js";
 import { Dust } from "./dust.js";
 import { CollisionObject } from "./gameobject.js";
 import { GameState } from "./gamestate.js";
 import { Sprite } from "./sprite.js";
+import { Stage } from "./stage.js";
 import { computeFriction, nextObject, State } from "./util.js";
 import { Vector2 } from "./vector.js";
 
@@ -28,8 +31,12 @@ export class Player extends CollisionObject {
     private dust : Array<Dust>;
     private dustTimer : number;
 
+    private pieces : Array<BodyPiece>;
+
     private thumping : boolean;
     private thumpWait : number;
+
+    private hurtTimer : number;
 
     private flip : Flip;
 
@@ -54,6 +61,7 @@ export class Player extends CollisionObject {
         this.jumpMargin = 0;
         this.stompMargin = 0;
 
+        this.spr = new Sprite(16, 16);
         this.sprBody = new Sprite(24, 24);
         this.sprFeet = new Sprite(16, 8);
         this.sprWing = new Sprite(12, 24);
@@ -62,12 +70,73 @@ export class Player extends CollisionObject {
         this.dust = new Array<Dust>();
         this.dustTimer = 0;
     
+        this.pieces = new Array<BodyPiece> ();
+
         this.thumping = false;
         this.thumpWait = 0;
+
+        this.hurtTimer = 0;
 
         this.flip = Flip.None;
 
         this.state = state;
+    }
+
+
+    private respawn() {
+
+        this.dying = false;
+        this.stopMovement();
+
+        this.thumping = false;
+        this.inCamera = true;
+        this.canJump = false;
+        this.doubleJump = false;
+        this.jumpTimer = 0;
+        this.jumpMargin = 0;
+        this.stompMargin = 0;
+    }
+
+
+    protected die(ev : GameEvent) {
+
+        const NEAR = 4.0;
+        const RETURN_SPEED = 2.0;
+        const HURT_TIME = 120.0;
+
+        this.updatePieces(ev);
+        
+        for (let d of this.dust) {
+
+            d.update(ev);
+        }
+
+        let dir = new Vector2(this.checkpoint.x - this.pos.x, 
+                this.checkpoint.y - this.pos.y);
+
+        this.target = Vector2.scalarMultiply(
+            Vector2.normalize(dir), RETURN_SPEED);
+        this.updateMovement(ev);
+
+        if (dir.length() < NEAR) {
+
+            this.respawn();
+            this.hurtTimer = HURT_TIME;
+        }
+
+        this.flip = this.speed.x < 0 ? Flip.Horizontal : Flip.None;
+        this.spr.setFrame(0, 4);
+
+        return false;
+    }
+
+
+    private updatePieces(ev : GameEvent) {
+
+        for (let p of this.pieces) {
+
+            p.update(ev);
+        }
     }
 
     
@@ -237,6 +306,11 @@ export class Player extends CollisionObject {
         const DOUBLE_JUMP_SPEED = -0.225;
         const DOUBLE_JUMP_MIN_SPEED = -1.5;
 
+        if (this.hurtTimer > 0) {
+
+            this.hurtTimer -= ev.step;
+        }
+
         if (this.jumpMargin > 0) {
 
             this.jumpMargin -= ev.step;
@@ -272,9 +346,28 @@ export class Player extends CollisionObject {
         this.animate(ev);
         this.updateTimers(ev);
         this.updateDust(ev);
+        this.updatePieces(ev);
 
         this.canJump = false;
         this.slopeFriction = 0;
+    }
+
+
+    public specialCameraCheck(cam : Camera) {
+
+        for (let p of this.pieces) {
+
+            p.cameraCheck(cam);
+        }
+    }
+
+
+    public bodypieceCollisions(stage : Stage, ev : GameEvent) {
+
+        for (let p of this.pieces) {
+
+            stage.objectCollisions(p, ev);
+        }
     }
 
 
@@ -289,15 +382,29 @@ export class Player extends CollisionObject {
 
     public draw(c : Canvas) {
 
+        let bmp = c.getBitmap("owl");
+
+        for (let p of this.pieces) {
+
+            p.draw(c);
+        }
+
+        if (this.hurtTimer > 0 && Math.floor(this.hurtTimer / 4) % 2 == 0)
+            return;
+        
         let px = Math.round(this.pos.x);
         let py = Math.round(this.pos.y);
+
+        if (this.dying) {
+
+            c.drawSprite(this.spr, bmp, px-8, py-8, this.flip);
+            return;
+        }
 
         if (this.flip == Flip.Vertical) {
 
             py += 4;
         }
-        
-        let bmp = c.getBitmap("owl");
 
         // Wings
         c.drawSprite(this.sprWing, bmp, px - 16, py - 16, this.flip);
@@ -361,6 +468,7 @@ export class Player extends CollisionObject {
     public setPosition(x : number, y : number) {
 
         this.pos = new Vector2(x, y);
+        this.checkpoint = this.pos.clone();
         this.oldPos = this.pos.clone();
     }
 
@@ -389,8 +497,52 @@ export class Player extends CollisionObject {
     public isThumping = () : boolean => this.thumping;
 
 
-    public setCheckPoint(p : Vector2) {
+    public setCheckpoint(p : Vector2) {
 
-        this.checkpoint = p.clone();
+        // NOTE: we do not clone p
+        this.checkpoint = p;
     }
+
+
+    public getCheckpointRef() : Vector2 {
+
+        return this.checkpoint;
+    }
+
+
+    private spawnPieces(count : number, angleOffset : number,
+        speedAmount : number) {
+
+        const BASE_SPEED = 1.5;
+        const BASE_JUMP = -1.0;
+
+        let angle : number;
+        let speed : Vector2;
+
+        for (let i = 0; i < count; ++ i) {
+
+            angle = Math.PI * 2 / count * i + angleOffset;
+
+            speed = new Vector2(
+                Math.cos(angle) * BASE_SPEED,
+                Math.sin(angle) * BASE_SPEED + BASE_JUMP * speedAmount);
+
+            nextObject(this.pieces, BodyPiece)
+                .spawn(this.pos.x, this.pos.y, speed);
+        }
+        
+    }
+
+
+    public kill(ev : GameEvent) {
+
+        if (this.dying) return;
+
+        this.spawnPieces(6, 0, 2.0);
+        this.dying = true;
+        // this.stopMovement();
+    }
+
+
+    public canBeHurt = () : boolean => this.hurtTimer <= 0;
 }

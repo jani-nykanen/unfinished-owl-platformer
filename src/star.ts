@@ -104,7 +104,7 @@ export class Star extends InteractionTarget {
 
     public playerCollision(pl : Player, ev : GameEvent) : boolean {
 
-        if (!this.exist || this.dying || !this.inCamera)
+        if (!this.exist || this.dying || !this.inCamera || pl.isDying())
             return false;
 
         if (pl.overlayObject(this)) {

@@ -165,8 +165,9 @@ export abstract class Enemy extends CollisionObject {
 
         const STOMP_MARGIN = 8;
         const STOMP_MARGIN_TIME = 8;
+        const STOMP_MARGIN_H = 0.25;
 
-        if (this.isDeactivated()) 
+        if (this.isDeactivated() || pl.isDying()) 
             return false;
 
         this.playerEvent(pl, ev);
@@ -178,9 +179,11 @@ export abstract class Enemy extends CollisionObject {
         let hbox = pl.getHitbox();
         let px = pl.getPos().x;
 
+        let margin = this.hitbox.x * STOMP_MARGIN_H;
+
         if (pl.getSpeed().y >= this.speed.y &&
-            px + hbox.x/2 >= this.pos.x - this.hitbox.x/2 &&
-            px - hbox.x/2 < this.pos.x + this.hitbox.x/2 &&
+            px + hbox.x/2 >= this.pos.x - this.hitbox.x/2 - margin &&
+            px - hbox.x/2 < this.pos.x + this.hitbox.x/2 + margin &&
             py >= top && 
             py < top + (STOMP_MARGIN + Math.max(0, this.speed.y))*ev.step) {
 
@@ -190,6 +193,16 @@ export abstract class Enemy extends CollisionObject {
             this.dying = true;
             this.deathTime = ENEMY_DEATH_TIME;
             this.spawnParticles(6, 1.5);
+
+            return true;
+        }
+
+        // Hurt player
+        if (pl.canBeHurt() &&
+            this.overlayObject(pl)) {
+
+            pl.kill(ev);
+            return true;
         }
 
         return false;

@@ -18,9 +18,14 @@ var Checkpoint = /** @class */ (function (_super) {
     __extends(Checkpoint, _super);
     function Checkpoint(x, y) {
         var _this = _super.call(this, x, y) || this;
-        _this.spr = new Sprite(24, 24);
-        _this.hitbox = new Vector2(8, 20);
-        _this.waveTimer = Math.random() * (Math.PI * 2);
+        // For checking if in camera 
+        // (need more height because of the
+        // wave animation)
+        _this.spr = new Sprite(16, 24);
+        // For animation
+        _this.actualSprite = new Sprite(16, 16);
+        _this.hitbox = new Vector2(12, 16);
+        _this.waveTimer = Math.PI / 2;
         _this.active = false;
         return _this;
     }
@@ -29,30 +34,35 @@ var Checkpoint = /** @class */ (function (_super) {
         var WAVE_SPEED = 0.05;
         if (!this.active)
             return;
-        this.spr.animate(0, 1, 5, ANIM_SPEED, ev.step);
+        this.actualSprite.animate(0, 1, 5, ANIM_SPEED, ev.step);
         this.waveTimer = (this.waveTimer + WAVE_SPEED * ev.step) % (Math.PI * 2);
     };
     Checkpoint.prototype.draw = function (c) {
         var AMPLITUDE = 3;
         if (!this.exist || !this.inCamera)
             return;
-        var yoff = Math.round(Math.sin(this.waveTimer) * AMPLITUDE);
-        c.drawSprite(this.spr, c.getBitmap("checkpoint"), Math.round(this.pos.x) - 12, Math.round(this.pos.y) - 12 + yoff);
+        var yoff = 1;
+        if (this.active)
+            yoff = -4 + Math.round(Math.sin(this.waveTimer) * AMPLITUDE);
+        c.drawSprite(this.actualSprite, c.getBitmap("checkpoint"), Math.round(this.pos.x) - 8, Math.round(this.pos.y) - 8 + yoff);
     };
     Checkpoint.prototype.playerCollision = function (pl, ev) {
-        if (!this.exist || this.dying || !this.inCamera)
+        if (!this.exist || this.dying || !this.inCamera || pl.isDying())
             return false;
         if (pl.overlayObject(this)) {
             this.active = true;
-            pl.setCheckPoint(this.pos);
+            pl.setCheckpoint(this.pos);
             return true;
+        }
+        if (this.active && pl.getCheckpointRef() != this.pos) {
+            this.deactivate();
         }
         return false;
     };
     Checkpoint.prototype.deactivate = function () {
         this.active = false;
-        this.spr.setFrame(0, 0);
-        this.waveTimer = 0;
+        this.actualSprite.setFrame(0, 0);
+        this.waveTimer = Math.PI / 2;
     };
     return Checkpoint;
 }(InteractionTarget));
