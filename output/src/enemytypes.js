@@ -39,9 +39,11 @@ var Turtle = /** @class */ (function (_super) {
         this.flip = this.speed.x > 0 ? Flip.Horizontal : Flip.None;
     };
     Turtle.prototype.wallCollisionEvent = function (dir, ev) {
-        this.target.x = -dir * Math.abs(this.target.x);
-        this.speed.x = this.target.x;
         this.dir = -dir;
+    };
+    Turtle.prototype.enemyCollisionEvent = function (dirx, diry, ev) {
+        if (dirx != 0)
+            this.dir = -dirx;
     };
     return Turtle;
 }(Enemy));

@@ -42,6 +42,17 @@ export class ObjectManager {
             e.update(ev);
             e.playerCollision(this.player, ev);
             stage.objectCollisions(e, ev);
+
+            if (!e.isDeactivated()) {
+
+                for (let e2 of this.enemies) {
+
+                    if (e2 != e) {
+
+                        e.enemyCollision(e2, ev);
+                    }
+                }
+            }
         }
 
         this.player.update(ev);

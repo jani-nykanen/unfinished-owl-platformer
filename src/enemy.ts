@@ -37,6 +37,9 @@ export abstract class Enemy extends CollisionObject {
         this.canJump = false;
     }
 
+    
+    public isDeactivated = () : boolean => (this.dying || !this.exist || !this.inCamera);
+
 
     protected updateAI(ev : GameEvent) {}
 
@@ -69,10 +72,30 @@ export abstract class Enemy extends CollisionObject {
 
     public playerCollision(pl : Player, ev : GameEvent) : boolean {
 
-        if (this.dying || !this.exist || !this.inCamera) 
+        if (this.isDeactivated()) 
             return false;
 
         this.playerEvent(pl, ev);
+
+        return false;
+    }
+
+
+    protected enemyCollisionEvent(dirx : number, diry : number, ev : GameEvent) {};
+
+
+    public enemyCollision(e : Enemy, ev : GameEvent) : boolean {
+
+        if (this.isDeactivated() || e.isDeactivated())
+            return false;
+
+        if (this.overlayObject(e)) {
+
+            this.enemyCollisionEvent(
+                Math.sign(e.pos.x - this.pos.x), 
+                Math.sign(e.pos.y - this.pos.y), ev);
+            return true;
+        }
 
         return false;
     }

@@ -46,10 +46,14 @@ export class Turtle extends Enemy {
 
     protected wallCollisionEvent(dir : number, ev : GameEvent) {
 
-        this.target.x = -dir * Math.abs(this.target.x);
-        this.speed.x = this.target.x;
-
         this.dir = -dir;
+    }
+
+
+    protected enemyCollisionEvent(dirx : number, diry : number, ev : GameEvent) {
+
+        if (dirx != 0)
+            this.dir = -dirx;
     }
 
 }

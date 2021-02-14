@@ -19,6 +19,7 @@ var Enemy = /** @class */ (function (_super) {
     function Enemy(x, y, id) {
         if (id === void 0) { id = 0; }
         var _this = _super.call(this, x, y) || this;
+        _this.isDeactivated = function () { return (_this.dying || !_this.exist || !_this.inCamera); };
         _this.id = id;
         _this.spr = new Sprite(24, 24);
         _this.spr.setFrame(0, id);
@@ -48,9 +49,20 @@ var Enemy = /** @class */ (function (_super) {
     };
     Enemy.prototype.playerEvent = function (pl, ev) { };
     Enemy.prototype.playerCollision = function (pl, ev) {
-        if (this.dying || !this.exist || !this.inCamera)
+        if (this.isDeactivated())
             return false;
         this.playerEvent(pl, ev);
+        return false;
+    };
+    Enemy.prototype.enemyCollisionEvent = function (dirx, diry, ev) { };
+    ;
+    Enemy.prototype.enemyCollision = function (e, ev) {
+        if (this.isDeactivated() || e.isDeactivated())
+            return false;
+        if (this.overlayObject(e)) {
+            this.enemyCollisionEvent(Math.sign(e.pos.x - this.pos.x), Math.sign(e.pos.y - this.pos.y), ev);
+            return true;
+        }
         return false;
     };
     Enemy.prototype.slopeCollisionEvent = function (dir, friction, ev) {

@@ -22,6 +22,14 @@ var ObjectManager = /** @class */ (function () {
             e.update(ev);
             e.playerCollision(this.player, ev);
             stage.objectCollisions(e, ev);
+            if (!e.isDeactivated()) {
+                for (var _d = 0, _e = this.enemies; _d < _e.length; _d++) {
+                    var e2 = _e[_d];
+                    if (e2 != e) {
+                        e.enemyCollision(e2, ev);
+                    }
+                }
+            }
         }
         this.player.update(ev);
         cam.followObject(this.player, ev);
