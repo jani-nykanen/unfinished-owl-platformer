@@ -6,7 +6,7 @@ import { Vector2 } from "./vector.js";
 
 
 export const getEnemyType = (id : number) : Function =>
-    [Turtle][id];
+    [Turtle, SpikedTurtle][id];
 
 
 export class Turtle extends Enemy {
@@ -70,4 +70,19 @@ export class Turtle extends Enemy {
             this.dir = -dirx;
     }
 
+}
+
+
+export class SpikedTurtle extends Turtle {
+
+
+    constructor(x : number, y : number) {
+
+        super(x, y);
+
+        this.id = 1;
+        this.spr.setFrame(0, 1);
+
+        this.canBeStomped = false;
+    }
 }

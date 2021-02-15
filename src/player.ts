@@ -104,7 +104,7 @@ export class Player extends CollisionObject {
 
         const NEAR = 4.0;
         const RETURN_SPEED_MIN = 2.0;
-        const HURT_TIME = 120.0;
+        const HURT_TIME = 90.0;
         const FLAP_SPEED = 6;
         const REFORM_TIME = 8;
 
@@ -555,7 +555,7 @@ export class Player extends CollisionObject {
 
     public kill(ev : GameEvent) {
 
-        const ESCAPE_SPEED = 2.0;
+        const ESCAPE_SPEED = 3.0;
 
         if (this.dying) return;
 

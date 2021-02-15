@@ -29,8 +29,16 @@ var ObjectManager = /** @class */ (function () {
         this.initialCheckForGameobjectArray(this.checkpoints, cam);
     };
     ObjectManager.prototype.update = function (cam, stage, ev) {
+        // Static
         this.updateInteractionTargetArray(this.stars, cam, ev);
         this.updateInteractionTargetArray(this.checkpoints, cam, ev);
+        // Player
+        this.player.specialCameraCheck(cam);
+        this.player.update(ev);
+        cam.followObject(this.player, ev);
+        stage.objectCollisions(this.player, ev);
+        this.player.bodypieceCollisions(stage, ev);
+        // Enemies
         for (var _i = 0, _a = this.enemies; _i < _a.length; _i++) {
             var e = _a[_i];
             e.cameraCheck(cam);
@@ -46,11 +54,6 @@ var ObjectManager = /** @class */ (function () {
                 }
             }
         }
-        this.player.specialCameraCheck(cam);
-        this.player.update(ev);
-        cam.followObject(this.player, ev);
-        stage.objectCollisions(this.player, ev);
-        this.player.bodypieceCollisions(stage, ev);
     };
     ObjectManager.prototype.draw = function (c) {
         for (var _i = 0, _a = this.enemies; _i < _a.length; _i++) {
@@ -81,8 +84,9 @@ var ObjectManager = /** @class */ (function () {
     ObjectManager.prototype.addStar = function (x, y) {
         this.stars.push(new Star(x * 16 + 8, y * 16 + 8));
     };
-    ObjectManager.prototype.addCheckpoint = function (x, y) {
-        this.checkpoints.push(new Checkpoint(x * 16 + 8, y * 16 + 8));
+    ObjectManager.prototype.addCheckpoint = function (x, y, makeActive) {
+        if (makeActive === void 0) { makeActive = false; }
+        this.checkpoints.push(new Checkpoint(x * 16 + 8, y * 16 + 8, makeActive));
     };
     ObjectManager.prototype.addEnemy = function (x, y, id) {
         this.enemies.push(new (getEnemyType(id))

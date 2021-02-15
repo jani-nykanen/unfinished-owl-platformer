@@ -40,6 +40,7 @@ var Enemy = /** @class */ (function (_super) {
         _this.canBeKnocked = true;
         _this.knockTimer = 0;
         _this.knockOffset = 0;
+        _this.canBeStomped = true;
         return _this;
     }
     Enemy.prototype.updateAI = function (ev) { };
@@ -116,7 +117,8 @@ var Enemy = /** @class */ (function (_super) {
         var hbox = pl.getHitbox();
         var px = pl.getPos().x;
         var margin = this.hitbox.x * STOMP_MARGIN_H;
-        if (pl.getSpeed().y >= this.speed.y &&
+        if ((this.canBeStomped || this.knockTimer > 0) &&
+            pl.getSpeed().y >= this.speed.y &&
             px + hbox.x / 2 >= this.pos.x - this.hitbox.x / 2 - margin &&
             px - hbox.x / 2 < this.pos.x + this.hitbox.x / 2 + margin &&
             py >= top - NEAR_MARGIN * ev.step &&

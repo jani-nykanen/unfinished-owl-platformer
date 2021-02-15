@@ -50,7 +50,8 @@ var BodyPiece = /** @class */ (function (_super) {
     };
     BodyPiece.prototype.slopeCollisionEvent = function (dir, k, ev) {
         var EPS = 0.1;
-        if (Math.abs(this.speed.y) < EPS)
+        if (Math.abs(this.speed.y) < EPS &&
+            Math.abs(this.speed.x) < EPS)
             this.exist = false;
     };
     return BodyPiece;

@@ -16,7 +16,7 @@ import { Enemy } from "./enemy.js";
 import { computeFriction } from "./util.js";
 import { Vector2 } from "./vector.js";
 export var getEnemyType = function (id) {
-    return [Turtle][id];
+    return [Turtle, SpikedTurtle][id];
 };
 var Turtle = /** @class */ (function (_super) {
     __extends(Turtle, _super);
@@ -56,3 +56,15 @@ var Turtle = /** @class */ (function (_super) {
     return Turtle;
 }(Enemy));
 export { Turtle };
+var SpikedTurtle = /** @class */ (function (_super) {
+    __extends(SpikedTurtle, _super);
+    function SpikedTurtle(x, y) {
+        var _this = _super.call(this, x, y) || this;
+        _this.id = 1;
+        _this.spr.setFrame(0, 1);
+        _this.canBeStomped = false;
+        return _this;
+    }
+    return SpikedTurtle;
+}(Turtle));
+export { SpikedTurtle };

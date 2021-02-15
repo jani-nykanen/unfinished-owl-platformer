@@ -14,7 +14,7 @@ export class Checkpoint extends InteractionTarget {
     private actualSprite : Sprite;
 
 
-    constructor(x : number, y  : number) {
+    constructor(x : number, y  : number, makeActive = false) {
 
         super(x, y);
 
@@ -28,7 +28,9 @@ export class Checkpoint extends InteractionTarget {
         this.hitbox = new Vector2(12, 16);
         this.waveTimer = Math.PI/2;
 
-        this.active = false;
+        this.active = makeActive;
+        if (makeActive)
+            this.spr.setFrame(1, 0);
     }
 
 
@@ -90,4 +92,5 @@ export class Checkpoint extends InteractionTarget {
         this.actualSprite.setFrame(0, 0);
         this.waveTimer = Math.PI/2;
     }
+
 }

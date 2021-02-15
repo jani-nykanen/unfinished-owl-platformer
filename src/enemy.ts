@@ -28,6 +28,8 @@ export abstract class Enemy extends CollisionObject {
     protected knockTimer : number;
     protected knockOffset : number;
 
+    protected canBeStomped : boolean;
+
 
     constructor(x : number, y : number, id = 0) {
 
@@ -54,6 +56,8 @@ export abstract class Enemy extends CollisionObject {
         this.canBeKnocked = true;
         this.knockTimer = 0;
         this.knockOffset = 0;
+
+        this.canBeStomped = true;
     }
 
     
@@ -182,7 +186,8 @@ export abstract class Enemy extends CollisionObject {
 
         let margin = this.hitbox.x * STOMP_MARGIN_H;
 
-        if (pl.getSpeed().y >= this.speed.y &&
+        if ((this.canBeStomped || this.knockTimer > 0) &&
+            pl.getSpeed().y >= this.speed.y &&
             px + hbox.x/2 >= this.pos.x - this.hitbox.x/2 - margin &&
             px - hbox.x/2 < this.pos.x + this.hitbox.x/2 + margin &&
             py >= top - NEAR_MARGIN * ev.step && 

@@ -65,7 +65,7 @@ var Player = /** @class */ (function (_super) {
     Player.prototype.die = function (ev) {
         var NEAR = 4.0;
         var RETURN_SPEED_MIN = 2.0;
-        var HURT_TIME = 120.0;
+        var HURT_TIME = 90.0;
         var FLAP_SPEED = 6;
         var REFORM_TIME = 8;
         this.updatePieces(ev);
@@ -362,7 +362,7 @@ var Player = /** @class */ (function (_super) {
         }
     };
     Player.prototype.kill = function (ev) {
-        var ESCAPE_SPEED = 2.0;
+        var ESCAPE_SPEED = 3.0;
         if (this.dying)
             return;
         this.spawnPieces(6, 0, 1.5);

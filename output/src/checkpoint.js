@@ -16,7 +16,8 @@ import { Sprite } from "./sprite.js";
 import { Vector2 } from "./vector.js";
 var Checkpoint = /** @class */ (function (_super) {
     __extends(Checkpoint, _super);
-    function Checkpoint(x, y) {
+    function Checkpoint(x, y, makeActive) {
+        if (makeActive === void 0) { makeActive = false; }
         var _this = _super.call(this, x, y) || this;
         // For checking if in camera 
         // (need more height because of the
@@ -26,7 +27,9 @@ var Checkpoint = /** @class */ (function (_super) {
         _this.actualSprite = new Sprite(16, 16);
         _this.hitbox = new Vector2(12, 16);
         _this.waveTimer = Math.PI / 2;
-        _this.active = false;
+        _this.active = makeActive;
+        if (makeActive)
+            _this.spr.setFrame(1, 0);
         return _this;
     }
     Checkpoint.prototype.updateLogic = function (ev) {

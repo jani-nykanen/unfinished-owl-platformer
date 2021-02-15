@@ -78,14 +78,16 @@ export class Stage {
 
     public draw(c : Canvas, cam : Camera) {
 
+        const RADIUS = 2;
+
         let tileset = c.getBitmap("tileset");
 
         let view = cam.getViewport();
 
-        let startx = Math.floor(view.x / 16) - 1;
-        let starty = Math.floor(view.y / 16) - 1;
-        let endx = startx + Math.floor(view.w/16) + 2;
-        let endy = starty + Math.floor(view.h/16) + 2;
+        let startx = Math.floor(view.x / 16) - RADIUS;
+        let starty = Math.floor(view.y / 16) - RADIUS;
+        let endx = startx + Math.floor(view.w/16) + RADIUS*2;
+        let endy = starty + Math.floor(view.h/16) + RADIUS*2;
 
         let sx : number;
         let sy : number;
@@ -241,6 +243,7 @@ export class Stage {
                 case 0:
 
                     objects.setPlayerPosition(x, y);
+                    objects.addCheckpoint(x, y, true);
                     break;
                 
                 // Star

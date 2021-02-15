@@ -46,12 +46,13 @@ var Stage = /** @class */ (function () {
     Stage.prototype.update = function (ev) {
     };
     Stage.prototype.draw = function (c, cam) {
+        var RADIUS = 2;
         var tileset = c.getBitmap("tileset");
         var view = cam.getViewport();
-        var startx = Math.floor(view.x / 16) - 1;
-        var starty = Math.floor(view.y / 16) - 1;
-        var endx = startx + Math.floor(view.w / 16) + 2;
-        var endy = starty + Math.floor(view.h / 16) + 2;
+        var startx = Math.floor(view.x / 16) - RADIUS;
+        var starty = Math.floor(view.y / 16) - RADIUS;
+        var endx = startx + Math.floor(view.w / 16) + RADIUS * 2;
+        var endy = starty + Math.floor(view.h / 16) + RADIUS * 2;
         var sx;
         var sy;
         var tid;
@@ -149,6 +150,7 @@ var Stage = /** @class */ (function () {
                     // Player
                     case 0:
                         objects.setPlayerPosition(x, y);
+                        objects.addCheckpoint(x, y, true);
                         break;
                     // Star
                     case 1:
