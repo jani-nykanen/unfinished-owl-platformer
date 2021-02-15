@@ -108,17 +108,18 @@ var Enemy = /** @class */ (function (_super) {
         var FAR_MARGIN = 8;
         var STOMP_MARGIN_TIME = 8;
         var STOMP_MARGIN_H = 0.25;
+        var STOMP_EPS = 0.1;
         if (this.isDeactivated() || pl.isDying())
             return false;
         this.playerEvent(pl, ev);
         // Stomp
-        var top = this.pos.y + this.center.y - this.collisionBox.y / 2;
-        var py = pl.getBottom();
+        var top = this.pos.y + this.center.y - this.hitbox.y / 2;
         var hbox = pl.getHitbox();
         var px = pl.getPos().x;
+        var py = pl.getBottom();
         var margin = this.hitbox.x * STOMP_MARGIN_H;
         if ((this.canBeStomped || this.knockTimer > 0) &&
-            pl.getSpeed().y >= this.speed.y &&
+            pl.getSpeed().y >= this.speed.y - STOMP_EPS &&
             px + hbox.x / 2 >= this.pos.x - this.hitbox.x / 2 - margin &&
             px - hbox.x / 2 < this.pos.x + this.hitbox.x / 2 + margin &&
             py >= top - NEAR_MARGIN * ev.step &&

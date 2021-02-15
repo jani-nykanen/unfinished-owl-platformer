@@ -501,7 +501,7 @@ export class Player extends CollisionObject {
     
     public getBottom() : number {
 
-        return this.pos.y + this.collisionBox.y/2;
+        return this.pos.y + this.center.y + this.hitbox.y/2;
     }
 
 

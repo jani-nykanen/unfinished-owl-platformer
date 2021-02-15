@@ -335,7 +335,7 @@ var Player = /** @class */ (function (_super) {
         this.state.addStar();
     };
     Player.prototype.getBottom = function () {
-        return this.pos.y + this.collisionBox.y / 2;
+        return this.pos.y + this.center.y + this.hitbox.y / 2;
     };
     Player.prototype.setStompMargin = function (time) {
         this.stompMargin = time;

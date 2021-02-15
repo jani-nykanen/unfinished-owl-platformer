@@ -171,6 +171,7 @@ export abstract class Enemy extends CollisionObject {
         const FAR_MARGIN = 8;
         const STOMP_MARGIN_TIME = 8;
         const STOMP_MARGIN_H = 0.25;
+        const STOMP_EPS = 0.1;
 
         if (this.isDeactivated() || pl.isDying()) 
             return false;
@@ -178,16 +179,16 @@ export abstract class Enemy extends CollisionObject {
         this.playerEvent(pl, ev);
 
         // Stomp
-        let top = this.pos.y + this.center.y - this.collisionBox.y/2;
-        let py = pl.getBottom();
-
+        let top = this.pos.y + this.center.y - this.hitbox.y/2;
+        
         let hbox = pl.getHitbox();
         let px = pl.getPos().x;
+        let py = pl.getBottom();
 
         let margin = this.hitbox.x * STOMP_MARGIN_H;
 
         if ((this.canBeStomped || this.knockTimer > 0) &&
-            pl.getSpeed().y >= this.speed.y &&
+            pl.getSpeed().y >= this.speed.y - STOMP_EPS &&
             px + hbox.x/2 >= this.pos.x - this.hitbox.x/2 - margin &&
             px - hbox.x/2 < this.pos.x + this.hitbox.x/2 + margin &&
             py >= top - NEAR_MARGIN * ev.step && 
