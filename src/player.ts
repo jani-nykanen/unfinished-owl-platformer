@@ -37,6 +37,7 @@ export class Player extends CollisionObject {
     private thumpWait : number;
 
     private hurtTimer : number;
+    private respawning : boolean;
 
     private flip : Flip;
 
@@ -61,7 +62,7 @@ export class Player extends CollisionObject {
         this.jumpMargin = 0;
         this.stompMargin = 0;
 
-        this.spr = new Sprite(16, 16);
+        this.spr = new Sprite(24, 24);
         this.sprBody = new Sprite(24, 24);
         this.sprFeet = new Sprite(16, 8);
         this.sprWing = new Sprite(12, 24);
@@ -76,6 +77,7 @@ export class Player extends CollisionObject {
         this.thumpWait = 0;
 
         this.hurtTimer = 0;
+        this.respawning = false;
 
         this.flip = Flip.None;
 
@@ -101,8 +103,10 @@ export class Player extends CollisionObject {
     protected die(ev : GameEvent) {
 
         const NEAR = 4.0;
-        const RETURN_SPEED = 2.0;
+        const RETURN_SPEED_MIN = 2.0;
         const HURT_TIME = 120.0;
+        const FLAP_SPEED = 6;
+        const REFORM_TIME = 8;
 
         this.updatePieces(ev);
         
@@ -111,21 +115,37 @@ export class Player extends CollisionObject {
             d.update(ev);
         }
 
+        if (this.respawning) {
+
+            this.spr.animate(4, 0, 4, REFORM_TIME, ev.step);
+            if (this.spr.getColumn() == 4) {
+
+                this.respawn();
+                this.respawning = false;
+                this.hurtTimer = HURT_TIME;
+            }
+            return false;
+        }
+
         let dir = new Vector2(this.checkpoint.x - this.pos.x, 
                 this.checkpoint.y - this.pos.y);
 
+        let speed = Math.max(RETURN_SPEED_MIN, dir.length() / 64);
+
         this.target = Vector2.scalarMultiply(
-            Vector2.normalize(dir), RETURN_SPEED);
+            Vector2.normalize(dir), speed);
         this.updateMovement(ev);
+
+        this.spr.animate(3, 0, 3, FLAP_SPEED, ev.step);
 
         if (dir.length() < NEAR) {
 
-            this.respawn();
-            this.hurtTimer = HURT_TIME;
-        }
+            this.respawning = true;
+            this.stopMovement();
+            this.pos = this.checkpoint.clone();
 
-        this.flip = this.speed.x < 0 ? Flip.Horizontal : Flip.None;
-        this.spr.setFrame(0, 4);
+            this.spr.setFrame(0, 4);
+        }
 
         return false;
     }
@@ -397,7 +417,7 @@ export class Player extends CollisionObject {
 
         if (this.dying) {
 
-            c.drawSprite(this.spr, bmp, px-8, py-8, this.flip);
+            c.drawSprite(this.spr, bmp, px-12, py-16, this.flip);
             return;
         }
 
@@ -513,9 +533,8 @@ export class Player extends CollisionObject {
     private spawnPieces(count : number, angleOffset : number,
         speedAmount : number) {
 
-        const BASE_SPEED = 1.5;
-        const BASE_JUMP = -1.0;
-
+        const BASE_SPEED = 1.0;
+        const BASE_JUMP = -1.5;
         let angle : number;
         let speed : Vector2;
 
@@ -524,8 +543,8 @@ export class Player extends CollisionObject {
             angle = Math.PI * 2 / count * i + angleOffset;
 
             speed = new Vector2(
-                Math.cos(angle) * BASE_SPEED,
-                Math.sin(angle) * BASE_SPEED + BASE_JUMP * speedAmount);
+                Math.cos(angle) * BASE_SPEED * speedAmount,
+                (Math.sin(angle) * BASE_SPEED + BASE_JUMP) * speedAmount);
 
             nextObject(this.pieces, BodyPiece)
                 .spawn(this.pos.x, this.pos.y, speed);
@@ -536,11 +555,19 @@ export class Player extends CollisionObject {
 
     public kill(ev : GameEvent) {
 
+        const ESCAPE_SPEED = 2.0;
+
         if (this.dying) return;
 
-        this.spawnPieces(6, 0, 2.0);
+        this.spawnPieces(6, 0, 1.5);
         this.dying = true;
-        // this.stopMovement();
+        this.stopMovement();
+
+        let dir = new Vector2(this.checkpoint.x - this.pos.x, 
+            this.checkpoint.y - this.pos.y);
+        dir.normalize();
+
+        this.speed = Vector2.scalarMultiply(dir, -ESCAPE_SPEED);
     }
 
 

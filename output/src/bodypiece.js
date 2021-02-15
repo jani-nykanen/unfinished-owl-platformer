@@ -11,7 +11,9 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+import { Flip } from "./canvas.js";
 import { CollisionObject } from "./gameobject.js";
+import { Sprite } from "./sprite.js";
 import { Vector2 } from "./vector.js";
 var BodyPiece = /** @class */ (function (_super) {
     __extends(BodyPiece, _super);
@@ -19,8 +21,10 @@ var BodyPiece = /** @class */ (function (_super) {
         var _this = _super.call(this, 0, 0) || this;
         _this.exist = false;
         _this.friction = new Vector2(0.01, 0.1);
-        _this.collisionBox = new Vector2(4, 6);
-        _this.bounceFactor = 0.75;
+        _this.collisionBox = new Vector2(4, 8);
+        _this.spr = new Sprite(16, 16);
+        _this.spr.setFrame(0, 0);
+        _this.bounceFactor = 0.90;
         return _this;
     }
     BodyPiece.prototype.outsideCameraEvent = function () {
@@ -34,10 +38,15 @@ var BodyPiece = /** @class */ (function (_super) {
         this.exist = true;
         this.inCamera = true;
     };
+    BodyPiece.prototype.updateLogic = function (ev) {
+        var speed = 12 - 6 * Math.abs(this.speed.x);
+        this.spr.animate(0, 0, 3, speed, ev.step);
+    };
     BodyPiece.prototype.draw = function (c) {
         if (!this.exist || !this.inCamera)
             return;
-        c.drawBitmapRegion(c.getBitmap("pieces"), 0, 0, 16, 16, Math.round(this.pos.x) - 8, Math.round(this.pos.y) - 8);
+        var flip = this.speed.x > 0 ? Flip.Horizontal : Flip.None;
+        c.drawSprite(this.spr, c.getBitmap("pieces"), Math.round(this.pos.x) - 8, Math.round(this.pos.y) - 8, flip);
     };
     BodyPiece.prototype.slopeCollisionEvent = function (dir, k, ev) {
         var EPS = 0.1;

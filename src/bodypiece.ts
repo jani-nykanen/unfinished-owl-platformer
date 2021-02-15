@@ -1,6 +1,7 @@
-import { Canvas } from "./canvas.js";
+import { Canvas, Flip } from "./canvas.js";
 import { GameEvent } from "./core.js";
 import { CollisionObject } from "./gameobject.js";
+import { Sprite } from "./sprite.js";
 import { Vector2 } from "./vector.js";
 
 
@@ -12,9 +13,12 @@ export class BodyPiece extends CollisionObject {
 
         this.exist = false;
         this.friction = new Vector2(0.01, 0.1);
-        this.collisionBox = new Vector2(4, 6);
+        this.collisionBox = new Vector2(4, 8);
 
-        this.bounceFactor = 0.75;
+        this.spr = new Sprite(16, 16);
+        this.spr.setFrame(0, 0);
+
+        this.bounceFactor = 0.90;
     }
 
 
@@ -38,15 +42,25 @@ export class BodyPiece extends CollisionObject {
     }
 
 
+    public updateLogic(ev : GameEvent) {
+
+        let speed = 12 - 6 * Math.abs(this.speed.x);
+
+        this.spr.animate(0, 0, 3, speed, ev.step);
+    }
+
+
 
     public draw(c : Canvas) {
 
         if (!this.exist || !this.inCamera) return;
 
-        c.drawBitmapRegion(c.getBitmap("pieces"),
-            0, 0, 16, 16,
+        let flip = this.speed.x > 0 ? Flip.Horizontal : Flip.None;
+
+        c.drawSprite(this.spr, c.getBitmap("pieces"),
             Math.round(this.pos.x)-8,
-            Math.round(this.pos.y)-8);
+            Math.round(this.pos.y)-8,
+            flip);
     }
     
 

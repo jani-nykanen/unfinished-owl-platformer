@@ -17,6 +17,17 @@ var ObjectManager = /** @class */ (function () {
             a.playerCollision(this.player, ev);
         }
     };
+    ObjectManager.prototype.initialCheckForGameobjectArray = function (arr, cam) {
+        for (var _i = 0, arr_2 = arr; _i < arr_2.length; _i++) {
+            var a = arr_2[_i];
+            a.cameraCheck(cam);
+        }
+    };
+    ObjectManager.prototype.initialCameraCheck = function (cam) {
+        this.initialCheckForGameobjectArray(this.enemies, cam);
+        this.initialCheckForGameobjectArray(this.stars, cam);
+        this.initialCheckForGameobjectArray(this.checkpoints, cam);
+    };
     ObjectManager.prototype.update = function (cam, stage, ev) {
         this.updateInteractionTargetArray(this.stars, cam, ev);
         this.updateInteractionTargetArray(this.checkpoints, cam, ev);

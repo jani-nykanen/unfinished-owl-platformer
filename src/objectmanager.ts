@@ -4,6 +4,7 @@ import { Checkpoint } from "./checkpoint.js";
 import { GameEvent } from "./core.js";
 import { Enemy } from "./enemy.js";
 import { getEnemyType } from "./enemytypes.js";
+import { WeakGameObject } from "./gameobject.js";
 import { GameState } from "./gamestate.js";
 import { InteractionTarget } from "./interactiontarget.js";
 import { Player } from "./player.js";
@@ -38,6 +39,23 @@ export class ObjectManager {
             a.update(ev);
             a.playerCollision(this.player, ev);
         }
+    }
+
+
+    private initialCheckForGameobjectArray(arr : Array<WeakGameObject>, cam : Camera) {
+
+        for (let a of arr) {
+
+            a.cameraCheck(cam);
+        }
+    }
+
+
+    public initialCameraCheck(cam : Camera) {
+
+        this.initialCheckForGameobjectArray(this.enemies, cam);
+        this.initialCheckForGameobjectArray(this.stars, cam);
+        this.initialCheckForGameobjectArray(this.checkpoints, cam);
     }
 
 

@@ -103,7 +103,8 @@ var Enemy = /** @class */ (function (_super) {
         }
     };
     Enemy.prototype.playerCollision = function (pl, ev) {
-        var STOMP_MARGIN = 8;
+        var NEAR_MARGIN = 1;
+        var FAR_MARGIN = 8;
         var STOMP_MARGIN_TIME = 8;
         var STOMP_MARGIN_H = 0.25;
         if (this.isDeactivated() || pl.isDying())
@@ -118,8 +119,8 @@ var Enemy = /** @class */ (function (_super) {
         if (pl.getSpeed().y >= this.speed.y &&
             px + hbox.x / 2 >= this.pos.x - this.hitbox.x / 2 - margin &&
             px - hbox.x / 2 < this.pos.x + this.hitbox.x / 2 + margin &&
-            py >= top &&
-            py < top + (STOMP_MARGIN + Math.max(0, this.speed.y)) * ev.step) {
+            py >= top - NEAR_MARGIN * ev.step &&
+            py < top + (FAR_MARGIN + Math.max(0, this.speed.y)) * ev.step) {
             if (!pl.isThumping())
                 pl.setStompMargin(STOMP_MARGIN_TIME);
             this.dying = true;

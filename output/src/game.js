@@ -13,6 +13,7 @@ var GameScene = /** @class */ (function () {
         this.objects = new ObjectManager(this.state);
         this.stage.parseObjects(this.objects);
         this.objects.setCamera(this.cam);
+        this.objects.initialCameraCheck(this.cam);
         this.cloudPos = (new Array(2)).fill(0);
         this.hudAppearTimer = 0;
         this.hudAppearMode = 0;

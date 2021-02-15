@@ -35,7 +35,7 @@ var Player = /** @class */ (function (_super) {
         _this.jumpTimer = 0;
         _this.jumpMargin = 0;
         _this.stompMargin = 0;
-        _this.spr = new Sprite(16, 16);
+        _this.spr = new Sprite(24, 24);
         _this.sprBody = new Sprite(24, 24);
         _this.sprFeet = new Sprite(16, 8);
         _this.sprWing = new Sprite(12, 24);
@@ -46,6 +46,7 @@ var Player = /** @class */ (function (_super) {
         _this.thumping = false;
         _this.thumpWait = 0;
         _this.hurtTimer = 0;
+        _this.respawning = false;
         _this.flip = Flip.None;
         _this.state = state;
         return _this;
@@ -63,22 +64,35 @@ var Player = /** @class */ (function (_super) {
     };
     Player.prototype.die = function (ev) {
         var NEAR = 4.0;
-        var RETURN_SPEED = 2.0;
+        var RETURN_SPEED_MIN = 2.0;
         var HURT_TIME = 120.0;
+        var FLAP_SPEED = 6;
+        var REFORM_TIME = 8;
         this.updatePieces(ev);
         for (var _i = 0, _a = this.dust; _i < _a.length; _i++) {
             var d = _a[_i];
             d.update(ev);
         }
-        var dir = new Vector2(this.checkpoint.x - this.pos.x, this.checkpoint.y - this.pos.y);
-        this.target = Vector2.scalarMultiply(Vector2.normalize(dir), RETURN_SPEED);
-        this.updateMovement(ev);
-        if (dir.length() < NEAR) {
-            this.respawn();
-            this.hurtTimer = HURT_TIME;
+        if (this.respawning) {
+            this.spr.animate(4, 0, 4, REFORM_TIME, ev.step);
+            if (this.spr.getColumn() == 4) {
+                this.respawn();
+                this.respawning = false;
+                this.hurtTimer = HURT_TIME;
+            }
+            return false;
         }
-        this.flip = this.speed.x < 0 ? Flip.Horizontal : Flip.None;
-        this.spr.setFrame(0, 4);
+        var dir = new Vector2(this.checkpoint.x - this.pos.x, this.checkpoint.y - this.pos.y);
+        var speed = Math.max(RETURN_SPEED_MIN, dir.length() / 64);
+        this.target = Vector2.scalarMultiply(Vector2.normalize(dir), speed);
+        this.updateMovement(ev);
+        this.spr.animate(3, 0, 3, FLAP_SPEED, ev.step);
+        if (dir.length() < NEAR) {
+            this.respawning = true;
+            this.stopMovement();
+            this.pos = this.checkpoint.clone();
+            this.spr.setFrame(0, 4);
+        }
         return false;
     };
     Player.prototype.updatePieces = function (ev) {
@@ -264,7 +278,7 @@ var Player = /** @class */ (function (_super) {
         var px = Math.round(this.pos.x);
         var py = Math.round(this.pos.y);
         if (this.dying) {
-            c.drawSprite(this.spr, bmp, px - 8, py - 8, this.flip);
+            c.drawSprite(this.spr, bmp, px - 12, py - 16, this.flip);
             return;
         }
         if (this.flip == Flip.Vertical) {
@@ -336,23 +350,27 @@ var Player = /** @class */ (function (_super) {
         return this.checkpoint;
     };
     Player.prototype.spawnPieces = function (count, angleOffset, speedAmount) {
-        var BASE_SPEED = 1.5;
-        var BASE_JUMP = -1.0;
+        var BASE_SPEED = 1.0;
+        var BASE_JUMP = -1.5;
         var angle;
         var speed;
         for (var i = 0; i < count; ++i) {
             angle = Math.PI * 2 / count * i + angleOffset;
-            speed = new Vector2(Math.cos(angle) * BASE_SPEED, Math.sin(angle) * BASE_SPEED + BASE_JUMP * speedAmount);
+            speed = new Vector2(Math.cos(angle) * BASE_SPEED * speedAmount, (Math.sin(angle) * BASE_SPEED + BASE_JUMP) * speedAmount);
             nextObject(this.pieces, BodyPiece)
                 .spawn(this.pos.x, this.pos.y, speed);
         }
     };
     Player.prototype.kill = function (ev) {
+        var ESCAPE_SPEED = 2.0;
         if (this.dying)
             return;
-        this.spawnPieces(6, 0, 2.0);
+        this.spawnPieces(6, 0, 1.5);
         this.dying = true;
-        // this.stopMovement();
+        this.stopMovement();
+        var dir = new Vector2(this.checkpoint.x - this.pos.x, this.checkpoint.y - this.pos.y);
+        dir.normalize();
+        this.speed = Vector2.scalarMultiply(dir, -ESCAPE_SPEED);
     };
     return Player;
 }(CollisionObject));

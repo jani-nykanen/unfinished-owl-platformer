@@ -134,7 +134,7 @@ var Stage = /** @class */ (function () {
         o.wallCollision(this.width * 16, -BOUND_COLLISION_Y_MARGIN, this.height * 16 + BOUND_COLLISION_Y_MARGIN * 2, 1, ev, true);
     };
     Stage.prototype.restrictCamera = function (c, cam) {
-        cam.restrictCamera(c, 0, 0, this.width * 16, this.height * 16);
+        cam.restrictCamera(c, 16, 0, (this.width - 2) * 16, (this.height - 1) * 16);
     };
     Stage.prototype.parseObjects = function (objects) {
         var FIRST_OBJECT_INDEX = 257;
