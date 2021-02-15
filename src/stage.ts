@@ -207,10 +207,10 @@ export class Stage {
             }
         }
 
-        o.wallCollision(0, -BOUND_COLLISION_Y_MARGIN,
+        o.wallCollision(16, -BOUND_COLLISION_Y_MARGIN,
             this.height*16 + BOUND_COLLISION_Y_MARGIN*2, -1, ev, 
             true);
-        o.wallCollision(this.width*16, -BOUND_COLLISION_Y_MARGIN,
+        o.wallCollision((this.width-1)*16, -BOUND_COLLISION_Y_MARGIN,
             this.height*16 + BOUND_COLLISION_Y_MARGIN*2, 1, ev, 
             true);
     }

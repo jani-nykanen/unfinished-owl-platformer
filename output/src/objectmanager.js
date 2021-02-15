@@ -89,6 +89,9 @@ var ObjectManager = /** @class */ (function () {
         this.checkpoints.push(new Checkpoint(x * 16 + 8, y * 16 + 8, makeActive));
     };
     ObjectManager.prototype.addEnemy = function (x, y, id) {
+        var type = getEnemyType(id);
+        if (type == null)
+            return;
         this.enemies.push(new (getEnemyType(id))
             .prototype
             .constructor(x * 16 + 8, y * 16 + 8));

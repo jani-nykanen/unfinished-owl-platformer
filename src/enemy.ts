@@ -13,6 +13,7 @@ const ENEMY_DEATH_TIME = 32;
 
 export abstract class Enemy extends CollisionObject {
 
+    protected startPos : Vector2;
 
     protected flip : Flip;
     protected id : number;
@@ -34,6 +35,8 @@ export abstract class Enemy extends CollisionObject {
     constructor(x : number, y : number, id = 0) {
 
         super(x, y);
+
+        this.startPos = this.pos.clone();
 
         this.id = id;
         this.spr = new Sprite(24, 24);

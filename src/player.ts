@@ -562,6 +562,7 @@ export class Player extends CollisionObject {
         this.spawnPieces(6, 0, 1.5);
         this.dying = true;
         this.stopMovement();
+        this.flip = Flip.None;
 
         let dir = new Vector2(this.checkpoint.x - this.pos.x, 
             this.checkpoint.y - this.pos.y);

@@ -131,8 +131,8 @@ var Stage = /** @class */ (function () {
                 }
             }
         }
-        o.wallCollision(0, -BOUND_COLLISION_Y_MARGIN, this.height * 16 + BOUND_COLLISION_Y_MARGIN * 2, -1, ev, true);
-        o.wallCollision(this.width * 16, -BOUND_COLLISION_Y_MARGIN, this.height * 16 + BOUND_COLLISION_Y_MARGIN * 2, 1, ev, true);
+        o.wallCollision(16, -BOUND_COLLISION_Y_MARGIN, this.height * 16 + BOUND_COLLISION_Y_MARGIN * 2, -1, ev, true);
+        o.wallCollision((this.width - 1) * 16, -BOUND_COLLISION_Y_MARGIN, this.height * 16 + BOUND_COLLISION_Y_MARGIN * 2, 1, ev, true);
     };
     Stage.prototype.restrictCamera = function (c, cam) {
         cam.restrictCamera(c, 16, 0, (this.width - 2) * 16, (this.height - 1) * 16);

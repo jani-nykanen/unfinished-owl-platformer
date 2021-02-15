@@ -16,7 +16,7 @@ import { Enemy } from "./enemy.js";
 import { computeFriction } from "./util.js";
 import { Vector2 } from "./vector.js";
 export var getEnemyType = function (id) {
-    return [Turtle, SpikedTurtle, Mushroom][id];
+    return [Turtle, SpikedTurtle, Mushroom, Apple][id];
 };
 var Turtle = /** @class */ (function (_super) {
     __extends(Turtle, _super);
@@ -114,3 +114,44 @@ var Mushroom = /** @class */ (function (_super) {
     return Mushroom;
 }(Enemy));
 export { Mushroom };
+var Apple = /** @class */ (function (_super) {
+    __extends(Apple, _super);
+    function Apple(x, y) {
+        var _this = _super.call(this, x, y, 3) || this;
+        _this.hitbox = new Vector2(16, 16);
+        _this.collisionBox = new Vector2(10, 10);
+        _this.center.y = 4;
+        _this.canBeKnocked = false;
+        _this.waveTimer = 0;
+        _this.dir = 0;
+        return _this;
+    }
+    Apple.prototype.updateAI = function (ev) {
+        var AMPLITUDE = 4;
+        var BASE_SPEED = 0.25;
+        var WAVE_SPEED = 0.05;
+        this.target.x = this.dir * BASE_SPEED;
+        this.speed.x = this.target.x;
+        this.spr.animate(this.id, 0, 3, 4, ev.step);
+        this.flip = this.speed.x > 0 ? Flip.Horizontal : Flip.None;
+        this.waveTimer = (this.waveTimer + WAVE_SPEED * ev.step) % (Math.PI * 2);
+        this.pos.y = this.startPos.y + Math.sin(this.waveTimer) * AMPLITUDE;
+    };
+    Apple.prototype.wallCollisionEvent = function (dir, ev) {
+        this.dir = -dir;
+    };
+    Apple.prototype.enemyCollisionEvent = function (dirx, diry, ev) {
+        if (dirx != 0)
+            this.dir = -dirx;
+    };
+    Apple.prototype.playerEvent = function (pl, ev) {
+        if (!this.dirDetermined) {
+            // We do not use Math.sign here since the value 0
+            // is not accepted here
+            this.dir = pl.getPos().x > this.pos.x ? 1 : -1;
+            this.dirDetermined = true;
+        }
+    };
+    return Apple;
+}(Enemy));
+export { Apple };

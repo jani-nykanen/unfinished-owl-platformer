@@ -7,7 +7,7 @@ import { Vector2 } from "./vector.js";
 
 
 export const getEnemyType = (id : number) : Function =>
-    [Turtle, SpikedTurtle, Mushroom][id];
+    [Turtle, SpikedTurtle, Mushroom, Apple][id];
 
 
 export class Turtle extends Enemy {
@@ -155,5 +155,72 @@ export class Mushroom extends Enemy {
     protected playerEvent(pl : Player, ev : GameEvent) {
 
         this.flip = pl.getPos().x > this.pos.x ? Flip.Horizontal : Flip.None;
+    }
+}
+
+
+export class Apple extends Enemy {
+
+    
+    protected dir : number;
+    protected dirDetermined : boolean;
+    protected waveTimer : number;
+
+
+    constructor(x : number, y : number) {
+
+        super(x, y, 3);
+
+        this.hitbox = new Vector2(16, 16);
+        this.collisionBox = new Vector2(10, 10);
+
+        this.center.y = 4;
+        this.canBeKnocked = false;
+
+        this.waveTimer = 0;
+
+        this.dir = 0;
+    }
+
+
+    protected updateAI(ev : GameEvent) {
+
+        const AMPLITUDE = 4;
+        const BASE_SPEED = 0.25;
+        const WAVE_SPEED = 0.05;
+
+        this.target.x = this.dir * BASE_SPEED;
+        this.speed.x = this.target.x;
+
+        this.spr.animate(this.id, 0, 3, 4, ev.step);
+        this.flip = this.speed.x > 0 ? Flip.Horizontal : Flip.None;
+
+        this.waveTimer = (this.waveTimer + WAVE_SPEED*ev.step) % (Math.PI * 2);
+        this.pos.y = this.startPos.y + Math.sin(this.waveTimer) * AMPLITUDE;
+    }
+
+
+    protected wallCollisionEvent(dir : number, ev : GameEvent) {
+
+        this.dir = -dir;
+    }
+
+
+    protected enemyCollisionEvent(dirx : number, diry : number, ev : GameEvent) {
+
+        if (dirx != 0)
+            this.dir = -dirx;
+    }
+
+
+    protected playerEvent(pl : Player, ev : GameEvent) {
+
+        if (!this.dirDetermined) {
+
+            // We do not use Math.sign here since the value 0
+            // is not accepted here
+            this.dir = pl.getPos().x > this.pos.x ? 1 : -1;
+            this.dirDetermined = true;
+        }
     }
 }

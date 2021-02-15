@@ -147,6 +147,9 @@ export class ObjectManager {
 
     public addEnemy(x : number, y : number, id : number) {
 
+        let type = getEnemyType(id);
+        if (type == null) return;
+
         this.enemies.push(new (getEnemyType(id))
             .prototype
             .constructor(x*16 + 8, y*16 + 8));

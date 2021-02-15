@@ -24,6 +24,7 @@ var Enemy = /** @class */ (function (_super) {
         if (id === void 0) { id = 0; }
         var _this = _super.call(this, x, y) || this;
         _this.isDeactivated = function () { return (_this.dying || !_this.exist || !_this.inCamera); };
+        _this.startPos = _this.pos.clone();
         _this.id = id;
         _this.spr = new Sprite(24, 24);
         _this.spr.setFrame(0, id);

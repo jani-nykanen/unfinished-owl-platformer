@@ -368,6 +368,7 @@ var Player = /** @class */ (function (_super) {
         this.spawnPieces(6, 0, 1.5);
         this.dying = true;
         this.stopMovement();
+        this.flip = Flip.None;
         var dir = new Vector2(this.checkpoint.x - this.pos.x, this.checkpoint.y - this.pos.y);
         dir.normalize();
         this.speed = Vector2.scalarMultiply(dir, -ESCAPE_SPEED);
