@@ -39,6 +39,10 @@ export class Player extends CollisionObject {
     private hurtTimer : number;
     private respawning : boolean;
 
+    private spinning : boolean;
+    private spinCount : number;
+    private canSpin : boolean;
+
     private flip : Flip;
 
     private readonly state : GameState;
@@ -78,6 +82,10 @@ export class Player extends CollisionObject {
 
         this.hurtTimer = 0;
         this.respawning = false;
+
+        this.spinning = false;
+        this.spinCount = 0;
+        this.canSpin = true;
 
         this.flip = Flip.None;
 
@@ -172,6 +180,7 @@ export class Player extends CollisionObject {
         const THUMP_JUMP = -3.0;
         const BASE_Y_FRICTION = 0.125;
         const THUMP_Y_FRICTION = 0.5; 
+        const SPIN_GRAVITY = 0.5;
         
         this.friction.y = BASE_Y_FRICTION;
         if (this.thumping) {
@@ -183,12 +192,35 @@ export class Player extends CollisionObject {
         }
 
         this.target.x = ev.getStick().x * BASE_SPEED;
-        this.target.y = BASE_GRAVITY;
+        this.target.y = this.spinning ? SPIN_GRAVITY : BASE_GRAVITY;
 
-        let s = ev.getAction("fire1");
+        // Spin
+        let s = ev.getAction("fire2");
+        if (this.canSpin && 
+            !this.spinning && s == State.Pressed) {
+
+            this.canSpin = false;
+
+            this.spinning = true;
+            this.spinCount = 0;
+            this.spr.setFrame(0, 5);
+
+            this.flip = this.target.x <= 0.0 ? Flip.Horizontal : Flip.None;
+        }
+        else if (this.spinning && this.spinCount > 0 &&
+            (s & State.DownOrPressed) != 1) {
+
+            this.spinning = false;
+            this.spinCount = 0;
+        }
+
+        s = ev.getAction("fire1");
         let canDoDoubleJump = this.jumpMargin <= 0 && !this.doubleJump;
 
-        if (!this.canJump && ev.getStick().y > THUMP_EPS) {
+        // Thump
+        if (!this.spinning &&
+            !this.canJump && 
+            ev.getStick().y > THUMP_EPS) {
 
             this.speed.y = THUMP_JUMP;
             this.thumping = true;
@@ -196,12 +228,14 @@ export class Player extends CollisionObject {
             return;
         }
 
+        // Stomp jump
         if (this.stompMargin > 0 && (s & State.DownOrPressed) == 1) {
 
             this.jumpTimer = this.stompMargin + STOMP_BONUS;
             this.stompMargin = 0;
             this.jumpMargin = 0;
         }
+        // Normal & double jump
         else if ( (this.jumpMargin > 0 || canDoDoubleJump) && 
             s == State.Pressed) {
 
@@ -209,6 +243,8 @@ export class Player extends CollisionObject {
 
                 this.speed.y = Math.max(this.speed.y, 0);
                 this.doubleJump = true;
+
+                this.canSpin = true;
             }
 
             this.jumpTimer = canDoDoubleJump ? DJUMP_TIME : JUMP_TIME;
@@ -227,6 +263,8 @@ export class Player extends CollisionObject {
     private animate(ev : GameEvent) {
 
         const EPS = 0.01;
+        const SPIN_SPEED = 2;
+        const SPIN_MAX = 2;
 
         let speed : number;
         let bodyFrame : number;
@@ -234,6 +272,22 @@ export class Player extends CollisionObject {
 
         this.eyePos.x = 0;
         this.eyePos.y = 0;
+
+        let oldFrame = this.spr.getColumn();
+        if (this.spinning) {
+
+            this.spr.animate(5, 0, 7, SPIN_SPEED, ev.step);
+            if (oldFrame > this.spr.getColumn()) {
+
+                if ((++ this.spinCount) >= SPIN_MAX) {
+                    
+                    this.spinning = false;
+                    this.spinCount = 0;
+                }
+            }
+            if (this.spinning)
+                return;
+        }
 
         if (this.thumping) {
 
@@ -417,7 +471,13 @@ export class Player extends CollisionObject {
 
         if (this.dying) {
 
-            c.drawSprite(this.spr, bmp, px-12, py-16, this.flip);
+            c.drawSprite(this.spr, bmp, px-12, py-15, this.flip);
+            return;
+        }
+
+        if (this.spinning) {
+
+            c.drawSprite(this.spr, bmp, px-12, py-15, this.flip);
             return;
         }
 
@@ -476,6 +536,8 @@ export class Player extends CollisionObject {
 
                 ev.shake(30, 4);
             }
+        
+            this.canSpin = true;
         }
         else {
 
@@ -511,6 +573,7 @@ export class Player extends CollisionObject {
         this.jumpTimer = 0;
 
         this.doubleJump = false;
+        this.canSpin = true;
     }
 
 

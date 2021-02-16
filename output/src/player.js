@@ -47,6 +47,9 @@ var Player = /** @class */ (function (_super) {
         _this.thumpWait = 0;
         _this.hurtTimer = 0;
         _this.respawning = false;
+        _this.spinning = false;
+        _this.spinCount = 0;
+        _this.canSpin = true;
         _this.flip = Flip.None;
         _this.state = state;
         return _this;
@@ -112,6 +115,7 @@ var Player = /** @class */ (function (_super) {
         var THUMP_JUMP = -3.0;
         var BASE_Y_FRICTION = 0.125;
         var THUMP_Y_FRICTION = 0.5;
+        var SPIN_GRAVITY = 0.5;
         this.friction.y = BASE_Y_FRICTION;
         if (this.thumping) {
             this.friction.y = THUMP_Y_FRICTION;
@@ -120,25 +124,46 @@ var Player = /** @class */ (function (_super) {
             return;
         }
         this.target.x = ev.getStick().x * BASE_SPEED;
-        this.target.y = BASE_GRAVITY;
-        var s = ev.getAction("fire1");
+        this.target.y = this.spinning ? SPIN_GRAVITY : BASE_GRAVITY;
+        // Spin
+        var s = ev.getAction("fire2");
+        if (this.canSpin &&
+            !this.spinning && s == State.Pressed) {
+            this.canSpin = false;
+            this.spinning = true;
+            this.spinCount = 0;
+            this.spr.setFrame(0, 5);
+            this.flip = this.target.x <= 0.0 ? Flip.Horizontal : Flip.None;
+        }
+        else if (this.spinning && this.spinCount > 0 &&
+            (s & State.DownOrPressed) != 1) {
+            this.spinning = false;
+            this.spinCount = 0;
+        }
+        s = ev.getAction("fire1");
         var canDoDoubleJump = this.jumpMargin <= 0 && !this.doubleJump;
-        if (!this.canJump && ev.getStick().y > THUMP_EPS) {
+        // Thump
+        if (!this.spinning &&
+            !this.canJump &&
+            ev.getStick().y > THUMP_EPS) {
             this.speed.y = THUMP_JUMP;
             this.thumping = true;
             this.thumpWait = 0;
             return;
         }
+        // Stomp jump
         if (this.stompMargin > 0 && (s & State.DownOrPressed) == 1) {
             this.jumpTimer = this.stompMargin + STOMP_BONUS;
             this.stompMargin = 0;
             this.jumpMargin = 0;
         }
+        // Normal & double jump
         else if ((this.jumpMargin > 0 || canDoDoubleJump) &&
             s == State.Pressed) {
             if (canDoDoubleJump) {
                 this.speed.y = Math.max(this.speed.y, 0);
                 this.doubleJump = true;
+                this.canSpin = true;
             }
             this.jumpTimer = canDoDoubleJump ? DJUMP_TIME : JUMP_TIME;
             this.jumpMargin = 0;
@@ -150,11 +175,25 @@ var Player = /** @class */ (function (_super) {
     };
     Player.prototype.animate = function (ev) {
         var EPS = 0.01;
+        var SPIN_SPEED = 2;
+        var SPIN_MAX = 2;
         var speed;
         var bodyFrame;
         var wingFrame;
         this.eyePos.x = 0;
         this.eyePos.y = 0;
+        var oldFrame = this.spr.getColumn();
+        if (this.spinning) {
+            this.spr.animate(5, 0, 7, SPIN_SPEED, ev.step);
+            if (oldFrame > this.spr.getColumn()) {
+                if ((++this.spinCount) >= SPIN_MAX) {
+                    this.spinning = false;
+                    this.spinCount = 0;
+                }
+            }
+            if (this.spinning)
+                return;
+        }
         if (this.thumping) {
             this.sprBody.setFrame(0, 0);
             this.sprFeet.setFrame(1, 7);
@@ -278,7 +317,11 @@ var Player = /** @class */ (function (_super) {
         var px = Math.round(this.pos.x);
         var py = Math.round(this.pos.y);
         if (this.dying) {
-            c.drawSprite(this.spr, bmp, px - 12, py - 16, this.flip);
+            c.drawSprite(this.spr, bmp, px - 12, py - 15, this.flip);
+            return;
+        }
+        if (this.spinning) {
+            c.drawSprite(this.spr, bmp, px - 12, py - 15, this.flip);
             return;
         }
         if (this.flip == Flip.Vertical) {
@@ -320,6 +363,7 @@ var Player = /** @class */ (function (_super) {
                 this.thumpWait = THUMP_WAIT;
                 ev.shake(30, 4);
             }
+            this.canSpin = true;
         }
         else {
             this.jumpTimer = 0;
@@ -341,6 +385,7 @@ var Player = /** @class */ (function (_super) {
         this.stompMargin = time;
         this.jumpTimer = 0;
         this.doubleJump = false;
+        this.canSpin = true;
     };
     Player.prototype.setCheckpoint = function (p) {
         // NOTE: we do not clone p
