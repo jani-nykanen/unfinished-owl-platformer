@@ -28,6 +28,7 @@ var Player = /** @class */ (function (_super) {
         _this.friction = new Vector2(0.125, 0.125);
         _this.hitbox = new Vector2(16, 16);
         _this.collisionBox = new Vector2(12, 16);
+        _this.spinHitbox = new Vector2(28, _this.hitbox.y / 2);
         _this.center = new Vector2();
         _this.inCamera = true;
         _this.canJump = false;
@@ -417,6 +418,15 @@ var Player = /** @class */ (function (_super) {
         var dir = new Vector2(this.checkpoint.x - this.pos.x, this.checkpoint.y - this.pos.y);
         dir.normalize();
         this.speed = Vector2.scalarMultiply(dir, -ESCAPE_SPEED);
+    };
+    Player.prototype.doesCollideSpinning = function (o) {
+        if (!this.spinning)
+            return false;
+        var hbox = this.hitbox;
+        this.hitbox = this.spinHitbox;
+        var ret = this.spinning && this.overlayObject(o);
+        this.hitbox = hbox;
+        return ret;
     };
     return Player;
 }(CollisionObject));

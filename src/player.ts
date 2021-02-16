@@ -3,11 +3,11 @@ import { Camera } from "./camera.js";
 import { Canvas, Flip } from "./canvas.js";
 import { GameEvent } from "./core.js";
 import { Dust } from "./dust.js";
-import { CollisionObject } from "./gameobject.js";
+import { CollisionObject, WeakGameObject } from "./gameobject.js";
 import { GameState } from "./gamestate.js";
 import { Sprite } from "./sprite.js";
 import { Stage } from "./stage.js";
-import { computeFriction, nextObject, State } from "./util.js";
+import { boxOverlay, computeFriction, nextObject, State } from "./util.js";
 import { Vector2 } from "./vector.js";
 
 
@@ -42,6 +42,7 @@ export class Player extends CollisionObject {
     private spinning : boolean;
     private spinCount : number;
     private canSpin : boolean;
+    private spinHitbox : Vector2;
 
     private flip : Flip;
 
@@ -57,6 +58,7 @@ export class Player extends CollisionObject {
         this.friction = new Vector2(0.125, 0.125);
         this.hitbox = new Vector2(16, 16);
         this.collisionBox = new Vector2(12, 16);
+        this.spinHitbox = new Vector2(28, this.hitbox.y/2);
         this.center = new Vector2();
 
         this.inCamera = true;
@@ -632,6 +634,20 @@ export class Player extends CollisionObject {
         dir.normalize();
 
         this.speed = Vector2.scalarMultiply(dir, -ESCAPE_SPEED);
+    }
+
+
+    public doesCollideSpinning(o : WeakGameObject) : boolean {
+
+        if (!this.spinning) return false;
+
+        let hbox = this.hitbox;
+        this.hitbox = this.spinHitbox;
+
+        let ret = this.spinning && this.overlayObject(o);
+        this.hitbox = hbox;
+
+        return ret;
     }
 
 

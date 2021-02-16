@@ -41,16 +41,31 @@ var Enemy = /** @class */ (function (_super) {
         _this.canBeKnocked = true;
         _this.knockTimer = 0;
         _this.knockOffset = 0;
+        _this.knocked = false;
         _this.canBeStomped = true;
         return _this;
     }
     Enemy.prototype.updateAI = function (ev) { };
     Enemy.prototype.die = function (ev) {
+        var SPIN_KNOCK_GRAVITY = 4.0;
+        var SPIN_KNOCK_FRICTION = 0.1;
         for (var _i = 0, _a = this.particles; _i < _a.length; _i++) {
             var p = _a[_i];
             p.update(ev);
         }
+        if (this.knocked) {
+            this.target.y = SPIN_KNOCK_GRAVITY;
+            this.friction.y = SPIN_KNOCK_FRICTION;
+            this.updateMovement(ev);
+            return false;
+        }
         return (this.deathTime -= ev.step) <= 0;
+    };
+    Enemy.prototype.outsideCameraEvent = function () {
+        if (this.knocked) {
+            this.exist = false;
+            this.dying = false;
+        }
     };
     Enemy.prototype.updateLogic = function (ev) {
         var KNOCK_TIME = 120;
@@ -79,7 +94,7 @@ var Enemy = /** @class */ (function (_super) {
         }
     };
     Enemy.prototype.draw = function (c) {
-        if (this.isDeactivated())
+        if ((this.dying && !this.knocked) || !this.inCamera || !this.exist)
             return;
         var bmp = c.getBitmap("enemies");
         var px = Math.round(this.pos.x) + this.renderOffset.x - this.spr.width / 2;
@@ -110,9 +125,25 @@ var Enemy = /** @class */ (function (_super) {
         var STOMP_MARGIN_TIME = 8;
         var STOMP_MARGIN_H = 0.25;
         var STOMP_EPS = 0.1;
+        var SPIN_KNOCK_SPEED_X = 4.0;
+        var SPIN_KNOCK_JUMP = -2.0;
         if (this.isDeactivated() || pl.isDying())
             return false;
         this.playerEvent(pl, ev);
+        // Touch spin attack
+        if ((this.canBeStomped || this.knockTimer > 0) &&
+            pl.doesCollideSpinning(this)) {
+            this.dying = true;
+            this.deathTime = ENEMY_DEATH_TIME;
+            this.spawnParticles(4, 1.5, Math.PI / 4);
+            this.knocked = true;
+            this.target.x = SPIN_KNOCK_SPEED_X *
+                Math.sign(this.pos.x - pl.getPos().x);
+            this.speed.x = this.target.x;
+            this.speed.y = SPIN_KNOCK_JUMP;
+            this.knockTimer = 1;
+            return true;
+        }
         // Stomp
         var top = this.pos.y + this.center.y - this.hitbox.y / 2;
         var hbox = pl.getHitbox();
@@ -130,6 +161,7 @@ var Enemy = /** @class */ (function (_super) {
             this.dying = true;
             this.deathTime = ENEMY_DEATH_TIME;
             this.spawnParticles(6, 1.5);
+            this.knocked = false;
             return true;
         }
         // Hurt player

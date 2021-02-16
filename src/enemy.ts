@@ -28,6 +28,7 @@ export abstract class Enemy extends CollisionObject {
     protected canBeKnocked : boolean;
     protected knockTimer : number;
     protected knockOffset : number;
+    protected knocked : boolean;
 
     protected canBeStomped : boolean;
 
@@ -59,6 +60,7 @@ export abstract class Enemy extends CollisionObject {
         this.canBeKnocked = true;
         this.knockTimer = 0;
         this.knockOffset = 0;
+        this.knocked = false;
 
         this.canBeStomped = true;
     }
@@ -72,12 +74,34 @@ export abstract class Enemy extends CollisionObject {
 
     protected die(ev : GameEvent) : boolean {
 
+        const SPIN_KNOCK_GRAVITY = 4.0;
+        const SPIN_KNOCK_FRICTION = 0.1;
+
         for (let p of this.particles) {
 
             p.update(ev);
         }
 
+        if (this.knocked) {
+
+            this.target.y = SPIN_KNOCK_GRAVITY;
+            this.friction.y = SPIN_KNOCK_FRICTION;
+
+            this.updateMovement(ev);
+            return false;
+        }
+
         return (this.deathTime -= ev.step) <= 0;
+    }
+
+    
+    protected outsideCameraEvent() {
+
+        if (this.knocked) {
+
+            this.exist = false;
+            this.dying = false;
+        }
     }
 
 
@@ -122,7 +146,7 @@ export abstract class Enemy extends CollisionObject {
 
     public draw(c : Canvas) {
 
-        if (this.isDeactivated())
+        if ((this.dying && !this.knocked) || !this.inCamera || !this.exist)
             return;
 
         let bmp = c.getBitmap("enemies");
@@ -175,11 +199,32 @@ export abstract class Enemy extends CollisionObject {
         const STOMP_MARGIN_TIME = 8;
         const STOMP_MARGIN_H = 0.25;
         const STOMP_EPS = 0.1;
+        const SPIN_KNOCK_SPEED_X = 4.0;
+        const SPIN_KNOCK_JUMP = -2.0;
 
         if (this.isDeactivated() || pl.isDying()) 
             return false;
 
         this.playerEvent(pl, ev);
+
+        // Touch spin attack
+        if ((this.canBeStomped || this.knockTimer > 0) &&
+            pl.doesCollideSpinning(this)) {
+
+            this.dying = true;
+            this.deathTime = ENEMY_DEATH_TIME;
+            this.spawnParticles(4, 1.5, Math.PI/4);
+            this.knocked = true;
+
+            this.target.x = SPIN_KNOCK_SPEED_X * 
+                Math.sign(this.pos.x - pl.getPos().x);
+            this.speed.x = this.target.x;
+            this.speed.y = SPIN_KNOCK_JUMP;
+
+            this.knockTimer = 1;
+    
+            return true;     
+        }
 
         // Stomp
         let top = this.pos.y + this.center.y - this.hitbox.y/2;
@@ -203,6 +248,7 @@ export abstract class Enemy extends CollisionObject {
             this.dying = true;
             this.deathTime = ENEMY_DEATH_TIME;
             this.spawnParticles(6, 1.5);
+            this.knocked = false;
 
             return true;
         }
