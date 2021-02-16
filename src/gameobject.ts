@@ -86,8 +86,10 @@ export abstract class WeakGameObject extends ExistingObject {
 
         let view = cam.getViewport();
 
+        let checkbox = new Vector2(this.spr.width, this.spr.height);
+
         let oldState = this.inCamera;
-        this.inCamera = boxOverlay(this.pos, this.center, this.hitbox,
+        this.inCamera = boxOverlay(this.pos, this.center, checkbox,
             view.x, view.y, view.w, view.h);
 
         if (oldState && !this.inCamera) {

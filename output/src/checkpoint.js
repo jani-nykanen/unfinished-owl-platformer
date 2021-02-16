@@ -14,11 +14,13 @@ var __extends = (this && this.__extends) || (function () {
 import { InteractionTarget } from "./interactiontarget.js";
 import { Sprite } from "./sprite.js";
 import { Vector2 } from "./vector.js";
+var TEXT_TIME = 60;
 var Checkpoint = /** @class */ (function (_super) {
     __extends(Checkpoint, _super);
     function Checkpoint(x, y, makeActive) {
         if (makeActive === void 0) { makeActive = false; }
         var _this = _super.call(this, x, y) || this;
+        _this.textTimer = 0;
         // For checking if in camera 
         // (need more height because of the
         // wave animation)
@@ -32,13 +34,24 @@ var Checkpoint = /** @class */ (function (_super) {
             _this.spr.setFrame(1, 0);
         return _this;
     }
+    Checkpoint.prototype.outsideCameraEvent = function () {
+        this.textTimer = 0;
+    };
     Checkpoint.prototype.updateLogic = function (ev) {
         var ANIM_SPEED = 6;
         var WAVE_SPEED = 0.05;
+        var STOP_TEXT_MOVEMENT = 40;
+        var TEXT_SPEED = 2;
         if (!this.active)
             return;
         this.actualSprite.animate(0, 1, 5, ANIM_SPEED, ev.step);
         this.waveTimer = (this.waveTimer + WAVE_SPEED * ev.step) % (Math.PI * 2);
+        if (this.textTimer > 0) {
+            if (this.textTimer > STOP_TEXT_MOVEMENT) {
+                this.textPos -= TEXT_SPEED * ev.step;
+            }
+            this.textTimer -= ev.step;
+        }
     };
     Checkpoint.prototype.draw = function (c) {
         var AMPLITUDE = 3;
@@ -49,12 +62,20 @@ var Checkpoint = /** @class */ (function (_super) {
             yoff = -4 + Math.round(Math.sin(this.waveTimer) * AMPLITUDE);
         c.drawSprite(this.actualSprite, c.getBitmap("checkpoint"), Math.round(this.pos.x) - 8, Math.round(this.pos.y) - 8 + yoff);
     };
+    Checkpoint.prototype.postDraw = function (c) {
+        if (!this.exist || this.textTimer <= 0)
+            return;
+        c.drawText(c.getBitmap("font"), "CHECKPOINT", this.pos.x, this.textPos, 0, 0, true);
+    };
     Checkpoint.prototype.playerCollision = function (pl, ev) {
         if (!this.exist || this.dying || !this.inCamera || pl.isDying())
             return false;
-        if (pl.overlayObject(this)) {
+        if (!this.active &&
+            pl.overlayObject(this)) {
             this.active = true;
             pl.setCheckpoint(this.pos);
+            this.textTimer = TEXT_TIME;
+            this.textPos = this.pos.y - 8;
             return true;
         }
         if (this.active && pl.getCheckpointRef() != this.pos) {

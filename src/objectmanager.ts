@@ -118,6 +118,11 @@ export class ObjectManager {
 
         this.player.preDraw(c);
         this.player.draw(c);
+
+        for (let o of this.checkpoints) {
+
+            o.postDraw(c);
+        }
     }
 
 

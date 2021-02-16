@@ -60,8 +60,9 @@ var WeakGameObject = /** @class */ (function (_super) {
     };
     WeakGameObject.prototype.cameraCheck = function (cam) {
         var view = cam.getViewport();
+        var checkbox = new Vector2(this.spr.width, this.spr.height);
         var oldState = this.inCamera;
-        this.inCamera = boxOverlay(this.pos, this.center, this.hitbox, view.x, view.y, view.w, view.h);
+        this.inCamera = boxOverlay(this.pos, this.center, checkbox, view.x, view.y, view.w, view.h);
         if (oldState && !this.inCamera) {
             this.outsideCameraEvent();
         }

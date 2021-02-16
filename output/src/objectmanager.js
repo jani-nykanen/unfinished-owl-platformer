@@ -74,6 +74,10 @@ var ObjectManager = /** @class */ (function () {
         }
         this.player.preDraw(c);
         this.player.draw(c);
+        for (var _h = 0, _j = this.checkpoints; _h < _j.length; _h++) {
+            var o = _j[_h];
+            o.postDraw(c);
+        }
     };
     ObjectManager.prototype.setCamera = function (cam) {
         cam.setPosition(this.player.getPos());

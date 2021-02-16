@@ -16,7 +16,7 @@ import { Enemy } from "./enemy.js";
 import { computeFriction } from "./util.js";
 import { Vector2 } from "./vector.js";
 export var getEnemyType = function (id) {
-    return [Turtle, SpikedTurtle, Mushroom, Apple][id];
+    return [Turtle, SpikedTurtle, Mushroom, Apple, Bunny][id];
 };
 var Turtle = /** @class */ (function (_super) {
     __extends(Turtle, _super);
@@ -155,3 +155,71 @@ var Apple = /** @class */ (function (_super) {
     return Apple;
 }(Enemy));
 export { Apple };
+var Bunny = /** @class */ (function (_super) {
+    __extends(Bunny, _super);
+    function Bunny(x, y) {
+        var _this = this;
+        var BASE_GRAVITY = 4.0;
+        _this = _super.call(this, x, y, 4) || this;
+        _this.target.y = BASE_GRAVITY;
+        _this.friction.y = 0.1;
+        _this.jumpTimer = Bunny.JUMP_TIME +
+            (Bunny.JUMP_TIME / 2) * (((x / 16) | 0) % 2);
+        _this.collisionBox = new Vector2(10, 10);
+        _this.hitbox = new Vector2(14, 12);
+        _this.center.y = 4;
+        _this.renderOffset.y = -2;
+        _this.knockOffset = 3;
+        _this.canBeStomped = true;
+        _this.dir = 0;
+        _this.activated = false;
+        return _this;
+    }
+    Bunny.prototype.updateAI = function (ev) {
+        var JUMP_HEIGHT = -2.5;
+        var EPS = 0.5;
+        var JUMP_SPEED = 0.75;
+        var frame;
+        if (this.canJump) {
+            this.spr.setFrame(0, this.id);
+            this.target.x = 0;
+            if ((this.jumpTimer -= ev.step) <= 0) {
+                this.speed.y = JUMP_HEIGHT;
+                this.jumpTimer += Bunny.JUMP_TIME;
+                this.spr.setFrame(1, this.id);
+                this.target.x = this.dir * JUMP_SPEED;
+                this.speed.x = this.target.x;
+            }
+        }
+        else {
+            frame = 0;
+            if (this.speed.y < -EPS)
+                frame = 1;
+            else if (this.speed.y > EPS)
+                frame = 2;
+            this.spr.setFrame(frame, this.id);
+        }
+        this.flip = this.dir > 0 ? Flip.Horizontal : Flip.None;
+    };
+    Bunny.prototype.playerEvent = function (pl, ev) {
+        if (!this.activated) {
+            this.dir = pl.getPos().x > this.pos.x ? 1 : -1;
+            this.activated = true;
+        }
+    };
+    Bunny.prototype.wallCollisionEvent = function (dir, ev) {
+        this.dir = -dir;
+        this.speed.x = this.dir * Math.abs(this.speed.x);
+        this.target.x = this.dir * Math.abs(this.target.x);
+    };
+    Bunny.prototype.enemyCollisionEvent = function (dirx, diry, ev) {
+        if (dirx != 0) {
+            this.dir = -dirx;
+            this.speed.x = this.dir * Math.abs(this.speed.x);
+            this.target.x = this.dir * Math.abs(this.target.x);
+        }
+    };
+    Bunny.JUMP_TIME = 60;
+    return Bunny;
+}(Enemy));
+export { Bunny };

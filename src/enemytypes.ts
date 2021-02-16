@@ -7,7 +7,7 @@ import { Vector2 } from "./vector.js";
 
 
 export const getEnemyType = (id : number) : Function =>
-    [Turtle, SpikedTurtle, Mushroom, Apple][id];
+    [Turtle, SpikedTurtle, Mushroom, Apple, Bunny][id];
 
 
 export class Turtle extends Enemy {
@@ -221,6 +221,112 @@ export class Apple extends Enemy {
             // is not accepted here
             this.dir = pl.getPos().x > this.pos.x ? 1 : -1;
             this.dirDetermined = true;
+        }
+    }
+}
+
+
+export class Bunny extends Enemy {
+
+
+    static JUMP_TIME = 60;
+
+    private jumpTimer : number;
+    private dir : number;
+    private activated : boolean;
+
+
+    constructor(x : number, y : number) {
+
+        const BASE_GRAVITY = 4.0;
+
+        super(x, y, 4);
+
+        this.target.y = BASE_GRAVITY;
+        this.friction.y = 0.1;
+
+        this.jumpTimer = Bunny.JUMP_TIME + 
+            (Bunny.JUMP_TIME/2) * (((x/16) | 0) % 2);
+
+        this.collisionBox = new Vector2(10, 10);
+        this.hitbox = new Vector2(14, 12);
+        this.center.y = 4;
+        this.renderOffset.y = -2;
+        this.knockOffset = 3;
+
+        this.canBeStomped = true;
+
+        this.dir = 0;
+        this.activated = false;
+    }
+
+
+    protected updateAI(ev : GameEvent) {
+
+        const JUMP_HEIGHT = -2.5;
+        const EPS = 0.5;
+        const JUMP_SPEED = 0.75;
+
+        let frame : number;
+
+        if (this.canJump) {
+
+            this.spr.setFrame(0, this.id);
+
+            this.target.x = 0;
+
+            if ((this.jumpTimer -= ev.step) <= 0) {
+
+                this.speed.y = JUMP_HEIGHT;
+                this.jumpTimer += Bunny.JUMP_TIME;
+                this.spr.setFrame(1, this.id);
+
+                this.target.x = this.dir * JUMP_SPEED;
+                this.speed.x = this.target.x;
+            }
+        }
+        else {
+
+            frame = 0;
+            if (this.speed.y < -EPS)
+                frame = 1;
+            else if (this.speed.y > EPS)
+                frame = 2;
+
+            this.spr.setFrame(frame, this.id);
+        }
+
+        this.flip = this.dir > 0 ? Flip.Horizontal : Flip.None;
+    }
+
+
+    protected playerEvent(pl : Player, ev : GameEvent) {
+
+        if (!this.activated) {
+
+            this.dir = pl.getPos().x > this.pos.x ? 1 : -1;
+            this.activated = true;
+        }
+    }
+
+
+    protected wallCollisionEvent(dir : number, ev : GameEvent) {
+
+        this.dir = -dir;
+
+        this.speed.x = this.dir * Math.abs(this.speed.x);
+        this.target.x = this.dir * Math.abs(this.target.x);
+    }
+
+
+    protected enemyCollisionEvent(dirx : number, diry : number, ev : GameEvent) {
+
+        if (dirx != 0) {
+
+            this.dir = -dirx;
+
+            this.speed.x = this.dir * Math.abs(this.speed.x);
+            this.target.x = this.dir * Math.abs(this.target.x);
         }
     }
 }
