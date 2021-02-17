@@ -90,15 +90,12 @@ export class Checkpoint extends InteractionTarget {
             c.getBitmap("checkpoint"),
             Math.round(this.pos.x) - 8,
             Math.round(this.pos.y) - 8 + yoff);
-    }
 
+        if (this.textTimer > 0) {
 
-    public postDraw(c : Canvas) {
-
-        if (!this.exist || this.textTimer <= 0) return;
-
-        c.drawText(c.getBitmap("font"), "CHECKPOINT",
+            c.drawText(c.getBitmap("font"), "CHECKPOINT",
                 this.pos.x, this.textPos, 0, 0, true);
+        }
     }
 
 
@@ -138,6 +135,8 @@ export class Checkpoint extends InteractionTarget {
         this.active = false;
         this.actualSprite.setFrame(0, 0);
         this.waveTimer = Math.PI/2;
+
+        this.textTimer = 0;
     }
 
 }

@@ -442,7 +442,7 @@ export class Player extends CollisionObject {
 
         for (let p of this.pieces) {
 
-            stage.objectCollisions(p, ev);
+            stage.objectCollisions(p, null, ev);
         }
     }
 

@@ -36,7 +36,7 @@ var ObjectManager = /** @class */ (function () {
         this.player.specialCameraCheck(cam);
         this.player.update(ev);
         cam.followObject(this.player, ev);
-        stage.objectCollisions(this.player, ev);
+        stage.objectCollisions(this.player, this, ev);
         this.player.bodypieceCollisions(stage, ev);
         // Enemies
         for (var _i = 0, _a = this.enemies; _i < _a.length; _i++) {
@@ -44,7 +44,7 @@ var ObjectManager = /** @class */ (function () {
             e.cameraCheck(cam);
             e.update(ev);
             e.playerCollision(this.player, ev);
-            stage.objectCollisions(e, ev);
+            stage.objectCollisions(e, null, ev);
             if (!e.isDeactivated()) {
                 for (var _b = 0, _c = this.enemies; _b < _c.length; _b++) {
                     var e2 = _c[_b];
@@ -74,10 +74,6 @@ var ObjectManager = /** @class */ (function () {
         }
         this.player.preDraw(c);
         this.player.draw(c);
-        for (var _h = 0, _j = this.checkpoints; _h < _j.length; _h++) {
-            var o = _j[_h];
-            o.postDraw(c);
-        }
     };
     ObjectManager.prototype.setCamera = function (cam) {
         cam.setPosition(this.player.getPos());

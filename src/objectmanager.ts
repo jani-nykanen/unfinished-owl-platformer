@@ -69,7 +69,7 @@ export class ObjectManager {
         this.player.specialCameraCheck(cam);
         this.player.update(ev);
         cam.followObject(this.player, ev);
-        stage.objectCollisions(this.player, ev);
+        stage.objectCollisions(this.player, this, ev);
         this.player.bodypieceCollisions(stage, ev);
 
         // Enemies
@@ -78,7 +78,7 @@ export class ObjectManager {
             e.cameraCheck(cam);
             e.update(ev);
             e.playerCollision(this.player, ev);
-            stage.objectCollisions(e, ev);
+            stage.objectCollisions(e, null, ev);
 
             if (!e.isDeactivated()) {
 
@@ -118,11 +118,6 @@ export class ObjectManager {
 
         this.player.preDraw(c);
         this.player.draw(c);
-
-        for (let o of this.checkpoints) {
-
-            o.postDraw(c);
-        }
     }
 
 

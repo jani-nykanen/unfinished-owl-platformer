@@ -298,7 +298,7 @@ var Player = /** @class */ (function (_super) {
     Player.prototype.bodypieceCollisions = function (stage, ev) {
         for (var _i = 0, _a = this.pieces; _i < _a.length; _i++) {
             var p = _a[_i];
-            stage.objectCollisions(p, ev);
+            stage.objectCollisions(p, null, ev);
         }
     };
     Player.prototype.preDraw = function (c) {

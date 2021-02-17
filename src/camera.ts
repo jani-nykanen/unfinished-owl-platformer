@@ -46,7 +46,7 @@ export class Camera {
     public followObject(o : GameObject, ev : GameEvent) {
 
         const WAIT_TIME = 60;
-        const WAIT_LIMIT = 16;
+        const WAIT_LIMIT = 24;
         const EPS = 0.1;
         const FORWARD = 48;
         const MOVE_SPEED_X = 1.0;

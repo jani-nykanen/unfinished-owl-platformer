@@ -63,11 +63,9 @@ var Checkpoint = /** @class */ (function (_super) {
         if (this.active)
             yoff = -4 + Math.round(Math.sin(this.waveTimer) * AMPLITUDE);
         c.drawSprite(this.actualSprite, c.getBitmap("checkpoint"), Math.round(this.pos.x) - 8, Math.round(this.pos.y) - 8 + yoff);
-    };
-    Checkpoint.prototype.postDraw = function (c) {
-        if (!this.exist || this.textTimer <= 0)
-            return;
-        c.drawText(c.getBitmap("font"), "CHECKPOINT", this.pos.x, this.textPos, 0, 0, true);
+        if (this.textTimer > 0) {
+            c.drawText(c.getBitmap("font"), "CHECKPOINT", this.pos.x, this.textPos, 0, 0, true);
+        }
     };
     Checkpoint.prototype.playerCollision = function (pl, ev) {
         if (!this.exist || this.dying || !this.inCamera || pl.isDying())
@@ -92,6 +90,7 @@ var Checkpoint = /** @class */ (function (_super) {
         this.active = false;
         this.actualSprite.setFrame(0, 0);
         this.waveTimer = Math.PI / 2;
+        this.textTimer = 0;
     };
     return Checkpoint;
 }(InteractionTarget));

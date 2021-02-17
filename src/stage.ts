@@ -224,18 +224,26 @@ export class Stage {
 
     private handleSpecialTileCollisions(o : CollisionObject, 
         layer : number, x : number, y : number, 
-        colId : number, ev : GameEvent) {
+        colId : number, objects : ObjectManager,
+        ev : GameEvent) {
 
         const CHIP_SPEED = 1.75;
 
         switch(colId) {
 
         case 32:
+        case 33:
 
             if (o.breakCollision(x*16, y*16, 16, 16)) {
 
                 this.layers[layer][y * this.width + x] = 0;
                 this.spawnPieces(x*16 + 8, y*16 + 8, 6, CHIP_SPEED, 0);
+                
+                if (objects != null && colId == 33) {
+
+                    objects.addStar(x, y);
+                }
+                
                 return;
             }   
             this.handleBaseTileCollision(o, layer, x, y, 14, ev);
@@ -248,7 +256,8 @@ export class Stage {
     }
 
 
-    public objectCollisions(o : CollisionObject, ev : GameEvent) {
+    public objectCollisions(o : CollisionObject, 
+        objects : ObjectManager, ev : GameEvent) {
 
         const BOUND_COLLISION_Y_MARGIN = 256;
         const RADIUS = 2;
@@ -283,7 +292,8 @@ export class Stage {
                         this.handleSlopeCollisions(o, x, y, colId-1, ev);
                     
                     else
-                        this.handleSpecialTileCollisions(o, layer, x, y, colId-1, ev);
+                        this.handleSpecialTileCollisions(o, layer, x, y, 
+                            colId-1, objects, ev);
                 }
             }
         }

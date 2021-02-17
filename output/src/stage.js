@@ -135,13 +135,17 @@ var Stage = /** @class */ (function () {
                 .spawn(x, y, speed, 1, (Math.random() * 4) | 0);
         }
     };
-    Stage.prototype.handleSpecialTileCollisions = function (o, layer, x, y, colId, ev) {
+    Stage.prototype.handleSpecialTileCollisions = function (o, layer, x, y, colId, objects, ev) {
         var CHIP_SPEED = 1.75;
         switch (colId) {
             case 32:
+            case 33:
                 if (o.breakCollision(x * 16, y * 16, 16, 16)) {
                     this.layers[layer][y * this.width + x] = 0;
                     this.spawnPieces(x * 16 + 8, y * 16 + 8, 6, CHIP_SPEED, 0);
+                    if (objects != null && colId == 33) {
+                        objects.addStar(x, y);
+                    }
                     return;
                 }
                 this.handleBaseTileCollision(o, layer, x, y, 14, ev);
@@ -150,7 +154,7 @@ var Stage = /** @class */ (function () {
                 break;
         }
     };
-    Stage.prototype.objectCollisions = function (o, ev) {
+    Stage.prototype.objectCollisions = function (o, objects, ev) {
         var BOUND_COLLISION_Y_MARGIN = 256;
         var RADIUS = 2;
         var BASE_TILE_MAX = 16;
@@ -175,7 +179,7 @@ var Stage = /** @class */ (function () {
                     else if (colId <= SLOPE_MAX)
                         this.handleSlopeCollisions(o, x, y, colId - 1, ev);
                     else
-                        this.handleSpecialTileCollisions(o, layer, x, y, colId - 1, ev);
+                        this.handleSpecialTileCollisions(o, layer, x, y, colId - 1, objects, ev);
                 }
             }
         }

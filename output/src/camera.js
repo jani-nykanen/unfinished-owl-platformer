@@ -22,7 +22,7 @@ var Camera = /** @class */ (function () {
     };
     Camera.prototype.followObject = function (o, ev) {
         var WAIT_TIME = 60;
-        var WAIT_LIMIT = 16;
+        var WAIT_LIMIT = 24;
         var EPS = 0.1;
         var FORWARD = 48;
         var MOVE_SPEED_X = 1.0;
