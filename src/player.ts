@@ -1,4 +1,4 @@
-import { BodyPiece } from "./bodypiece.js";
+import { FlyingPiece } from "./flyingpiece.js";
 import { Camera } from "./camera.js";
 import { Canvas, Flip } from "./canvas.js";
 import { GameEvent } from "./core.js";
@@ -31,7 +31,7 @@ export class Player extends CollisionObject {
     private dust : Array<Dust>;
     private dustTimer : number;
 
-    private pieces : Array<BodyPiece>;
+    private pieces : Array<FlyingPiece>;
 
     private thumping : boolean;
     private thumpWait : number;
@@ -58,7 +58,7 @@ export class Player extends CollisionObject {
         this.friction = new Vector2(0.125, 0.125);
         this.hitbox = new Vector2(16, 16);
         this.collisionBox = new Vector2(12, 16);
-        this.spinHitbox = new Vector2(28, this.hitbox.y/2);
+        this.spinHitbox = new Vector2(28, 12);
         this.center = new Vector2();
 
         this.inCamera = true;
@@ -77,7 +77,7 @@ export class Player extends CollisionObject {
         this.dust = new Array<Dust>();
         this.dustTimer = 0;
     
-        this.pieces = new Array<BodyPiece> ();
+        this.pieces = new Array<FlyingPiece> ();
 
         this.thumping = false;
         this.thumpWait = 0;
@@ -549,6 +549,23 @@ export class Player extends CollisionObject {
     }
 
 
+    public breakCollision(x : number, y : number, w : number, h : number) : boolean {
+
+        const THUMP_EPS = 0.1;
+        // TO make it possible to break two "piled" bricks
+        // while standing on the ground
+        const SPIN_MARGIN_Y = 6;
+
+        return !this.dying &&  
+            ((this.spinning &&
+            boxOverlay(this.pos, this.center, this.spinHitbox,
+                x, y, w, h + SPIN_MARGIN_Y)) ||
+            (this.speed.y > THUMP_EPS && this.thumping &&
+            boxOverlay(this.pos, this.center, this.collisionBox,
+                x, y, w, h)));
+    }
+
+
     public setPosition(x : number, y : number) {
 
         this.pos = new Vector2(x, y);
@@ -611,7 +628,7 @@ export class Player extends CollisionObject {
                 Math.cos(angle) * BASE_SPEED * speedAmount,
                 (Math.sin(angle) * BASE_SPEED + BASE_JUMP) * speedAmount);
 
-            nextObject(this.pieces, BodyPiece)
+            nextObject(this.pieces, FlyingPiece)
                 .spawn(this.pos.x, this.pos.y, speed);
         }
         

@@ -21,6 +21,7 @@ var Checkpoint = /** @class */ (function (_super) {
         if (makeActive === void 0) { makeActive = false; }
         var _this = _super.call(this, x, y) || this;
         _this.textTimer = 0;
+        _this.textPos = -1;
         // For checking if in camera 
         // (need more height because of the
         // wave animation)
@@ -29,7 +30,8 @@ var Checkpoint = /** @class */ (function (_super) {
         _this.actualSprite = new Sprite(16, 16);
         _this.hitbox = new Vector2(12, 16);
         _this.waveTimer = Math.PI / 2;
-        _this.active = makeActive;
+        _this.active = false;
+        _this.initiallyActive = makeActive;
         if (makeActive)
             _this.spr.setFrame(1, 0);
         return _this;
@@ -74,8 +76,11 @@ var Checkpoint = /** @class */ (function (_super) {
             pl.overlayObject(this)) {
             this.active = true;
             pl.setCheckpoint(this.pos);
-            this.textTimer = TEXT_TIME;
-            this.textPos = this.pos.y - 8;
+            if (!this.initiallyActive) {
+                this.textTimer = TEXT_TIME;
+                this.textPos = this.pos.y - 8;
+            }
+            this.initiallyActive = false;
             return true;
         }
         if (this.active && pl.getCheckpointRef() != this.pos) {

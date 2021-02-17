@@ -107,8 +107,10 @@ var Enemy = /** @class */ (function (_super) {
         c.drawSprite(this.spr, bmp, px, py, flip);
     };
     Enemy.prototype.playerEvent = function (pl, ev) { };
-    Enemy.prototype.spawnParticles = function (count, speedAmount, angleOffset) {
+    Enemy.prototype.spawnParticles = function (count, speedAmount, angleOffset, id, time) {
         if (angleOffset === void 0) { angleOffset = 0; }
+        if (id === void 0) { id = 1; }
+        if (time === void 0) { time = ENEMY_DEATH_TIME - 1; }
         var ANIM_SPEED = 4.0;
         var angle;
         var speed;
@@ -116,7 +118,7 @@ var Enemy = /** @class */ (function (_super) {
             angle = Math.PI * 2 / count * i + angleOffset;
             speed = new Vector2(Math.cos(angle) * speedAmount, Math.sin(angle) * speedAmount);
             nextObject(this.particles, Particle)
-                .spawn(this.pos.x, this.pos.y, speed, ENEMY_DEATH_TIME - 1, ANIM_SPEED, 0, 1);
+                .spawn(this.pos.x, this.pos.y, speed, time, ANIM_SPEED, 0, id);
         }
     };
     Enemy.prototype.playerCollision = function (pl, ev) {
@@ -135,7 +137,7 @@ var Enemy = /** @class */ (function (_super) {
             pl.doesCollideSpinning(this)) {
             this.dying = true;
             this.deathTime = ENEMY_DEATH_TIME;
-            this.spawnParticles(4, 1.5, Math.PI / 4);
+            this.spawnParticles(4, 3.0, Math.PI / 4, 2, ENEMY_DEATH_TIME / 2);
             this.knocked = true;
             this.target.x = SPIN_KNOCK_SPEED_X *
                 Math.sign(this.pos.x - pl.getPos().x);

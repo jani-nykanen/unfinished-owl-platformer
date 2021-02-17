@@ -77,7 +77,7 @@ var GameScene = /** @class */ (function () {
             return;
         }
         this.objects.update(this.cam, this.stage, ev);
-        this.stage.update(ev);
+        this.stage.update(this.cam, ev);
         for (var i = 0; i < this.cloudPos.length; ++i) {
             this.cloudPos[i] = (this.cloudPos[i] + CLOUD_SPEED[i] * ev.step) % 256;
         }

@@ -5,7 +5,11 @@ import { Sprite } from "./sprite.js";
 import { Vector2 } from "./vector.js";
 
 
-export class BodyPiece extends CollisionObject {
+export class FlyingPiece extends CollisionObject {
+
+
+    private animate : boolean;
+
 
     constructor() {
 
@@ -19,6 +23,8 @@ export class BodyPiece extends CollisionObject {
         this.spr.setFrame(0, 0);
 
         this.bounceFactor = 0.90;
+
+        this.animate = false;
     }
 
 
@@ -28,7 +34,7 @@ export class BodyPiece extends CollisionObject {
     }
 
 
-    public spawn(x : number, y : number, speed : Vector2) {
+    public spawn(x : number, y : number, speed : Vector2, row = 0, frame = -1) {
 
         const BASE_GRAVITY = 4.0;
 
@@ -39,6 +45,9 @@ export class BodyPiece extends CollisionObject {
 
         this.exist = true;
         this.inCamera = true;
+
+        this.animate = frame < 0;
+        this.spr.setFrame(Math.max(0, frame), row);
     }
 
 
@@ -46,7 +55,8 @@ export class BodyPiece extends CollisionObject {
 
         let speed = 12 - 6 * Math.abs(this.speed.x);
 
-        this.spr.animate(0, 0, 3, speed, ev.step);
+        if (this.animate)
+            this.spr.animate(this.spr.getRow(), 0, 3, speed, ev.step);
     }
 
 

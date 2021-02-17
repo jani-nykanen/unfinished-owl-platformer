@@ -311,6 +311,12 @@ export abstract class CollisionObject extends GameObject {
     }
 
 
+    public breakCollision(x : number, y : number, w : number, h : number) : boolean {
+
+        return false;
+    }
+
+
     public getCollisionBox = () : Vector2 => this.collisionBox.clone();
     public collisionsDisabled = () : boolean => this.disableCollisions;
 }

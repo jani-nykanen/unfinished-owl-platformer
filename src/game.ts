@@ -132,7 +132,7 @@ export class GameScene implements Scene {
         }
 
         this.objects.update(this.cam, this.stage, ev);
-        this.stage.update(ev);
+        this.stage.update(this.cam, ev);
 
         for (let i = 0; i < this.cloudPos.length; ++ i) {
 

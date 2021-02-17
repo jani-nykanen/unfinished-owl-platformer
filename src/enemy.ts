@@ -169,7 +169,8 @@ export abstract class Enemy extends CollisionObject {
     protected playerEvent(pl : Player, ev : GameEvent) {}
 
 
-    private spawnParticles(count : number, speedAmount : number, angleOffset = 0) {
+    private spawnParticles(count : number, speedAmount : number, 
+        angleOffset = 0, id = 1, time = ENEMY_DEATH_TIME-1) {
 
         const ANIM_SPEED = 4.0;
 
@@ -186,8 +187,8 @@ export abstract class Enemy extends CollisionObject {
 
             nextObject(this.particles, Particle)
                 .spawn(this.pos.x, this.pos.y, speed, 
-                    ENEMY_DEATH_TIME-1, ANIM_SPEED,
-                    0, 1);
+                    time, ANIM_SPEED,
+                    0, id);
         }
     }
 
@@ -213,7 +214,7 @@ export abstract class Enemy extends CollisionObject {
 
             this.dying = true;
             this.deathTime = ENEMY_DEATH_TIME;
-            this.spawnParticles(4, 1.5, Math.PI/4);
+            this.spawnParticles(4, 3.0, Math.PI/4, 2, ENEMY_DEATH_TIME/2);
             this.knocked = true;
 
             this.target.x = SPIN_KNOCK_SPEED_X * 

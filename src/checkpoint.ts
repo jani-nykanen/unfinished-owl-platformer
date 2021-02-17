@@ -18,12 +18,15 @@ export class Checkpoint extends InteractionTarget {
     private textTimer : number;
     private textPos : number;
 
+    private initiallyActive : boolean;
+
 
     constructor(x : number, y  : number, makeActive = false) {
 
         super(x, y);
 
         this.textTimer = 0;
+        this.textPos = -1;
 
         // For checking if in camera 
         // (need more height because of the
@@ -35,7 +38,9 @@ export class Checkpoint extends InteractionTarget {
         this.hitbox = new Vector2(12, 16);
         this.waveTimer = Math.PI/2;
 
-        this.active = makeActive;
+        this.active = false;
+        this.initiallyActive = makeActive;
+
         if (makeActive)
             this.spr.setFrame(1, 0);
     }
@@ -108,9 +113,14 @@ export class Checkpoint extends InteractionTarget {
             this.active = true;
             pl.setCheckpoint(this.pos);
 
-            this.textTimer = TEXT_TIME;
-            this.textPos = this.pos.y - 8;
+            if (!this.initiallyActive) {
+                
+                this.textTimer = TEXT_TIME;
+                this.textPos = this.pos.y - 8;
+            }
 
+            this.initiallyActive = false;
+            
             return true;
         }
 

@@ -1,8 +1,11 @@
+import { FlyingPiece } from "./flyingpiece.js";
 import { Camera } from "./camera.js";
 import { Canvas } from "./canvas.js";
 import { GameEvent } from "./core.js";
 import { CollisionObject } from "./gameobject.js";
 import { ObjectManager } from "./objectmanager.js";
+import { nextObject } from "./util.js";
+import { Vector2 } from "./vector.js";
 
 
 // For collisions
@@ -36,6 +39,9 @@ export class Stage {
 
     private layers : Array<Array<number>>;
     private collisionMap : Array<number>;
+
+    private pieces : Array<FlyingPiece>;
+
     public readonly width : number;
     public readonly height : number;
 
@@ -48,6 +54,8 @@ export class Stage {
         this.collisionMap = ev.getTilemap("collisions").cloneLayer(0);
         this.width = baseMap.width;
         this.height = baseMap.height;
+
+        this.pieces = new Array<FlyingPiece> ();
     }
 
 
@@ -71,9 +79,14 @@ export class Stage {
     }
 
 
-    public update(ev : GameEvent) {
+    public update(cam : Camera, ev : GameEvent) {
 
-    }
+        for (let p of this.pieces) {
+
+            p.cameraCheck(cam);
+            p.update(ev);
+        }
+    }   
 
 
     public draw(c : Canvas, cam : Camera) {
@@ -112,13 +125,18 @@ export class Stage {
                 }
             }
         }
+
+        for (let p of this.pieces) {
+
+            p.draw(c);
+        }
     }
 
 
     private isSlope = (id : number) : boolean => (id >= 17 && id <= 23);
 
 
-    private handeTileCollision(o : CollisionObject, 
+    private handleBaseTileCollision(o : CollisionObject, 
         layer : number, x : number, y : number, 
         colId : number, ev : GameEvent) {
 
@@ -147,8 +165,13 @@ export class Stage {
 
             o.wallCollision(x*16, y*16, 16, 1, ev);
         }
+    }
 
-        // Slopes
+
+    private handleSlopeCollisions(o : CollisionObject, 
+        x : number, y : number, 
+        colId : number, ev : GameEvent) {
+
         if (colId == 16) {
 
             o.slopeCollision(x*16, y*16, (x+1)*16, (y+1)*16, 1, ev);
@@ -176,10 +199,61 @@ export class Stage {
     }
 
 
+
+    private spawnPieces(x : number, y : number, 
+        count : number, speedAmount : number, angleOffset = 0) {
+
+        const BASE_JUMP = -1.25;
+
+        let angle : number;
+        let speed : Vector2;
+
+        for (let i = 0; i < count; ++ i) {
+
+            angle = Math.PI * 2 / count * i + angleOffset;
+
+            speed = new Vector2(
+                Math.cos(angle) * speedAmount,
+                Math.sin(angle) * speedAmount + BASE_JUMP * speedAmount);
+
+            nextObject(this.pieces, FlyingPiece)
+                .spawn(x, y, speed, 1, (Math.random() * 4) | 0);
+        }
+    }
+
+
+    private handleSpecialTileCollisions(o : CollisionObject, 
+        layer : number, x : number, y : number, 
+        colId : number, ev : GameEvent) {
+
+        const CHIP_SPEED = 1.75;
+
+        switch(colId) {
+
+        case 32:
+
+            if (o.breakCollision(x*16, y*16, 16, 16)) {
+
+                this.layers[layer][y * this.width + x] = 0;
+                this.spawnPieces(x*16 + 8, y*16 + 8, 6, CHIP_SPEED, 0);
+                return;
+            }   
+            this.handleBaseTileCollision(o, layer, x, y, 14, ev);
+
+            break;  
+
+        default:
+            break;
+        }
+    }
+
+
     public objectCollisions(o : CollisionObject, ev : GameEvent) {
 
         const BOUND_COLLISION_Y_MARGIN = 256;
         const RADIUS = 2;
+        const BASE_TILE_MAX = 16;
+        const SLOPE_MAX = 24;
 
         if (!o.doesExist() || o.isDying() || !o.isInCamera()) 
             return;
@@ -202,7 +276,14 @@ export class Stage {
                     colId = this.getCollisionTile(tid-1);
                     if (colId <= 0) continue;
 
-                    this.handeTileCollision(o,layer,  x, y, colId-1, ev);
+                    if (colId <= BASE_TILE_MAX)
+                        this.handleBaseTileCollision(o, layer,  x, y, colId-1, ev);
+                    
+                    else if (colId <= SLOPE_MAX)
+                        this.handleSlopeCollisions(o, x, y, colId-1, ev);
+                    
+                    else
+                        this.handleSpecialTileCollisions(o, layer, x, y, colId-1, ev);
                 }
             }
         }

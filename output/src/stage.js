@@ -1,3 +1,6 @@
+import { FlyingPiece } from "./flyingpiece.js";
+import { nextObject } from "./util.js";
+import { Vector2 } from "./vector.js";
 // For collisions
 var COL_DOWN = 1;
 var COL_WALL_LEFT = 2;
@@ -28,6 +31,7 @@ var Stage = /** @class */ (function () {
         this.collisionMap = ev.getTilemap("collisions").cloneLayer(0);
         this.width = baseMap.width;
         this.height = baseMap.height;
+        this.pieces = new Array();
     }
     Stage.prototype.getTile = function (l, x, y, def) {
         if (def === void 0) { def = 0; }
@@ -43,7 +47,12 @@ var Stage = /** @class */ (function () {
             return def;
         return this.collisionMap[i];
     };
-    Stage.prototype.update = function (ev) {
+    Stage.prototype.update = function (cam, ev) {
+        for (var _i = 0, _a = this.pieces; _i < _a.length; _i++) {
+            var p = _a[_i];
+            p.cameraCheck(cam);
+            p.update(ev);
+        }
     };
     Stage.prototype.draw = function (c, cam) {
         var RADIUS = 2;
@@ -69,8 +78,12 @@ var Stage = /** @class */ (function () {
                 }
             }
         }
+        for (var _i = 0, _a = this.pieces; _i < _a.length; _i++) {
+            var p = _a[_i];
+            p.draw(c);
+        }
     };
-    Stage.prototype.handeTileCollision = function (o, layer, x, y, colId, ev) {
+    Stage.prototype.handleBaseTileCollision = function (o, layer, x, y, colId, ev) {
         var c = COLLISION_TABLE[colId];
         var left = this.getCollisionTile(this.getTile(layer, x - 1, y) - 1);
         var right = this.getCollisionTile(this.getTile(layer, x + 1, y) - 1);
@@ -89,7 +102,8 @@ var Stage = /** @class */ (function () {
         if ((c & COL_WALL_LEFT) == COL_WALL_LEFT) {
             o.wallCollision(x * 16, y * 16, 16, 1, ev);
         }
-        // Slopes
+    };
+    Stage.prototype.handleSlopeCollisions = function (o, x, y, colId, ev) {
         if (colId == 16) {
             o.slopeCollision(x * 16, y * 16, (x + 1) * 16, (y + 1) * 16, 1, ev);
         }
@@ -109,9 +123,38 @@ var Stage = /** @class */ (function () {
             o.slopeCollision(x * 16, (y + 1) * 16, (x + 1) * 16, y * 16 + 8, 1, ev);
         }
     };
+    Stage.prototype.spawnPieces = function (x, y, count, speedAmount, angleOffset) {
+        if (angleOffset === void 0) { angleOffset = 0; }
+        var BASE_JUMP = -1.25;
+        var angle;
+        var speed;
+        for (var i = 0; i < count; ++i) {
+            angle = Math.PI * 2 / count * i + angleOffset;
+            speed = new Vector2(Math.cos(angle) * speedAmount, Math.sin(angle) * speedAmount + BASE_JUMP * speedAmount);
+            nextObject(this.pieces, FlyingPiece)
+                .spawn(x, y, speed, 1, (Math.random() * 4) | 0);
+        }
+    };
+    Stage.prototype.handleSpecialTileCollisions = function (o, layer, x, y, colId, ev) {
+        var CHIP_SPEED = 1.75;
+        switch (colId) {
+            case 32:
+                if (o.breakCollision(x * 16, y * 16, 16, 16)) {
+                    this.layers[layer][y * this.width + x] = 0;
+                    this.spawnPieces(x * 16 + 8, y * 16 + 8, 6, CHIP_SPEED, 0);
+                    return;
+                }
+                this.handleBaseTileCollision(o, layer, x, y, 14, ev);
+                break;
+            default:
+                break;
+        }
+    };
     Stage.prototype.objectCollisions = function (o, ev) {
         var BOUND_COLLISION_Y_MARGIN = 256;
         var RADIUS = 2;
+        var BASE_TILE_MAX = 16;
+        var SLOPE_MAX = 24;
         if (!o.doesExist() || o.isDying() || !o.isInCamera())
             return;
         var px = Math.floor(o.getPos().x / 16);
@@ -127,7 +170,12 @@ var Stage = /** @class */ (function () {
                     colId = this.getCollisionTile(tid - 1);
                     if (colId <= 0)
                         continue;
-                    this.handeTileCollision(o, layer, x, y, colId - 1, ev);
+                    if (colId <= BASE_TILE_MAX)
+                        this.handleBaseTileCollision(o, layer, x, y, colId - 1, ev);
+                    else if (colId <= SLOPE_MAX)
+                        this.handleSlopeCollisions(o, x, y, colId - 1, ev);
+                    else
+                        this.handleSpecialTileCollisions(o, layer, x, y, colId - 1, ev);
                 }
             }
         }

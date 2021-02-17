@@ -11,12 +11,12 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-import { BodyPiece } from "./bodypiece.js";
+import { FlyingPiece } from "./flyingpiece.js";
 import { Flip } from "./canvas.js";
 import { Dust } from "./dust.js";
 import { CollisionObject } from "./gameobject.js";
 import { Sprite } from "./sprite.js";
-import { computeFriction, nextObject, State } from "./util.js";
+import { boxOverlay, computeFriction, nextObject, State } from "./util.js";
 import { Vector2 } from "./vector.js";
 var Player = /** @class */ (function (_super) {
     __extends(Player, _super);
@@ -28,7 +28,7 @@ var Player = /** @class */ (function (_super) {
         _this.friction = new Vector2(0.125, 0.125);
         _this.hitbox = new Vector2(16, 16);
         _this.collisionBox = new Vector2(12, 16);
-        _this.spinHitbox = new Vector2(28, _this.hitbox.y / 2);
+        _this.spinHitbox = new Vector2(28, 12);
         _this.center = new Vector2();
         _this.inCamera = true;
         _this.canJump = false;
@@ -371,6 +371,17 @@ var Player = /** @class */ (function (_super) {
             this.stompMargin = 0;
         }
     };
+    Player.prototype.breakCollision = function (x, y, w, h) {
+        var THUMP_EPS = 0.1;
+        // TO make it possible to break two "piled" bricks
+        // while standing on the ground
+        var SPIN_MARGIN_Y = 6;
+        return !this.dying &&
+            ((this.spinning &&
+                boxOverlay(this.pos, this.center, this.spinHitbox, x, y, w, h + SPIN_MARGIN_Y)) ||
+                (this.speed.y > THUMP_EPS && this.thumping &&
+                    boxOverlay(this.pos, this.center, this.collisionBox, x, y, w, h)));
+    };
     Player.prototype.setPosition = function (x, y) {
         this.pos = new Vector2(x, y);
         this.checkpoint = this.pos.clone();
@@ -403,7 +414,7 @@ var Player = /** @class */ (function (_super) {
         for (var i = 0; i < count; ++i) {
             angle = Math.PI * 2 / count * i + angleOffset;
             speed = new Vector2(Math.cos(angle) * BASE_SPEED * speedAmount, (Math.sin(angle) * BASE_SPEED + BASE_JUMP) * speedAmount);
-            nextObject(this.pieces, BodyPiece)
+            nextObject(this.pieces, FlyingPiece)
                 .spawn(this.pos.x, this.pos.y, speed);
         }
     };
