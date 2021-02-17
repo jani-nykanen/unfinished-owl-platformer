@@ -7,11 +7,11 @@ import { Rect, Vector2 } from "./vector.js";
 
 export class Camera {
 
-
     private pos : Vector2;
     private viewport : Rect;
     private centerOff : Vector2;
     private centerOffTarget : Vector2;
+    private waitTimer : number;
 
 
     constructor(x : number, y : number) {
@@ -21,6 +21,8 @@ export class Camera {
 
         this.centerOff = new Vector2();
         this.centerOffTarget = this.centerOff.clone();
+    
+        this.waitTimer = 0;
     }
 
 
@@ -43,10 +45,15 @@ export class Camera {
 
     public followObject(o : GameObject, ev : GameEvent) {
 
+        const WAIT_TIME = 60;
+        const WAIT_LIMIT = 16;
         const EPS = 0.1;
         const FORWARD = 48;
         const MOVE_SPEED_X = 1.0;
         const VERTICAL_DEADZONE = 32;
+
+        if (this.waitTimer > 0)
+            this.waitTimer -= ev.step;
 
         this.pos.x = o.getPos().x;
         let d = this.pos.y - o.getPos().y;
@@ -62,10 +69,26 @@ export class Camera {
             dir = Math.sign(target);
         }
 
-        this.centerOffTarget.x = dir * FORWARD;
+        let difSign = Math.sign(dir) != Math.sign(this.centerOffTarget.x);
+
+        if (this.waitTimer <= 0 || Math.abs(dir) > EPS) {
+            
+            if (this.waitTimer > 0 && difSign) {
+
+                this.waitTimer = 0;
+            }
+
+            this.centerOffTarget.x = dir * FORWARD;
+        }
 
         this.centerOff.x = updateSpeedAxis(this.centerOff.x, 
             this.centerOffTarget.x, MOVE_SPEED_X * ev.step);
+
+        if (this.waitTimer <= 0 &&
+            Math.abs(this.centerOff.x) >= WAIT_LIMIT) {
+
+            this.waitTimer = WAIT_TIME;
+        }
         
     }
 
