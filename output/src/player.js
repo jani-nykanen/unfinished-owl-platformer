@@ -371,24 +371,28 @@ var Player = /** @class */ (function (_super) {
             this.stompMargin = 0;
         }
     };
-    Player.prototype.breakCollision = function (x, y, w, h) {
+    Player.prototype.breakCollision = function (x, y, w, h, ev) {
         var THUMP_EPS = 0.1;
         // TO make it possible to break two "piled" bricks
         // while standing on the ground
         var SPIN_MARGIN_Y = 6;
+        var HEAD_KNOCK_OFFSET = 2;
         return !this.dying &&
             ((this.spinning &&
                 boxOverlay(this.pos, this.center, this.spinHitbox, x, y, w, h + SPIN_MARGIN_Y)) ||
                 (this.speed.y > THUMP_EPS && this.thumping &&
-                    boxOverlay(this.pos, this.center, this.collisionBox, x, y, w, h)));
+                    boxOverlay(this.pos, this.center, this.collisionBox, x, y, w, h)) ||
+                this.constantSlopeCollision(x, y + h + HEAD_KNOCK_OFFSET, w, -1, true, true, ev));
     };
     Player.prototype.setPosition = function (x, y) {
         this.pos = new Vector2(x, y);
         this.checkpoint = this.pos.clone();
         this.oldPos = this.pos.clone();
     };
-    Player.prototype.addStar = function () {
-        this.state.addStar();
+    Player.prototype.addStar = function (isOneUp) {
+        if (isOneUp === void 0) { isOneUp = false; }
+        if (!isOneUp)
+            this.state.addStar();
     };
     Player.prototype.getBottom = function () {
         return this.pos.y + this.center.y + this.hitbox.y / 2;

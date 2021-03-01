@@ -44,6 +44,7 @@ export class Stage {
 
     public readonly width : number;
     public readonly height : number;
+    public readonly starCount : number;
 
 
     constructor(ev : GameEvent) {
@@ -56,6 +57,27 @@ export class Stage {
         this.height = baseMap.height;
 
         this.pieces = new Array<FlyingPiece> ();
+
+        this.starCount = this.countStars();
+    }
+
+
+    private countStars() : number {
+
+        const STAR_TILES = [258, 58, 59, 74, 75];
+
+        let count = 0;
+
+        for (let l = 0; l < this.layers.length; ++ l) {
+
+            for (let i = 0; i < this.width*this.height; ++ i) {
+
+                if (STAR_TILES.includes((this.layers[l][i])))
+                    ++ count;
+            }
+        }
+
+        return count;
     }
 
 
@@ -234,14 +256,14 @@ export class Stage {
         case 32:
         case 33:
 
-            if (o.breakCollision(x*16, y*16, 16, 16)) {
+            if (o.breakCollision(x*16, y*16, 16, 16, ev)) {
 
                 this.layers[layer][y * this.width + x] = 0;
                 this.spawnPieces(x*16 + 8, y*16 + 8, 6, CHIP_SPEED, 0);
                 
                 if (objects != null && colId == 33) {
 
-                    objects.addStar(x, y);
+                    objects.addStar(x, y, false);
                 }
                 
                 return;
@@ -339,8 +361,9 @@ export class Stage {
                 
                 // Star
                 case 1:
+                case 3:
 
-                    objects.addStar(x, y);
+                    objects.addStar(x, y, tid == 3);
                     break;
 
                 // Checkpoint

@@ -16,20 +16,27 @@ export class Star extends InteractionTarget {
 
     private waveTimer : number;
     private deathTimer : number;
+
+    // Why make a new class when you can just add
+    // one boolean property!
+    private isOneUp : boolean;
     
     private particles : Array<Particle>;
 
 
-    constructor(x : number, y  : number) {
+    constructor(x : number, y  : number, isOneUp = false) {
 
         super(x, y);
 
         this.spr = new Sprite(24, 24);
+        this.spr.setFrame(0, isOneUp ? 1 : 0)
         this.hitbox = new Vector2(8, 20);
         this.waveTimer = Math.random() * (Math.PI * 2);
 
         this.deathTimer = 0;
         this.particles = new Array<Particle>();
+
+        this.isOneUp = isOneUp;
     }
 
 
@@ -49,7 +56,7 @@ export class Star extends InteractionTarget {
         const ANIM_SPEED = 6;
         const WAVE_SPEED = 0.05;
 
-        this.spr.animate(0, 0, 7, ANIM_SPEED, ev.step);
+        this.spr.animate(this.spr.getRow(), 0, 7, ANIM_SPEED, ev.step);
 
         this.waveTimer = (this.waveTimer + WAVE_SPEED*ev.step) % (Math.PI*2);
     }
@@ -114,7 +121,7 @@ export class Star extends InteractionTarget {
             this.dying = true;
             this.deathTimer = STAR_DEATH_TIME;
 
-            pl.addStar();
+            pl.addStar(this.isOneUp);
 
             return true;
         }

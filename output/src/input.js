@@ -4,13 +4,13 @@ import { Vector2 } from "./vector.js";
 import { State } from "./util.js";
 var INPUT_SPECIAL_EPS = 0.25;
 var InputAction = /** @class */ (function () {
-    function InputAction(name, key, button1, button) {
+    function InputAction(name, key, button1, button2) {
         if (button1 === void 0) { button1 = -1; }
-        if (button === void 0) { button = -2; }
+        if (button2 === void 0) { button2 = -2; }
         this.name = name;
         this.key = key;
         this.button1 = button1;
-        this.button2 = this.button2;
+        this.button2 = button2;
         this.state = State.Up;
     }
     return InputAction;

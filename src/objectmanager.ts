@@ -133,9 +133,9 @@ export class ObjectManager {
     }
 
 
-    public addStar(x : number, y : number) {
+    public addStar(x : number, y : number, isOneUp = false) {
 
-        this.stars.push(new Star(x*16 + 8, y*16 + 8));
+        this.stars.push(new Star(x*16 + 8, y*16 + 8, isOneUp));
     }
 
 

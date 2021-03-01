@@ -81,8 +81,9 @@ var ObjectManager = /** @class */ (function () {
     ObjectManager.prototype.setPlayerPosition = function (x, y) {
         this.player.setPosition(x * 16 + 8, y * 16 + 8);
     };
-    ObjectManager.prototype.addStar = function (x, y) {
-        this.stars.push(new Star(x * 16 + 8, y * 16 + 8));
+    ObjectManager.prototype.addStar = function (x, y, isOneUp) {
+        if (isOneUp === void 0) { isOneUp = false; }
+        this.stars.push(new Star(x * 16 + 8, y * 16 + 8, isOneUp));
     };
     ObjectManager.prototype.addCheckpoint = function (x, y, makeActive) {
         if (makeActive === void 0) { makeActive = false; }

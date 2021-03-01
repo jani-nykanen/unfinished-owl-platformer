@@ -189,11 +189,12 @@ export class GameScene implements Scene {
             y = y - 16 / HUD_APPEAR_TIME * (HUD_APPEAR_TIME - this.hudAppearTimer);
         }
 
-        c.drawText(fontBigger, 
-            String.fromCharCode(3) + 
+        let str =  String.fromCharCode(3) + 
             String.fromCharCode(2) + 
-            String(this.state.getStarCount()), 
-            c.width/2, y, -6, 0, true);
+            String(this.state.getStarCount()) +
+            "/" + String(this.stage.starCount);
+
+        c.drawText(fontBigger, str, c.width/2, y, -6, 0, true);
     }
 
 

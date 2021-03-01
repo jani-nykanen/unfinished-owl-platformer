@@ -193,7 +193,7 @@ var CollisionObject = /** @class */ (function (_super) {
     CollisionObject.prototype.hurtCollision = function (x, y, w, h, dmg, knockback, ev) {
         return false;
     };
-    CollisionObject.prototype.breakCollision = function (x, y, w, h) {
+    CollisionObject.prototype.breakCollision = function (x, y, w, h, ev) {
         return false;
     };
     return CollisionObject;

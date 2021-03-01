@@ -32,7 +32,19 @@ var Stage = /** @class */ (function () {
         this.width = baseMap.width;
         this.height = baseMap.height;
         this.pieces = new Array();
+        this.starCount = this.countStars();
     }
+    Stage.prototype.countStars = function () {
+        var STAR_TILES = [258, 58, 59, 74, 75];
+        var count = 0;
+        for (var l = 0; l < this.layers.length; ++l) {
+            for (var i = 0; i < this.width * this.height; ++i) {
+                if (STAR_TILES.includes((this.layers[l][i])))
+                    ++count;
+            }
+        }
+        return count;
+    };
     Stage.prototype.getTile = function (l, x, y, def) {
         if (def === void 0) { def = 0; }
         if (l < 0 || l >= this.layers.length ||
@@ -140,11 +152,11 @@ var Stage = /** @class */ (function () {
         switch (colId) {
             case 32:
             case 33:
-                if (o.breakCollision(x * 16, y * 16, 16, 16)) {
+                if (o.breakCollision(x * 16, y * 16, 16, 16, ev)) {
                     this.layers[layer][y * this.width + x] = 0;
                     this.spawnPieces(x * 16 + 8, y * 16 + 8, 6, CHIP_SPEED, 0);
                     if (objects != null && colId == 33) {
-                        objects.addStar(x, y);
+                        objects.addStar(x, y, false);
                     }
                     return;
                 }
@@ -206,7 +218,8 @@ var Stage = /** @class */ (function () {
                         break;
                     // Star
                     case 1:
-                        objects.addStar(x, y);
+                    case 3:
+                        objects.addStar(x, y, tid == 3);
                         break;
                     // Checkpoint
                     case 2:

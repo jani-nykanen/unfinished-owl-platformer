@@ -549,12 +549,13 @@ export class Player extends CollisionObject {
     }
 
 
-    public breakCollision(x : number, y : number, w : number, h : number) : boolean {
+    public breakCollision(x : number, y : number, w : number, h : number, ev : GameEvent) : boolean {
 
         const THUMP_EPS = 0.1;
         // TO make it possible to break two "piled" bricks
         // while standing on the ground
         const SPIN_MARGIN_Y = 6;
+        const HEAD_KNOCK_OFFSET = 2;
 
         return !this.dying &&  
             ((this.spinning &&
@@ -562,7 +563,9 @@ export class Player extends CollisionObject {
                 x, y, w, h + SPIN_MARGIN_Y)) ||
             (this.speed.y > THUMP_EPS && this.thumping &&
             boxOverlay(this.pos, this.center, this.collisionBox,
-                x, y, w, h)));
+                x, y, w, h)) ||
+            this.constantSlopeCollision(
+                x, y + h + HEAD_KNOCK_OFFSET, w, -1, true, true, ev));
     }
 
 
@@ -574,9 +577,10 @@ export class Player extends CollisionObject {
     }
 
 
-    public addStar() {
+    public addStar(isOneUp = false) {
 
-        this.state.addStar();
+        if (!isOneUp)
+            this.state.addStar();
     }
 
     

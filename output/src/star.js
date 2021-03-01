@@ -19,13 +19,16 @@ import { Vector2 } from "./vector.js";
 var STAR_DEATH_TIME = 32;
 var Star = /** @class */ (function (_super) {
     __extends(Star, _super);
-    function Star(x, y) {
+    function Star(x, y, isOneUp) {
+        if (isOneUp === void 0) { isOneUp = false; }
         var _this = _super.call(this, x, y) || this;
         _this.spr = new Sprite(24, 24);
+        _this.spr.setFrame(0, isOneUp ? 1 : 0);
         _this.hitbox = new Vector2(8, 20);
         _this.waveTimer = Math.random() * (Math.PI * 2);
         _this.deathTimer = 0;
         _this.particles = new Array();
+        _this.isOneUp = isOneUp;
         return _this;
     }
     Star.prototype.die = function (ev) {
@@ -38,7 +41,7 @@ var Star = /** @class */ (function (_super) {
     Star.prototype.updateLogic = function (ev) {
         var ANIM_SPEED = 6;
         var WAVE_SPEED = 0.05;
-        this.spr.animate(0, 0, 7, ANIM_SPEED, ev.step);
+        this.spr.animate(this.spr.getRow(), 0, 7, ANIM_SPEED, ev.step);
         this.waveTimer = (this.waveTimer + WAVE_SPEED * ev.step) % (Math.PI * 2);
     };
     Star.prototype.draw = function (c) {
@@ -75,7 +78,7 @@ var Star = /** @class */ (function (_super) {
             this.spawnParticles(5, 3, -Math.PI / 10);
             this.dying = true;
             this.deathTimer = STAR_DEATH_TIME;
-            pl.addStar();
+            pl.addStar(this.isOneUp);
             return true;
         }
         return false;
