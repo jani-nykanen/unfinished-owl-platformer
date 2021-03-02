@@ -389,10 +389,17 @@ var Player = /** @class */ (function (_super) {
         this.checkpoint = this.pos.clone();
         this.oldPos = this.pos.clone();
     };
-    Player.prototype.addStar = function (isOneUp) {
-        if (isOneUp === void 0) { isOneUp = false; }
-        if (!isOneUp)
-            this.state.addStar();
+    Player.prototype.addCollectable = function (id) {
+        switch (id) {
+            case 0:
+                this.state.addStar();
+                break;
+            case 1:
+                this.state.addLives(1);
+                break;
+            default:
+                break;
+        }
     };
     Player.prototype.getBottom = function () {
         return this.pos.y + this.center.y + this.hitbox.y / 2;
@@ -433,6 +440,7 @@ var Player = /** @class */ (function (_super) {
         var dir = new Vector2(this.checkpoint.x - this.pos.x, this.checkpoint.y - this.pos.y);
         dir.normalize();
         this.speed = Vector2.scalarMultiply(dir, -ESCAPE_SPEED);
+        this.state.addLives(-1);
     };
     Player.prototype.doesCollideSpinning = function (o) {
         if (!this.spinning)

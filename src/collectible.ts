@@ -8,35 +8,31 @@ import { nextObject } from "./util.js";
 import { Vector2 } from "./vector.js";
 
 
-const STAR_DEATH_TIME = 32;
+const COLLECTIBLE_DEATH_TIME = 32;
 
 
-export class Star extends InteractionTarget {
-
+export class Collectible extends InteractionTarget {
 
     private waveTimer : number;
     private deathTimer : number;
-
-    // Why make a new class when you can just add
-    // one boolean property!
-    private isOneUp : boolean;
+    private id : number;
     
     private particles : Array<Particle>;
 
 
-    constructor(x : number, y  : number, isOneUp = false) {
+    constructor(x : number, y  : number, id = 0) {
 
         super(x, y);
 
         this.spr = new Sprite(24, 24);
-        this.spr.setFrame(0, isOneUp ? 1 : 0)
+        this.spr.setFrame(0, id)
         this.hitbox = new Vector2(8, 20);
         this.waveTimer = Math.random() * (Math.PI * 2);
 
         this.deathTimer = 0;
         this.particles = new Array<Particle>();
 
-        this.isOneUp = isOneUp;
+        this.id = id;
     }
 
 
@@ -103,7 +99,7 @@ export class Star extends InteractionTarget {
 
             nextObject(this.particles, Particle)
                 .spawn(this.pos.x, this.pos.y, speed, 
-                    STAR_DEATH_TIME-1, STAR_DEATH_TIME / 4,
+                    COLLECTIBLE_DEATH_TIME-1, COLLECTIBLE_DEATH_TIME / 4,
                     BASE_GRAVITY, 0);
         }
     }
@@ -119,9 +115,9 @@ export class Star extends InteractionTarget {
             this.spawnParticles(5, 3, -Math.PI/10);
 
             this.dying = true;
-            this.deathTimer = STAR_DEATH_TIME;
+            this.deathTimer = COLLECTIBLE_DEATH_TIME;
 
-            pl.addStar(this.isOneUp);
+            pl.addCollectable(this.id);
 
             return true;
         }

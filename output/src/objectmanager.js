@@ -1,11 +1,11 @@
 import { Checkpoint } from "./checkpoint.js";
 import { getEnemyType } from "./enemytypes.js";
 import { Player } from "./player.js";
-import { Star } from "./star.js";
+import { Collectible } from "./collectible.js";
 var ObjectManager = /** @class */ (function () {
     function ObjectManager(state) {
         this.player = new Player(0, 0, state);
-        this.stars = new Array();
+        this.collectibles = new Array();
         this.enemies = new Array();
         this.checkpoints = new Array();
     }
@@ -25,12 +25,12 @@ var ObjectManager = /** @class */ (function () {
     };
     ObjectManager.prototype.initialCameraCheck = function (cam) {
         this.initialCheckForGameobjectArray(this.enemies, cam);
-        this.initialCheckForGameobjectArray(this.stars, cam);
+        this.initialCheckForGameobjectArray(this.collectibles, cam);
         this.initialCheckForGameobjectArray(this.checkpoints, cam);
     };
     ObjectManager.prototype.update = function (cam, stage, ev) {
         // Static
-        this.updateInteractionTargetArray(this.stars, cam, ev);
+        this.updateInteractionTargetArray(this.collectibles, cam, ev);
         this.updateInteractionTargetArray(this.checkpoints, cam, ev);
         // Player
         this.player.specialCameraCheck(cam);
@@ -60,7 +60,7 @@ var ObjectManager = /** @class */ (function () {
             var e = _a[_i];
             e.preDraw(c);
         }
-        for (var _b = 0, _c = this.stars; _b < _c.length; _b++) {
+        for (var _b = 0, _c = this.collectibles; _b < _c.length; _b++) {
             var s = _c[_b];
             s.draw(c);
         }
@@ -81,9 +81,9 @@ var ObjectManager = /** @class */ (function () {
     ObjectManager.prototype.setPlayerPosition = function (x, y) {
         this.player.setPosition(x * 16 + 8, y * 16 + 8);
     };
-    ObjectManager.prototype.addStar = function (x, y, isOneUp) {
-        if (isOneUp === void 0) { isOneUp = false; }
-        this.stars.push(new Star(x * 16 + 8, y * 16 + 8, isOneUp));
+    ObjectManager.prototype.addCollectible = function (x, y, id) {
+        if (id === void 0) { id = 0; }
+        this.collectibles.push(new Collectible(x * 16 + 8, y * 16 + 8, id));
     };
     ObjectManager.prototype.addCheckpoint = function (x, y, makeActive) {
         if (makeActive === void 0) { makeActive = false; }

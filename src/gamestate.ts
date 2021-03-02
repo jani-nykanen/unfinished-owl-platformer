@@ -4,31 +4,49 @@ export class GameState {
 
 
     private stars : number;
-    private changed : boolean;
+    private lives : number;
+
+    private starsChanged : boolean;
+    private livesChanged : boolean;
 
 
-    constructor() {
+    constructor(startingLives = 5) {
 
         this.stars = 0;
-        this.changed = false;
+        this.lives = startingLives;
+
+        this.starsChanged = false;
+        this.livesChanged = false;
     }
 
 
     public update() {
 
-        this.changed = false;
+        this.starsChanged = false;
+        this.livesChanged = false;
     }
 
 
     public addStar() {
 
         ++ this.stars;
-        this.changed = true;
+
+        this.starsChanged = true;
     }
 
 
-    public hasChanged = () : boolean => this.changed;
+    public addLives(count) {
+
+        this.lives = Math.max(0, this.lives + count);
+
+        this.livesChanged = true;
+    }
 
 
-    public getStarCount = () : number =>  this.stars;
+    public hasStarsChanged = () : boolean => this.starsChanged;
+    public hasLivesChanged = () : boolean => this.livesChanged;
+
+
+    public getStarCount = () : number => this.stars;
+    public getLifeCount = () : number => this.lives;
 }

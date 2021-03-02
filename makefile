@@ -1,8 +1,8 @@
 
 .PHONY: js
 js:
-	#mkdir -p output
-	#mkdir -p output/src
+	mkdir -p output
+	mkdir -p output/src
 	tsc src/*.ts --module es2020 --lib es2020,dom --outDir output/src
 
 server:

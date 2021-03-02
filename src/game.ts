@@ -8,7 +8,7 @@ import { Stage } from "./stage.js";
 import { State } from "./util.js";
 
 
-const HUD_APPEAR_TIME = 30;
+const HUD_APPEAR_TIME = 15;
 const HUD_TIME = 120;
 
 
@@ -22,9 +22,9 @@ export class GameScene implements Scene {
 
     private cloudPos : Array<number>;
 
-    private hudAppearTimer : number;
-    private hudAppearMode : number;
-    private hudTimer : number;
+    private hudAppearTimer : Array<number>;
+    private hudAppearMode : Array<number>;
+    private hudTimer : Array<number>;
 
     private paused : boolean;
     private pauseWaveTimer : number;
@@ -44,39 +44,34 @@ export class GameScene implements Scene {
 
         this.cloudPos = (new Array<number>(2)).fill(0);
 
-        this.hudAppearTimer = 0;
-        this.hudAppearMode = 0;
-        this.hudTimer = 0;
+        this.hudAppearTimer = (new Array<number> (2)).fill(0);
+        this.hudAppearMode = (new Array<number> (2)).fill(0);
+        this.hudTimer = (new Array<number> (2)).fill(0);
         this.paused = false;
         this.pauseWaveTimer = 0;
     }
 
 
-    private updateHUD(ev : GameEvent) {
+    private updateHudTimer(index : number, condition : boolean, ev : GameEvent) {
 
-        //
-        // All these nested ifs are so ugly, but this was the
-        // easiest way to achieve this
-        //
+        if (condition) {
 
-        if (this.state.hasChanged()) {
-
-            switch (this.hudAppearMode) {
+            switch (this.hudAppearMode[index]) {
 
             case 0:
 
-                this.hudAppearMode = 1;
-                this.hudAppearTimer = HUD_APPEAR_TIME;
+                this.hudAppearMode[index] = 1;
+                this.hudAppearTimer[index] = HUD_APPEAR_TIME;
                 break;
 
             case 2:
 
-                this.hudAppearTimer = HUD_APPEAR_TIME - this.hudAppearTimer;
-                this.hudAppearMode = 1;
+                this.hudAppearTimer[index] = HUD_APPEAR_TIME - this.hudAppearTimer[index];
+                this.hudAppearMode[index] = 1;
                 break;
 
             case 3:
-                this.hudTimer = HUD_TIME;
+                this.hudTimer[index] = HUD_TIME;
                 break;
 
             default:
@@ -85,29 +80,37 @@ export class GameScene implements Scene {
             
         }
 
-        if (this.hudAppearMode != 0) {
+        if (this.hudAppearMode[index] != 0) {
 
-            if (this.hudAppearMode == 3) {
+            if (this.hudAppearMode[index] == 3) {
 
-                if ((this.hudTimer -= ev.step) <= 0) {
+                if ((this.hudTimer[index] -= ev.step) <= 0) {
 
-                    this.hudAppearMode = 2;
-                    this.hudAppearTimer = HUD_APPEAR_TIME;
+                    this.hudAppearMode[index] = 2;
+                    this.hudAppearTimer[index] = HUD_APPEAR_TIME;
                 }
             }
-            else if ((this.hudAppearTimer -= ev.step) <= 0) {
+            else if ((this.hudAppearTimer[index] -= ev.step) <= 0) {
 
-                if (this.hudAppearMode == 1) {
+                if (this.hudAppearMode[index] == 1) {
 
-                    this.hudAppearMode = 3;
-                    this.hudTimer = HUD_TIME;
+                    this.hudAppearMode[index] = 3;
+                    this.hudTimer[index] = HUD_TIME;
                 }
                 else {
 
-                    this.hudAppearMode = 0;
+                    this.hudAppearMode[index] = 0;
                 }
             }
         }
+    }
+
+
+
+    private updateHUD(ev : GameEvent) {
+
+        this.updateHudTimer(0, this.state.hasLivesChanged(), ev);
+        this.updateHudTimer(1, this.state.hasStarsChanged(), ev);
     }
 
 
@@ -118,8 +121,11 @@ export class GameScene implements Scene {
 
         if (ev.getAction("start") == State.Pressed) {
 
-            this.hudTimer = HUD_TIME;
-            this.hudAppearMode = 3;
+            for (let i = 0; i < this.hudTimer.length; ++ i) {
+
+                this.hudTimer[i] = HUD_TIME;
+                this.hudAppearMode[i] = 3;
+            }
             this.paused = !this.paused;
             this.pauseWaveTimer = 0;
         }
@@ -173,28 +179,46 @@ export class GameScene implements Scene {
     }
 
 
+    private computeHudElementPosition(index : number) : number {
+
+        if (this.hudAppearMode[index] == 0) 
+            return -16;
+
+        let y = 2;
+        if (this.hudAppearMode[index] == 1) {
+
+            y = y - 16 / HUD_APPEAR_TIME * this.hudAppearTimer[index];
+        }
+        else if (this.hudAppearMode[index] == 2) {
+
+            y = y - 16 / HUD_APPEAR_TIME * (HUD_APPEAR_TIME - this.hudAppearTimer[index]);
+        }
+
+        return y;
+    }
+
+
     private drawHUD(c : Canvas) {
 
         let fontBigger = c.getBitmap("fontBigger");
 
-        if (this.hudAppearMode == 0) return;
+        // Lives
+        let y = this.computeHudElementPosition(0);
+        let str =  String.fromCharCode(4) + 
+            String.fromCharCode(2) + 
+            String(this.state.getLifeCount());
+        if (y > -16)
+            c.drawText(fontBigger, str, 4, y, -6, 0, false);
 
-        let y = 2;
-        if (this.hudAppearMode == 1) {
-
-            y = y - 16 / HUD_APPEAR_TIME * this.hudAppearTimer;
-        }
-        else if (this.hudAppearMode == 2) {
-
-            y = y - 16 / HUD_APPEAR_TIME * (HUD_APPEAR_TIME - this.hudAppearTimer);
-        }
-
-        let str =  String.fromCharCode(3) + 
+        // Stars
+        y = this.computeHudElementPosition(1);
+        str =  String.fromCharCode(3) + 
             String.fromCharCode(2) + 
             String(this.state.getStarCount()) +
             "/" + String(this.stage.starCount);
+        if (y > -16)
+            c.drawText(fontBigger, str, c.width/2, y, -6, 0, true);
 
-        c.drawText(fontBigger, str, c.width/2, y, -6, 0, true);
     }
 
 

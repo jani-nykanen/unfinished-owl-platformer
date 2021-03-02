@@ -9,14 +9,14 @@ import { GameState } from "./gamestate.js";
 import { InteractionTarget } from "./interactiontarget.js";
 import { Player } from "./player.js";
 import { Stage } from "./stage.js";
-import { Star } from "./star.js";
+import { Collectible } from "./collectible.js";
 
 
 export class ObjectManager {
 
 
     private player : Player;
-    private stars : Array<Star>;
+    private collectibles : Array<Collectible>;
     private checkpoints : Array<Checkpoint>;
     private enemies : Array<Enemy>;
 
@@ -24,7 +24,7 @@ export class ObjectManager {
     constructor(state : GameState) {
 
         this.player = new Player(0, 0, state);
-        this.stars = new Array<Star> ();
+        this.collectibles = new Array<Collectible> ();
         this.enemies = new Array<Enemy> ();
         this.checkpoints = new Array<Checkpoint> ();
     }
@@ -54,7 +54,7 @@ export class ObjectManager {
     public initialCameraCheck(cam : Camera) {
 
         this.initialCheckForGameobjectArray(this.enemies, cam);
-        this.initialCheckForGameobjectArray(this.stars, cam);
+        this.initialCheckForGameobjectArray(this.collectibles, cam);
         this.initialCheckForGameobjectArray(this.checkpoints, cam);
     }
 
@@ -62,7 +62,7 @@ export class ObjectManager {
     public update(cam : Camera, stage : Stage, ev : GameEvent) {
         
         // Static
-        this.updateInteractionTargetArray(this.stars, cam, ev);
+        this.updateInteractionTargetArray(this.collectibles, cam, ev);
         this.updateInteractionTargetArray(this.checkpoints, cam, ev);
 
         // Player
@@ -101,7 +101,7 @@ export class ObjectManager {
             e.preDraw(c);
         }
 
-        for (let s of this.stars) {
+        for (let s of this.collectibles) {
 
             s.draw(c);
         }
@@ -133,9 +133,9 @@ export class ObjectManager {
     }
 
 
-    public addStar(x : number, y : number, isOneUp = false) {
+    public addCollectible(x : number, y : number, id = 0) {
 
-        this.stars.push(new Star(x*16 + 8, y*16 + 8, isOneUp));
+        this.collectibles.push(new Collectible(x*16 + 8, y*16 + 8, id));
     }
 
 

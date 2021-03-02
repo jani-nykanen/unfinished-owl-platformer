@@ -577,10 +577,21 @@ export class Player extends CollisionObject {
     }
 
 
-    public addStar(isOneUp = false) {
+    public addCollectable(id : number) {
 
-        if (!isOneUp)
+        switch(id) {
+
+        case 0:
             this.state.addStar();
+            break;
+
+        case 1:
+            this.state.addLives(1);
+            break;
+
+        default:
+            break;
+        }
     }
 
     
@@ -655,6 +666,8 @@ export class Player extends CollisionObject {
         dir.normalize();
 
         this.speed = Vector2.scalarMultiply(dir, -ESCAPE_SPEED);
+
+        this.state.addLives(-1);
     }
 
 

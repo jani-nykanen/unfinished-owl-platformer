@@ -16,35 +16,35 @@ import { Particle } from "./particle.js";
 import { Sprite } from "./sprite.js";
 import { nextObject } from "./util.js";
 import { Vector2 } from "./vector.js";
-var STAR_DEATH_TIME = 32;
-var Star = /** @class */ (function (_super) {
-    __extends(Star, _super);
-    function Star(x, y, isOneUp) {
-        if (isOneUp === void 0) { isOneUp = false; }
+var COLLECTIBLE_DEATH_TIME = 32;
+var Collectible = /** @class */ (function (_super) {
+    __extends(Collectible, _super);
+    function Collectible(x, y, id) {
+        if (id === void 0) { id = 0; }
         var _this = _super.call(this, x, y) || this;
         _this.spr = new Sprite(24, 24);
-        _this.spr.setFrame(0, isOneUp ? 1 : 0);
+        _this.spr.setFrame(0, id);
         _this.hitbox = new Vector2(8, 20);
         _this.waveTimer = Math.random() * (Math.PI * 2);
         _this.deathTimer = 0;
         _this.particles = new Array();
-        _this.isOneUp = isOneUp;
+        _this.id = id;
         return _this;
     }
-    Star.prototype.die = function (ev) {
+    Collectible.prototype.die = function (ev) {
         for (var _i = 0, _a = this.particles; _i < _a.length; _i++) {
             var p = _a[_i];
             p.update(ev);
         }
         return (this.deathTimer -= ev.step) <= 0;
     };
-    Star.prototype.updateLogic = function (ev) {
+    Collectible.prototype.updateLogic = function (ev) {
         var ANIM_SPEED = 6;
         var WAVE_SPEED = 0.05;
         this.spr.animate(this.spr.getRow(), 0, 7, ANIM_SPEED, ev.step);
         this.waveTimer = (this.waveTimer + WAVE_SPEED * ev.step) % (Math.PI * 2);
     };
-    Star.prototype.draw = function (c) {
+    Collectible.prototype.draw = function (c) {
         var AMPLITUDE = 3;
         if (!this.exist || !this.inCamera)
             return;
@@ -58,7 +58,7 @@ var Star = /** @class */ (function (_super) {
         var yoff = Math.round(Math.sin(this.waveTimer) * AMPLITUDE);
         c.drawSprite(this.spr, c.getBitmap("star"), Math.round(this.pos.x) - 12, Math.round(this.pos.y) - 12 + yoff);
     };
-    Star.prototype.spawnParticles = function (count, speedAmount, angleOffset) {
+    Collectible.prototype.spawnParticles = function (count, speedAmount, angleOffset) {
         if (angleOffset === void 0) { angleOffset = 0; }
         var BASE_JUMP = -0.5;
         var BASE_GRAVITY = 0.2;
@@ -68,21 +68,21 @@ var Star = /** @class */ (function (_super) {
             angle = Math.PI * 2 / count * i + angleOffset;
             speed = new Vector2(Math.cos(angle) * speedAmount, Math.sin(angle) * speedAmount + BASE_JUMP * speedAmount);
             nextObject(this.particles, Particle)
-                .spawn(this.pos.x, this.pos.y, speed, STAR_DEATH_TIME - 1, STAR_DEATH_TIME / 4, BASE_GRAVITY, 0);
+                .spawn(this.pos.x, this.pos.y, speed, COLLECTIBLE_DEATH_TIME - 1, COLLECTIBLE_DEATH_TIME / 4, BASE_GRAVITY, 0);
         }
     };
-    Star.prototype.playerCollision = function (pl, ev) {
+    Collectible.prototype.playerCollision = function (pl, ev) {
         if (!this.exist || this.dying || !this.inCamera || pl.isDying())
             return false;
         if (pl.overlayObject(this)) {
             this.spawnParticles(5, 3, -Math.PI / 10);
             this.dying = true;
-            this.deathTimer = STAR_DEATH_TIME;
-            pl.addStar(this.isOneUp);
+            this.deathTimer = COLLECTIBLE_DEATH_TIME;
+            pl.addCollectable(this.id);
             return true;
         }
         return false;
     };
-    return Star;
+    return Collectible;
 }(InteractionTarget));
-export { Star };
+export { Collectible };

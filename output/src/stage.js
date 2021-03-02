@@ -156,7 +156,7 @@ var Stage = /** @class */ (function () {
                     this.layers[layer][y * this.width + x] = 0;
                     this.spawnPieces(x * 16 + 8, y * 16 + 8, 6, CHIP_SPEED, 0);
                     if (objects != null && colId == 33) {
-                        objects.addStar(x, y, false);
+                        objects.addCollectible(x, y, 0);
                     }
                     return;
                 }
@@ -203,6 +203,7 @@ var Stage = /** @class */ (function () {
     };
     Stage.prototype.parseObjects = function (objects) {
         var FIRST_OBJECT_INDEX = 257;
+        var COLLECTIBLE_IDS = [0, 0, 1];
         var tid;
         for (var y = 0; y < this.height; ++y) {
             for (var x = 0; x < this.width; ++x) {
@@ -219,7 +220,7 @@ var Stage = /** @class */ (function () {
                     // Star
                     case 1:
                     case 3:
-                        objects.addStar(x, y, tid == 3);
+                        objects.addCollectible(x, y, COLLECTIBLE_IDS[tid - 1]);
                         break;
                     // Checkpoint
                     case 2:

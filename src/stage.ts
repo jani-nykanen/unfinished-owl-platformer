@@ -263,7 +263,7 @@ export class Stage {
                 
                 if (objects != null && colId == 33) {
 
-                    objects.addStar(x, y, false);
+                    objects.addCollectible(x, y, 0);
                 }
                 
                 return;
@@ -339,6 +339,7 @@ export class Stage {
     public parseObjects(objects : ObjectManager) {
 
         const FIRST_OBJECT_INDEX = 257;
+        const COLLECTIBLE_IDS = [0, 0, 1];
 
         let tid : number;
         for (let y = 0; y < this.height; ++ y) {
@@ -363,7 +364,8 @@ export class Stage {
                 case 1:
                 case 3:
 
-                    objects.addStar(x, y, tid == 3);
+                    objects.addCollectible(x, y, 
+                        COLLECTIBLE_IDS[tid-1]);
                     break;
 
                 // Checkpoint

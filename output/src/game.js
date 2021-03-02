@@ -3,7 +3,7 @@ import { GameState } from "./gamestate.js";
 import { ObjectManager } from "./objectmanager.js";
 import { Stage } from "./stage.js";
 import { State } from "./util.js";
-var HUD_APPEAR_TIME = 30;
+var HUD_APPEAR_TIME = 15;
 var HUD_TIME = 120;
 var GameScene = /** @class */ (function () {
     function GameScene(param, ev) {
@@ -15,58 +15,60 @@ var GameScene = /** @class */ (function () {
         this.objects.setCamera(this.cam);
         this.objects.initialCameraCheck(this.cam);
         this.cloudPos = (new Array(2)).fill(0);
-        this.hudAppearTimer = 0;
-        this.hudAppearMode = 0;
-        this.hudTimer = 0;
+        this.hudAppearTimer = (new Array(2)).fill(0);
+        this.hudAppearMode = (new Array(2)).fill(0);
+        this.hudTimer = (new Array(2)).fill(0);
         this.paused = false;
         this.pauseWaveTimer = 0;
     }
-    GameScene.prototype.updateHUD = function (ev) {
-        //
-        // All these nested ifs are so ugly, but this was the
-        // easiest way to achieve this
-        //
-        if (this.state.hasChanged()) {
-            switch (this.hudAppearMode) {
+    GameScene.prototype.updateHudTimer = function (index, condition, ev) {
+        if (condition) {
+            switch (this.hudAppearMode[index]) {
                 case 0:
-                    this.hudAppearMode = 1;
-                    this.hudAppearTimer = HUD_APPEAR_TIME;
+                    this.hudAppearMode[index] = 1;
+                    this.hudAppearTimer[index] = HUD_APPEAR_TIME;
                     break;
                 case 2:
-                    this.hudAppearTimer = HUD_APPEAR_TIME - this.hudAppearTimer;
-                    this.hudAppearMode = 1;
+                    this.hudAppearTimer[index] = HUD_APPEAR_TIME - this.hudAppearTimer[index];
+                    this.hudAppearMode[index] = 1;
                     break;
                 case 3:
-                    this.hudTimer = HUD_TIME;
+                    this.hudTimer[index] = HUD_TIME;
                     break;
                 default:
                     break;
             }
         }
-        if (this.hudAppearMode != 0) {
-            if (this.hudAppearMode == 3) {
-                if ((this.hudTimer -= ev.step) <= 0) {
-                    this.hudAppearMode = 2;
-                    this.hudAppearTimer = HUD_APPEAR_TIME;
+        if (this.hudAppearMode[index] != 0) {
+            if (this.hudAppearMode[index] == 3) {
+                if ((this.hudTimer[index] -= ev.step) <= 0) {
+                    this.hudAppearMode[index] = 2;
+                    this.hudAppearTimer[index] = HUD_APPEAR_TIME;
                 }
             }
-            else if ((this.hudAppearTimer -= ev.step) <= 0) {
-                if (this.hudAppearMode == 1) {
-                    this.hudAppearMode = 3;
-                    this.hudTimer = HUD_TIME;
+            else if ((this.hudAppearTimer[index] -= ev.step) <= 0) {
+                if (this.hudAppearMode[index] == 1) {
+                    this.hudAppearMode[index] = 3;
+                    this.hudTimer[index] = HUD_TIME;
                 }
                 else {
-                    this.hudAppearMode = 0;
+                    this.hudAppearMode[index] = 0;
                 }
             }
         }
+    };
+    GameScene.prototype.updateHUD = function (ev) {
+        this.updateHudTimer(0, this.state.hasLivesChanged(), ev);
+        this.updateHudTimer(1, this.state.hasStarsChanged(), ev);
     };
     GameScene.prototype.refresh = function (ev) {
         var CLOUD_SPEED = [0.125, 0.25];
         var PAUSE_WAVE_SPEED = 0.05;
         if (ev.getAction("start") == State.Pressed) {
-            this.hudTimer = HUD_TIME;
-            this.hudAppearMode = 3;
+            for (var i = 0; i < this.hudTimer.length; ++i) {
+                this.hudTimer[i] = HUD_TIME;
+                this.hudAppearMode[i] = 3;
+            }
             this.paused = !this.paused;
             this.pauseWaveTimer = 0;
         }
@@ -99,22 +101,35 @@ var GameScene = /** @class */ (function () {
             c.drawBitmap(bmpTrees, i * bmpTrees.width - dx, 16 + 192 - bmpTrees.height - dy);
         }
     };
+    GameScene.prototype.computeHudElementPosition = function (index) {
+        if (this.hudAppearMode[index] == 0)
+            return -16;
+        var y = 2;
+        if (this.hudAppearMode[index] == 1) {
+            y = y - 16 / HUD_APPEAR_TIME * this.hudAppearTimer[index];
+        }
+        else if (this.hudAppearMode[index] == 2) {
+            y = y - 16 / HUD_APPEAR_TIME * (HUD_APPEAR_TIME - this.hudAppearTimer[index]);
+        }
+        return y;
+    };
     GameScene.prototype.drawHUD = function (c) {
         var fontBigger = c.getBitmap("fontBigger");
-        if (this.hudAppearMode == 0)
-            return;
-        var y = 2;
-        if (this.hudAppearMode == 1) {
-            y = y - 16 / HUD_APPEAR_TIME * this.hudAppearTimer;
-        }
-        else if (this.hudAppearMode == 2) {
-            y = y - 16 / HUD_APPEAR_TIME * (HUD_APPEAR_TIME - this.hudAppearTimer);
-        }
-        var str = String.fromCharCode(3) +
+        // Lives
+        var y = this.computeHudElementPosition(0);
+        var str = String.fromCharCode(4) +
+            String.fromCharCode(2) +
+            String(this.state.getLifeCount());
+        if (y > -16)
+            c.drawText(fontBigger, str, 4, y, -6, 0, false);
+        // Stars
+        y = this.computeHudElementPosition(1);
+        str = String.fromCharCode(3) +
             String.fromCharCode(2) +
             String(this.state.getStarCount()) +
             "/" + String(this.stage.starCount);
-        c.drawText(fontBigger, str, c.width / 2, y, -6, 0, true);
+        if (y > -16)
+            c.drawText(fontBigger, str, c.width / 2, y, -6, 0, true);
     };
     GameScene.prototype.drawPause = function (c) {
         var TEXT_AMPLITUDE = 4;
