@@ -9,6 +9,10 @@ import { Sprite } from "./sprite.js";
 import { Stage } from "./stage.js";
 import { boxOverlay, computeFriction, nextObject, State } from "./util.js";
 import { Vector2 } from "./vector.js";
+import { FollowerFly } from "./fly.js";
+
+
+const FLY_MIN_DIST = 24;
 
 
 export class Player extends CollisionObject {
@@ -45,6 +49,8 @@ export class Player extends CollisionObject {
     private spinHitbox : Vector2;
 
     private flip : Flip;
+
+    private fly : FollowerFly;
 
     private readonly state : GameState;
 
@@ -92,6 +98,11 @@ export class Player extends CollisionObject {
         this.flip = Flip.None;
 
         this.state = state;
+
+        this.fly = new FollowerFly(
+            this.pos.x - FLY_MIN_DIST, 
+            this.pos.y, 
+            this, FLY_MIN_DIST);
     }
 
 
@@ -426,6 +437,8 @@ export class Player extends CollisionObject {
 
         this.canJump = false;
         this.slopeFriction = 0;
+
+        this.fly.update(ev);
     }
 
 
@@ -464,6 +477,8 @@ export class Player extends CollisionObject {
 
             p.draw(c);
         }
+
+        this.fly.draw(c);
 
         if (this.hurtTimer > 0 && Math.floor(this.hurtTimer / 4) % 2 == 0)
             return;
@@ -574,6 +589,8 @@ export class Player extends CollisionObject {
         this.pos = new Vector2(x, y);
         this.checkpoint = this.pos.clone();
         this.oldPos = this.pos.clone();
+
+        this.fly.setPos(this.pos.x - FLY_MIN_DIST, this.pos.y);
     }
 
 

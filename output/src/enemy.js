@@ -109,7 +109,7 @@ var Enemy = /** @class */ (function (_super) {
     Enemy.prototype.playerEvent = function (pl, ev) { };
     Enemy.prototype.spawnParticles = function (count, speedAmount, angleOffset, id, time) {
         if (angleOffset === void 0) { angleOffset = 0; }
-        if (id === void 0) { id = 1; }
+        if (id === void 0) { id = 3; }
         if (time === void 0) { time = ENEMY_DEATH_TIME - 1; }
         var ANIM_SPEED = 4.0;
         var angle;
@@ -137,7 +137,7 @@ var Enemy = /** @class */ (function (_super) {
             pl.doesCollideSpinning(this)) {
             this.dying = true;
             this.deathTime = ENEMY_DEATH_TIME;
-            this.spawnParticles(4, 3.0, Math.PI / 4, 2, ENEMY_DEATH_TIME / 2);
+            this.spawnParticles(4, 3.0, Math.PI / 4, 4, ENEMY_DEATH_TIME / 2);
             this.knocked = true;
             this.target.x = SPIN_KNOCK_SPEED_X *
                 Math.sign(this.pos.x - pl.getPos().x);

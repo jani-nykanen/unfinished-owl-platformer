@@ -203,7 +203,7 @@ var Stage = /** @class */ (function () {
     };
     Stage.prototype.parseObjects = function (objects) {
         var FIRST_OBJECT_INDEX = 257;
-        var COLLECTIBLE_IDS = [0, 0, 1];
+        var COLLECTIBLE_IDS = [0, 0, 1, 2];
         var tid;
         for (var y = 0; y < this.height; ++y) {
             for (var x = 0; x < this.width; ++x) {
@@ -220,6 +220,7 @@ var Stage = /** @class */ (function () {
                     // Star
                     case 1:
                     case 3:
+                    case 4:
                         objects.addCollectible(x, y, COLLECTIBLE_IDS[tid - 1]);
                         break;
                     // Checkpoint

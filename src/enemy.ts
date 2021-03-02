@@ -170,7 +170,7 @@ export abstract class Enemy extends CollisionObject {
 
 
     private spawnParticles(count : number, speedAmount : number, 
-        angleOffset = 0, id = 1, time = ENEMY_DEATH_TIME-1) {
+        angleOffset = 0, id = 3, time = ENEMY_DEATH_TIME-1) {
 
         const ANIM_SPEED = 4.0;
 
@@ -214,7 +214,7 @@ export abstract class Enemy extends CollisionObject {
 
             this.dying = true;
             this.deathTime = ENEMY_DEATH_TIME;
-            this.spawnParticles(4, 3.0, Math.PI/4, 2, ENEMY_DEATH_TIME/2);
+            this.spawnParticles(4, 3.0, Math.PI/4, 4, ENEMY_DEATH_TIME/2);
             this.knocked = true;
 
             this.target.x = SPIN_KNOCK_SPEED_X * 

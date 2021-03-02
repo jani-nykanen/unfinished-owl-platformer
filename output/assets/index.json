@@ -15,6 +15,7 @@
         {"name": "enemies",  "path": "enemies.png"},
         {"name": "checkpoint",  "path": "checkpoint.png"},
         {"name": "pieces",  "path": "pieces.png"},
+        {"name": "fly",  "path": "fly.png"},
         {"name": "tileset",  "path": "tileset.png"}
     ],
 

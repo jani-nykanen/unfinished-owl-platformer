@@ -18,6 +18,8 @@ import { CollisionObject } from "./gameobject.js";
 import { Sprite } from "./sprite.js";
 import { boxOverlay, computeFriction, nextObject, State } from "./util.js";
 import { Vector2 } from "./vector.js";
+import { FollowerFly } from "./fly.js";
+var FLY_MIN_DIST = 24;
 var Player = /** @class */ (function (_super) {
     __extends(Player, _super);
     function Player(x, y, state) {
@@ -53,6 +55,7 @@ var Player = /** @class */ (function (_super) {
         _this.canSpin = true;
         _this.flip = Flip.None;
         _this.state = state;
+        _this.fly = new FollowerFly(_this.pos.x - FLY_MIN_DIST, _this.pos.y, _this, FLY_MIN_DIST);
         return _this;
     }
     Player.prototype.respawn = function () {
@@ -288,6 +291,7 @@ var Player = /** @class */ (function (_super) {
         this.updatePieces(ev);
         this.canJump = false;
         this.slopeFriction = 0;
+        this.fly.update(ev);
     };
     Player.prototype.specialCameraCheck = function (cam) {
         for (var _i = 0, _a = this.pieces; _i < _a.length; _i++) {
@@ -313,6 +317,7 @@ var Player = /** @class */ (function (_super) {
             var p = _a[_i];
             p.draw(c);
         }
+        this.fly.draw(c);
         if (this.hurtTimer > 0 && Math.floor(this.hurtTimer / 4) % 2 == 0)
             return;
         var px = Math.round(this.pos.x);
@@ -388,6 +393,7 @@ var Player = /** @class */ (function (_super) {
         this.pos = new Vector2(x, y);
         this.checkpoint = this.pos.clone();
         this.oldPos = this.pos.clone();
+        this.fly.setPos(this.pos.x - FLY_MIN_DIST, this.pos.y);
     };
     Player.prototype.addCollectable = function (id) {
         switch (id) {

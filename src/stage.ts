@@ -339,7 +339,7 @@ export class Stage {
     public parseObjects(objects : ObjectManager) {
 
         const FIRST_OBJECT_INDEX = 257;
-        const COLLECTIBLE_IDS = [0, 0, 1];
+        const COLLECTIBLE_IDS = [0, 0, 1, 2];
 
         let tid : number;
         for (let y = 0; y < this.height; ++ y) {
@@ -363,6 +363,7 @@ export class Stage {
                 // Star
                 case 1:
                 case 3:
+                case 4:
 
                     objects.addCollectible(x, y, 
                         COLLECTIBLE_IDS[tid-1]);

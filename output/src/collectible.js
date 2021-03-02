@@ -68,7 +68,7 @@ var Collectible = /** @class */ (function (_super) {
             angle = Math.PI * 2 / count * i + angleOffset;
             speed = new Vector2(Math.cos(angle) * speedAmount, Math.sin(angle) * speedAmount + BASE_JUMP * speedAmount);
             nextObject(this.particles, Particle)
-                .spawn(this.pos.x, this.pos.y, speed, COLLECTIBLE_DEATH_TIME - 1, COLLECTIBLE_DEATH_TIME / 4, BASE_GRAVITY, 0);
+                .spawn(this.pos.x, this.pos.y, speed, COLLECTIBLE_DEATH_TIME - 1, COLLECTIBLE_DEATH_TIME / 4, BASE_GRAVITY, this.id);
         }
     };
     Collectible.prototype.playerCollision = function (pl, ev) {

@@ -100,7 +100,7 @@ export class Collectible extends InteractionTarget {
             nextObject(this.particles, Particle)
                 .spawn(this.pos.x, this.pos.y, speed, 
                     COLLECTIBLE_DEATH_TIME-1, COLLECTIBLE_DEATH_TIME / 4,
-                    BASE_GRAVITY, 0);
+                    BASE_GRAVITY, this.id);
         }
     }
 
