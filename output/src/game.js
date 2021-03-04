@@ -5,6 +5,7 @@ import { Stage } from "./stage.js";
 import { State } from "./util.js";
 var HUD_APPEAR_TIME = 15;
 var HUD_TIME = 120;
+var HUD_ELEMENT_COUNT = 3;
 var GameScene = /** @class */ (function () {
     function GameScene(param, ev) {
         this.state = new GameState();
@@ -15,9 +16,9 @@ var GameScene = /** @class */ (function () {
         this.objects.setCamera(this.cam);
         this.objects.initialCameraCheck(this.cam);
         this.cloudPos = (new Array(2)).fill(0);
-        this.hudAppearTimer = (new Array(2)).fill(0);
-        this.hudAppearMode = (new Array(2)).fill(0);
-        this.hudTimer = (new Array(2)).fill(0);
+        this.hudAppearTimer = (new Array(HUD_ELEMENT_COUNT)).fill(0);
+        this.hudAppearMode = (new Array(HUD_ELEMENT_COUNT)).fill(0);
+        this.hudTimer = (new Array(HUD_ELEMENT_COUNT)).fill(0);
         this.paused = false;
         this.pauseWaveTimer = 0;
     }
@@ -60,6 +61,7 @@ var GameScene = /** @class */ (function () {
     GameScene.prototype.updateHUD = function (ev) {
         this.updateHudTimer(0, this.state.hasLivesChanged(), ev);
         this.updateHudTimer(1, this.state.hasStarsChanged(), ev);
+        this.updateHudTimer(2, this.state.hasGemsChanged(), ev);
     };
     GameScene.prototype.refresh = function (ev) {
         var CLOUD_SPEED = [0.125, 0.25];
@@ -130,6 +132,13 @@ var GameScene = /** @class */ (function () {
             "/" + String(this.stage.starCount);
         if (y > -16)
             c.drawText(fontBigger, str, c.width / 2, y, -6, 0, true);
+        // Gems
+        y = this.computeHudElementPosition(2);
+        str = String.fromCharCode(5) +
+            String.fromCharCode(2) +
+            String(this.state.getGemCount());
+        if (y > -16)
+            c.drawText(fontBigger, str, c.width - (str.length + 1) * 10, y, -6, 0, false);
     };
     GameScene.prototype.drawPause = function (c) {
         var TEXT_AMPLITUDE = 4;

@@ -609,6 +609,10 @@ export class Player extends CollisionObject {
                 this.fly.spawn(x, y);
             break;
 
+        case 3:
+            this.state.addGem();
+            break;
+
         default:
             break;
         }

@@ -10,6 +10,7 @@ import { State } from "./util.js";
 
 const HUD_APPEAR_TIME = 15;
 const HUD_TIME = 120;
+const HUD_ELEMENT_COUNT = 3;
 
 
 export class GameScene implements Scene {
@@ -44,9 +45,9 @@ export class GameScene implements Scene {
 
         this.cloudPos = (new Array<number>(2)).fill(0);
 
-        this.hudAppearTimer = (new Array<number> (2)).fill(0);
-        this.hudAppearMode = (new Array<number> (2)).fill(0);
-        this.hudTimer = (new Array<number> (2)).fill(0);
+        this.hudAppearTimer = (new Array<number> (HUD_ELEMENT_COUNT)).fill(0);
+        this.hudAppearMode = (new Array<number> (HUD_ELEMENT_COUNT)).fill(0);
+        this.hudTimer = (new Array<number> (HUD_ELEMENT_COUNT)).fill(0);
         this.paused = false;
         this.pauseWaveTimer = 0;
     }
@@ -111,6 +112,7 @@ export class GameScene implements Scene {
 
         this.updateHudTimer(0, this.state.hasLivesChanged(), ev);
         this.updateHudTimer(1, this.state.hasStarsChanged(), ev);
+        this.updateHudTimer(2, this.state.hasGemsChanged(), ev);
     }
 
 
@@ -218,6 +220,15 @@ export class GameScene implements Scene {
             "/" + String(this.stage.starCount);
         if (y > -16)
             c.drawText(fontBigger, str, c.width/2, y, -6, 0, true);
+
+        // Gems
+        y = this.computeHudElementPosition(2);
+        str =  String.fromCharCode(5) + 
+            String.fromCharCode(2) + 
+            String(this.state.getGemCount());
+        if (y > -16)
+            c.drawText(fontBigger, str, c.width - (str.length+1)*10, 
+                y, -6, 0, false);
 
     }
 

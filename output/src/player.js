@@ -407,6 +407,9 @@ var Player = /** @class */ (function (_super) {
                 if (!this.fly.doesExist() || this.fly.isDying())
                     this.fly.spawn(x, y);
                 break;
+            case 3:
+                this.state.addGem();
+                break;
             default:
                 break;
         }
