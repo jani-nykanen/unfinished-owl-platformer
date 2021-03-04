@@ -55,7 +55,7 @@ var Player = /** @class */ (function (_super) {
         _this.canSpin = true;
         _this.flip = Flip.None;
         _this.state = state;
-        _this.fly = new FollowerFly(_this.pos.x - FLY_MIN_DIST, _this.pos.y, _this, FLY_MIN_DIST);
+        _this.fly = new FollowerFly(_this, FLY_MIN_DIST);
         return _this;
     }
     Player.prototype.respawn = function () {
@@ -395,13 +395,17 @@ var Player = /** @class */ (function (_super) {
         this.oldPos = this.pos.clone();
         this.fly.setPos(this.pos.x - FLY_MIN_DIST, this.pos.y);
     };
-    Player.prototype.addCollectable = function (id) {
+    Player.prototype.addCollectable = function (id, x, y) {
         switch (id) {
             case 0:
                 this.state.addStar();
                 break;
             case 1:
                 this.state.addLives(1);
+                break;
+            case 2:
+                if (!this.fly.doesExist() || this.fly.isDying())
+                    this.fly.spawn(x, y);
                 break;
             default:
                 break;
@@ -447,6 +451,18 @@ var Player = /** @class */ (function (_super) {
         dir.normalize();
         this.speed = Vector2.scalarMultiply(dir, -ESCAPE_SPEED);
         this.state.addLives(-1);
+    };
+    Player.prototype.hurt = function (ev) {
+        var HURT_TIME = 60;
+        if (this.dying)
+            return;
+        if (this.fly.doesExist()) {
+            this.fly.kill(ev);
+            this.hurtTimer = HURT_TIME;
+        }
+        else {
+            this.kill(ev);
+        }
     };
     Player.prototype.doesCollideSpinning = function (o) {
         if (!this.spinning)

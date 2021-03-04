@@ -255,15 +255,17 @@ export class Stage {
 
         case 32:
         case 33:
+        case 34:
+        case 35:
 
             if (o.breakCollision(x*16, y*16, 16, 16, ev)) {
 
                 this.layers[layer][y * this.width + x] = 0;
                 this.spawnPieces(x*16 + 8, y*16 + 8, 6, CHIP_SPEED, 0);
                 
-                if (objects != null && colId == 33) {
+                if (objects != null && colId >= 33) {
 
-                    objects.addCollectible(x, y, 0);
+                    objects.addCollectible(x, y, colId - 33);
                 }
                 
                 return;
@@ -339,7 +341,9 @@ export class Stage {
     public parseObjects(objects : ObjectManager) {
 
         const FIRST_OBJECT_INDEX = 257;
-        const COLLECTIBLE_IDS = [0, 0, 1, 2];
+        // I could as well move the checkpoint tile after the collectibles
+        // TODO: Maybe do that
+        const COLLECTIBLE_IDS = [0, 0, 1, 2, 3];
 
         let tid : number;
         for (let y = 0; y < this.height; ++ y) {
@@ -360,10 +364,11 @@ export class Stage {
                     objects.addCheckpoint(x, y, true);
                     break;
                 
-                // Star
+                // Collectible
                 case 1:
                 case 3:
                 case 4:
+                case 5:
 
                     objects.addCollectible(x, y, 
                         COLLECTIBLE_IDS[tid-1]);

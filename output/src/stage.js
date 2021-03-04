@@ -152,11 +152,13 @@ var Stage = /** @class */ (function () {
         switch (colId) {
             case 32:
             case 33:
+            case 34:
+            case 35:
                 if (o.breakCollision(x * 16, y * 16, 16, 16, ev)) {
                     this.layers[layer][y * this.width + x] = 0;
                     this.spawnPieces(x * 16 + 8, y * 16 + 8, 6, CHIP_SPEED, 0);
-                    if (objects != null && colId == 33) {
-                        objects.addCollectible(x, y, 0);
+                    if (objects != null && colId >= 33) {
+                        objects.addCollectible(x, y, colId - 33);
                     }
                     return;
                 }
@@ -203,7 +205,9 @@ var Stage = /** @class */ (function () {
     };
     Stage.prototype.parseObjects = function (objects) {
         var FIRST_OBJECT_INDEX = 257;
-        var COLLECTIBLE_IDS = [0, 0, 1, 2];
+        // I could as well move the checkpoint tile after the collectibles
+        // TODO: Maybe do that
+        var COLLECTIBLE_IDS = [0, 0, 1, 2, 3];
         var tid;
         for (var y = 0; y < this.height; ++y) {
             for (var x = 0; x < this.width; ++x) {
@@ -217,10 +221,11 @@ var Stage = /** @class */ (function () {
                         objects.setPlayerPosition(x, y);
                         objects.addCheckpoint(x, y, true);
                         break;
-                    // Star
+                    // Collectible
                     case 1:
                     case 3:
                     case 4:
+                    case 5:
                         objects.addCollectible(x, y, COLLECTIBLE_IDS[tid - 1]);
                         break;
                     // Checkpoint

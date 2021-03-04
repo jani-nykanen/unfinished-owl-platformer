@@ -49,12 +49,27 @@ export class Collectible extends InteractionTarget {
 
     protected updateLogic(ev : GameEvent) {
 
-        const ANIM_SPEED = 6;
+        const ANIM_SPEED = [6, 6, 6, 8];
+        const LAST_FRAME = [7, 7, 7, 4];
         const WAVE_SPEED = 0.05;
 
-        this.spr.animate(this.spr.getRow(), 0, 7, ANIM_SPEED, ev.step);
+        this.spr.animate(this.spr.getRow(), 0, 
+            LAST_FRAME[this.id], ANIM_SPEED[this.id], ev.step);
 
         this.waveTimer = (this.waveTimer + WAVE_SPEED*ev.step) % (Math.PI*2);
+    }
+
+
+    private drawFlyingText(c : Canvas) {
+
+        let y = Math.min(COLLECTIBLE_DEATH_TIME/2, 
+            COLLECTIBLE_DEATH_TIME - this.deathTimer);
+
+        y = Math.round(this.pos.y - y * 2);
+
+        c.drawText(c.getBitmap("font"), "1 UP!", 
+            Math.round(this.pos.x), y, 
+            0, 0, true);
     }
 
 
@@ -70,6 +85,10 @@ export class Collectible extends InteractionTarget {
 
                 p.draw(c);
             }
+
+            if (this.id == 1)
+                this.drawFlyingText(c);
+
             return;
         }
 
@@ -117,7 +136,7 @@ export class Collectible extends InteractionTarget {
             this.dying = true;
             this.deathTimer = COLLECTIBLE_DEATH_TIME;
 
-            pl.addCollectable(this.id);
+            pl.addCollectable(this.id, this.pos.x, this.pos.y);
 
             return true;
         }

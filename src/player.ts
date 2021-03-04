@@ -99,10 +99,7 @@ export class Player extends CollisionObject {
 
         this.state = state;
 
-        this.fly = new FollowerFly(
-            this.pos.x - FLY_MIN_DIST, 
-            this.pos.y, 
-            this, FLY_MIN_DIST);
+        this.fly = new FollowerFly(this, FLY_MIN_DIST);
     }
 
 
@@ -594,7 +591,7 @@ export class Player extends CollisionObject {
     }
 
 
-    public addCollectable(id : number) {
+    public addCollectable(id : number, x : number, y : number) {
 
         switch(id) {
 
@@ -604,6 +601,12 @@ export class Player extends CollisionObject {
 
         case 1:
             this.state.addLives(1);
+            break;
+
+        case 2:
+
+            if (!this.fly.doesExist() || this.fly.isDying())
+                this.fly.spawn(x, y);
             break;
 
         default:
@@ -666,7 +669,7 @@ export class Player extends CollisionObject {
         
     }
 
-
+    
     public kill(ev : GameEvent) {
 
         const ESCAPE_SPEED = 3.0;
@@ -685,6 +688,25 @@ export class Player extends CollisionObject {
         this.speed = Vector2.scalarMultiply(dir, -ESCAPE_SPEED);
 
         this.state.addLives(-1);
+    }
+
+
+
+    public hurt(ev : GameEvent) {
+
+        const HURT_TIME = 60;
+
+        if (this.dying) return;
+
+        if (this.fly.doesExist()) {
+
+            this.fly.kill(ev);
+            this.hurtTimer = HURT_TIME;
+        }
+        else {
+
+            this.kill(ev);
+        }
     }
 
 

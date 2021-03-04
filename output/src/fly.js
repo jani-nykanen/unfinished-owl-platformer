@@ -16,10 +16,10 @@ import { Sprite } from "./sprite.js";
 import { Vector2 } from "./vector.js";
 var FollowerFly = /** @class */ (function (_super) {
     __extends(FollowerFly, _super);
-    function FollowerFly(x, y, followedObject, triggerDistance) {
-        var _this = _super.call(this, x, y) || this;
+    function FollowerFly(followedObject, triggerDistance) {
+        var _this = _super.call(this, 0, 0) || this;
         _this.followedObject = followedObject;
-        _this.exist = true;
+        _this.exist = false;
         _this.friction = new Vector2(0.1, 0.1);
         _this.computeDistanceToTarget();
         _this.triggerDistance = triggerDistance;
@@ -28,6 +28,20 @@ var FollowerFly = /** @class */ (function (_super) {
         _this.waveTimer = 0;
         return _this;
     }
+    FollowerFly.prototype.spawn = function (x, y) {
+        this.pos = new Vector2(x, y);
+        this.exist = true;
+        this.spr.setFrame(0, 1);
+        this.stopMovement();
+    };
+    FollowerFly.prototype.kill = function (ev) {
+        this.dying = true;
+    };
+    FollowerFly.prototype.die = function (ev) {
+        var DEATH_SPEED = 5;
+        this.spr.animate(0, 0, 4, DEATH_SPEED, ev.step);
+        return this.spr.getColumn() >= 4;
+    };
     FollowerFly.prototype.computeDistanceToTarget = function () {
         this.distanceToObject = Vector2.distance(this.pos, this.followedObject.getPos());
     };
@@ -44,7 +58,7 @@ var FollowerFly = /** @class */ (function (_super) {
         else {
             this.target.zeros();
         }
-        this.spr.animate(0, 0, 3, ANIM_SPEED, ev.step);
+        this.spr.animate(1, 0, 3, ANIM_SPEED, ev.step);
         this.waveTimer = (this.waveTimer + WAVE_SPEED * ev.step) % (Math.PI * 2);
     };
     FollowerFly.prototype.draw = function (c) {

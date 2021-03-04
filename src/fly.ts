@@ -15,13 +15,12 @@ export class FollowerFly extends GameObject {
     private waveTimer : number;
 
 
-    constructor(x : number, y : number, followedObject : GameObject, 
-        triggerDistance : number) {
+    constructor( followedObject : GameObject, triggerDistance : number) {
 
-        super(x, y);
+        super(0, 0);
 
         this.followedObject = followedObject;
-        this.exist = true;
+        this.exist = false;
 
         this.friction = new Vector2(0.1, 0.1);
 
@@ -32,6 +31,32 @@ export class FollowerFly extends GameObject {
 
         this.inCamera = true;
         this.waveTimer = 0;
+    }
+
+
+    public spawn(x : number, y : number) {
+
+        this.pos = new Vector2(x, y);
+        this.exist = true;
+
+        this.spr.setFrame(0, 1);
+
+        this.stopMovement();
+    }
+
+
+    public kill(ev : GameEvent) {
+
+        this.dying = true;
+    }
+
+
+    protected die(ev : GameEvent) : boolean {
+
+        const DEATH_SPEED = 5;
+
+        this.spr.animate(0, 0, 4, DEATH_SPEED, ev.step);
+        return this.spr.getColumn() >= 4;
     }
 
 
@@ -63,7 +88,7 @@ export class FollowerFly extends GameObject {
             this.target.zeros();
         }
 
-        this.spr.animate(0, 0, 3, ANIM_SPEED, ev.step);
+        this.spr.animate(1, 0, 3, ANIM_SPEED, ev.step);
 
         this.waveTimer = (this.waveTimer + WAVE_SPEED * ev.step) % (Math.PI*2);
     }

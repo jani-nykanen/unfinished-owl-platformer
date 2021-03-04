@@ -39,10 +39,16 @@ var Collectible = /** @class */ (function (_super) {
         return (this.deathTimer -= ev.step) <= 0;
     };
     Collectible.prototype.updateLogic = function (ev) {
-        var ANIM_SPEED = 6;
+        var ANIM_SPEED = [6, 6, 6, 8];
+        var LAST_FRAME = [7, 7, 7, 4];
         var WAVE_SPEED = 0.05;
-        this.spr.animate(this.spr.getRow(), 0, 7, ANIM_SPEED, ev.step);
+        this.spr.animate(this.spr.getRow(), 0, LAST_FRAME[this.id], ANIM_SPEED[this.id], ev.step);
         this.waveTimer = (this.waveTimer + WAVE_SPEED * ev.step) % (Math.PI * 2);
+    };
+    Collectible.prototype.drawFlyingText = function (c) {
+        var y = Math.min(COLLECTIBLE_DEATH_TIME / 2, COLLECTIBLE_DEATH_TIME - this.deathTimer);
+        y = Math.round(this.pos.y - y * 2);
+        c.drawText(c.getBitmap("font"), "1 UP!", Math.round(this.pos.x), y, 0, 0, true);
     };
     Collectible.prototype.draw = function (c) {
         var AMPLITUDE = 3;
@@ -53,6 +59,8 @@ var Collectible = /** @class */ (function (_super) {
                 var p = _a[_i];
                 p.draw(c);
             }
+            if (this.id == 1)
+                this.drawFlyingText(c);
             return;
         }
         var yoff = Math.round(Math.sin(this.waveTimer) * AMPLITUDE);
@@ -78,7 +86,7 @@ var Collectible = /** @class */ (function (_super) {
             this.spawnParticles(5, 3, -Math.PI / 10);
             this.dying = true;
             this.deathTimer = COLLECTIBLE_DEATH_TIME;
-            pl.addCollectable(this.id);
+            pl.addCollectable(this.id, this.pos.x, this.pos.y);
             return true;
         }
         return false;

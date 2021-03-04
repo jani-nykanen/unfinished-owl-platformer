@@ -133,7 +133,7 @@ var Enemy = /** @class */ (function (_super) {
             return false;
         this.playerEvent(pl, ev);
         // Touch spin attack
-        if ((this.canBeStomped || this.knockTimer > 0) &&
+        if ((!pl.canBeHurt() || this.canBeStomped || this.knockTimer > 0) &&
             pl.doesCollideSpinning(this)) {
             this.dying = true;
             this.deathTime = ENEMY_DEATH_TIME;
@@ -152,7 +152,7 @@ var Enemy = /** @class */ (function (_super) {
         var px = pl.getPos().x;
         var py = pl.getBottom();
         var margin = this.hitbox.x * STOMP_MARGIN_H;
-        if ((this.canBeStomped || this.knockTimer > 0) &&
+        if ((!pl.canBeHurt() || this.canBeStomped || this.knockTimer > 0) &&
             pl.getSpeed().y >= this.speed.y - STOMP_EPS &&
             px + hbox.x / 2 >= this.pos.x - this.hitbox.x / 2 - margin &&
             px - hbox.x / 2 < this.pos.x + this.hitbox.x / 2 + margin &&
@@ -169,7 +169,7 @@ var Enemy = /** @class */ (function (_super) {
         // Hurt player
         if (pl.canBeHurt() &&
             this.overlayObject(pl)) {
-            pl.kill(ev);
+            pl.hurt(ev);
             return true;
         }
         return false;
