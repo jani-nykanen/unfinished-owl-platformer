@@ -2,7 +2,7 @@
 
 ^ The title says it all
 
-###[Play here](https://jani-nykanen.github.io/unfinished-owl-platformer/output/index.html)
+**[Play here](https://jani-nykanen.github.io/unfinished-owl-platformer/output/index.html)**
 
 ------
 
